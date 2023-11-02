@@ -30,7 +30,7 @@
 
 <!-- Navbars -->
 <nav class="navbar navbar-expand-lg navbar-light bg-light mx-2">
-  <a class="navbar-brand" href="#">ReWear Auctions</a>
+  <a class="navbar-brand" href="#">ReWear Auctions for YOU</a>
   <ul class="navbar-nav ml-auto">
     <li class="nav-item">
     
