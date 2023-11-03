@@ -34,7 +34,7 @@ function send_query($query)
 // Test with SELECT query
 
 $query = "SELECT userfirstname, userlastname FROM Users";
-$ouput = send_query($query); //returns mysql object
+$output = send_query($query); //returns mysql object
 echo '<table border="1">';
 while ($row = mysqli_fetch_array($output)) {
     echo '<tr>';
