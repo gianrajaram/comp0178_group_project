@@ -1,5 +1,3 @@
-Manager account for Auction project
-
 host: localhost
 username: AuctionProject
 password: london2023
