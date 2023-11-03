@@ -44,10 +44,8 @@ while ($row = mysqli_fetch_array($output)) {
 }
 echo '</table>';
 
-//$connection = open_connection();
-//$query = "INSERT INTO Users (userEmail, username, userPassword, userFirstName, userLastName, userAddress, userTel, userGender)".
-//"VALUES ('aa@gmail.com', 'user11', '111', 'HAHA', 'HIHI', 'Imaginary Land, London E14 9RZ UK', 0792200000, 'Female')";
-//$result = mysqli_query($connection,$query);
-//mysqli_close($connection);
-
+// Test with INSERT query
+$query = "INSERT INTO Users (userEmail, username, userPassword, userFirstName, userLastName, userAddress, userTel, userGender)".
+"VALUES ('a@gm.com', 'user121', '111', 'O', 'A', 'Imaginary Land, London E14 9RZ UK', 0792200000, 'Female')";
+send_query($query);
 ?>
