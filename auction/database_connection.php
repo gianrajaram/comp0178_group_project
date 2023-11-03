@@ -38,6 +38,7 @@ function sql_query($connection, $query)
 $connection = open_connection();
 $query = "SELECT userfirstname, userlastname FROM Users";
 $result = mysqli_query($connection,$query); //returns mysql object
+mysqli_close($connection);
 echo '<table border="1">';
 while ($row = mysqli_fetch_array($result)) {
     echo '<tr>';
