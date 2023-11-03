@@ -49,4 +49,11 @@ function send_query($query)
 //$query = "INSERT INTO Users (userEmail, username, userPassword, userFirstName, userLastName, userAddress, userTel, userGender)".
 //"VALUES ('a@gm.com', 'user121', '111', 'O', 'A', 'Imaginary Land, London E14 9RZ UK', 0792200000, 'Female')";
 //send_query($query);
+
+// Test with Delete query
+
+$query = "DELETE FROM Users Where UserID = '16'";
+send_query($query) 
+
+
 ?>
