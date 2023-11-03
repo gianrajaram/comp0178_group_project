@@ -1,11 +1,12 @@
-<html>
-<body>
+
 <?php
 // File with re-usable function to establish connection with the database 
 
-// Define function to open connection to database; If connection to database fails, re-connect. IF still unsuccesful, redirect user to error message page
-function open_connection()
+
+// Define function for making a sql query - adapted from Tutorial 3 slide 7 
+function send_query($query)
 {
+    //open connection to database; If connection to database fails, re-connect. If still unsuccesful, redirect user to error message page
     $connection = mysqli_connect("localhost", "AuctionProject", "london2023", "website_auction");
     if (!$connection) 
     { 
@@ -13,40 +14,40 @@ function open_connection()
         if (!$connection)
         {
             header("Location: failed_conncetion.php");
-        }
-        else
-        {
-            return $connection;
+            exit();
         }
     }
-    return $connection;
-}
 
-
-// Define function for making a sql query - adapted from Tutorial 3 slide 7  
-
-function sql_query($connection, $query)
-{
+    // send query
     $result = mysqli_query($connection, $query);
-    
     if (!$result)
     {
         die('Error making select users query'.mysqli_error($connection));
+        exit();
     }  
-    return $result;   
+
+    //close connection and return result query
+    mysqli_close($connection);
+    return $result; // mysqli object
 }
-$connection = open_connection();
+
+// Test with SELECT query
+
 $query = "SELECT userfirstname, userlastname FROM Users";
-$result = mysqli_query($connection,$query); //returns mysql object
-mysqli_close($connection);
+$ouput = send_query($query); //returns mysql object
 echo '<table border="1">';
-while ($row = mysqli_fetch_array($result)) {
+while ($row = mysqli_fetch_array($output)) {
     echo '<tr>';
     echo '<td>' . $row['userfirstname'] . '</td>';
     echo '<td>' . $row['userlastname'] . '</td>';
     echo '</tr>';
 }
 echo '</table>';
+
+//$connection = open_connection();
+//$query = "INSERT INTO Users (userEmail, username, userPassword, userFirstName, userLastName, userAddress, userTel, userGender)".
+//"VALUES ('aa@gmail.com', 'user11', '111', 'HAHA', 'HIHI', 'Imaginary Land, London E14 9RZ UK', 0792200000, 'Female')";
+//$result = mysqli_query($connection,$query);
+//mysqli_close($connection);
+
 ?>
-</html>
-</body>
