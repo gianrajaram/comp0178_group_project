@@ -6,6 +6,7 @@
 // Define function for making a sql query - adapted from Tutorial 3 slide 7 
 function send_query($query)
 {   
+    mysqli_report(MYSQLI_REPORT_OFF); // let errors be handled by error statements; without this trowing fatal exceptions despite error handling code - seems to be a problem in new php language update
     //read database host details securely
     //Beginning of adaptation from ChatGPT
     $configFile = 'Database_host.txt';
@@ -16,7 +17,7 @@ function send_query($query)
        list($key, $value) = explode('=', $line);
        $dbConfig[$key] = $value;
     }
-    //end of adaptation from ChatGPT
+    //End of adaptation from ChatGPT
 
     //open connection to database; If connection to database fails, re-connect. If still unsuccesful, redirect user to error message page
     $connection = mysqli_connect($dbConfig['host'], $dbConfig['username'], $dbConfig['password'], $dbConfig['DB_name']);
@@ -44,10 +45,10 @@ function send_query($query)
 
 // Test with SELECT query
 
-//$query = "SELECT userfirstname, userlastname FROM Users";
-//$output = send_query($query); //returns mysql object
-//echo '<table border="1">';
-//while ($row = mysqli_fetch_array($output)) {
+// $query = "SELECT userfirstname, userlastname FROM Users";
+// $output = send_query($query); //returns mysql object
+// echo '<table border="1">';
+// while ($row = mysqli_fetch_array($output)) {
 //    echo '<tr>';
 //   echo '<td>' . $row['userfirstname'] . '</td>';
 //    echo '<td>' . $row['userlastname'] . '</td>';
