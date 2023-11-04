@@ -16,7 +16,7 @@ CREATE TABLE Users (
     userID INT(10) AUTO_INCREMENT, 
 	userEmail VARCHAR(100) NOT NULL UNIQUE CHECK (userEmail LIKE "%_@__%.__%"), 
 	username VARCHAR(100) NOT NULL UNIQUE, 
-	userPassword VARCHAR(20) NOT NULL, 
+	userPassword VARCHAR(42) NOT NULL, 
 	userFirstName VARCHAR(100),
 	userLastName VARCHAR(100), 
 	userAddress VARCHAR(100), 
@@ -34,17 +34,17 @@ CREATE TABLE Users (
 
 /* Admin registration */
 INSERT INTO Users (userEmail, username, userPassword, userFirstName, userLastName, userAddress, userTel, userGender, userAdminRights) VALUES
-("gbakova@yahoo.com", "admin", "111", "Gabriela", "Bakova", "Discovery Dock East, London E14 9RZ UK", 0790000000, "Female", 1);
+("gbakova@yahoo.com", "admin", SHA('111'), "Gabriela", "Bakova", "Discovery Dock East, London E14 9RZ UK", 0790000000, "Female", 1);
 
 /* Sample user registration */
 INSERT INTO Users (userEmail, username, userPassword, userFirstName, userLastName, userAddress, userTel, userGender) VALUES
-("gabriela.bkva@gmail.com", "user2", "111", "Gabi", "Bakova", "Imaginary Land, London E14 9RZ UK", 0792200000, "Female"),
-("annecat.xhonneux@gmail.com", "user3", "111", "Cath", "Xhonneux", "Imaginary Land, London E14 9RZ UK", 0792200000, "Female"),
-("gianpremr@gmail.com", "user4", "111", "Gian", "Prem", "Imaginary Land, London E14 9RZ UK", 0792200000, "Male"),
-("mnamyslowska1@gmail.com", "user5", "111", "Maja", "Namyslowska", "Imaginary Land, London E14 9RZ UK", 0792200000, "Female"),
-("sample@user.com", "user6", "111", "Max", "Mustermann", "Imaginary Land, London E14 9RZ UK", 0790000000, "Male"),
-("sample@user6.com", "user7", "111", "Sam", "Samplemann", "Imaginary Land, London E14 9RZ UK", 0792200000, "Other"),
-("sample@user7.com", "user8", "111", "Sophie", "Samplemann", "Imaginary Land, London E14 9RZ UK", 0792200000, "Female");
+("gabriela.bkva@gmail.com", "user2", SHA('111'), "Gabi", "Bakova", "Imaginary Land, London E14 9RZ UK", 0792200000, "Female"),
+("annecat.xhonneux@gmail.com", "user3", SHA('111'), "Cath", "Xhonneux", "Imaginary Land, London E14 9RZ UK", 0792200000, "Female"),
+("gianpremr@gmail.com", "user4", SHA('111'), "Gian", "Prem", "Imaginary Land, London E14 9RZ UK", 0792200000, "Male"),
+("mnamyslowska1@gmail.com", "user5", SHA('111'), "Maja", "Namyslowska", "Imaginary Land, London E14 9RZ UK", 0792200000, "Female"),
+("sample@user.com", "user6", SHA('111'), "Max", "Mustermann", "Imaginary Land, London E14 9RZ UK", 0790000000, "Male"),
+("sample@user6.com", "user7", SHA('111'), "Sam", "Samplemann", "Imaginary Land, London E14 9RZ UK", 0792200000, "Other"),
+("sample@user7.com", "user8", SHA('111'), "Sophie", "Samplemann", "Imaginary Land, London E14 9RZ UK", 0792200000, "Female");
 
 
 CREATE TABLE CategoryClothsType (
