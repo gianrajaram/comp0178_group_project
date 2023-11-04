@@ -91,10 +91,12 @@
         <form method="POST" action="login_result.php">
           <div class="form-group">
             <label for="email">Email</label>
+            <small id="accountTypeHelp" class="form-text-inline text-muted"><span class="text-danger">* Required.</span></small>
             <input type="text" class="form-control" id="email" placeholder="Email">
           </div>
           <div class="form-group">
             <label for="password">Password</label>
+            <small id="accountTypeHelp" class="form-text-inline text-muted"><span class="text-danger">* Required.</span></small>
             <input type="password" class="form-control" id="password" placeholder="Password">
           </div>
           <div class="form-group">
