@@ -1,7 +1,19 @@
 <?php
+//Alert message & referal to registration page
+function alert_message_registration($message)
+{
+  echo "<script>alert('$message');</script>";
+  echo "<script>window.location.href='register.php';</script>";
+}
+function success_message_registration($message)
+{
+  echo "<script>alert('$message');</script>";
+  echo "<script>window.location.href='register.php';</script>";
+}
 
 // display_time_remaining:
 // Helper function to help figure out what time to display
+
 function display_time_remaining($interval) {
 
     if ($interval->days == 0 && $interval->h == 0) {
