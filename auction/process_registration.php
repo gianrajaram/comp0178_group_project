@@ -1,53 +1,84 @@
-<?php require_once("database_connection.php")?>
+<?php require_once("database_connection.php");
+require_once("utilities.php"); require_once("header.php")?>
 
 <?php
 // Establish connection with database
 $connection = connect();
 
 // Extract $_POST variables - carry out checks in between for correct and secure input 
-// Email
-if (filter_var($_POST["email"], FILTER_SANITIZE_EMAIL))
+// Email - check if in correct format - does not accept empty input by default - seems to not be very strong
+
+if (filter_var($_POST["emailReg"], FILTER_VALIDATE_EMAIL))
 {
-    $email = mysqli_real_escape_string($connection,$_POST["email"]);
+    $email = mysqli_real_escape_string($connection,$_POST["emailReg"]);
 }
 else
 {
-    echo "email is NOT a valid email address";
+    alert_message_registration($message = 'Email is NOT a valid email address');
+    exit;
 }
 
 // Username
-$username = mysqli_real_escape_string($connection,$_POST["username"]);
+if(empty($_POST["usernameReg"]))
+{
+    alert_message_registration($message = 'Username is not a valid entry.');
+    exit;
+}
+else
+{
+    $username = mysqli_real_escape_string($connection,$_POST["usernameReg"]);
+}
 
 // Password
-$submitted_password =  mysqli_real_escape_string($connection,$_POST["password"]);
+$submitted_password =  mysqli_real_escape_string($connection,$_POST["passwordReg"]);
 $submitted_passwordConfirmation =  mysqli_real_escape_string($connection,$_POST["passwordConfirmation"]);
 $list_common_passwords =["password", "password1", "admin", "123456789", "123abc", "password123", "123456", "guest"];
 $min_length_password = 8; // set min length of password
 
 if (!($submitted_password == $submitted_passwordConfirmation)) 
 {
-    echo "Password does not match password confirmation.";
-    header("refresh:2;url=registration.php");
+    alert_message_registration($message = 'Password does not match password confirmation.');   
+    exit;
 }
 else
 {
     if (in_array($submitted_password, $list_common_passwords) || (strlen($submitted_password) < $min_length_password))
     {
-        echo "Choose a stronger password (min. 8 characters)";
+        alert_message_registration($message = 'Choose a stronger password (min. 8 characters)'); 
+        exit;   
     }
     else
     {
-        $password = mysqli_real_escape_string($connection,$_POST["password"]);
+        $password = mysqli_real_escape_string($connection,$_POST["passwordReg"]);
     }
 }
 
-//Other less important attributes
+//Other less important attributes - no rules and not mandatory to be filled in
 $firstName = mysqli_real_escape_string($connection,$_POST["firstName"]);
 $lastName = mysqli_real_escape_string($connection,$_POST["lastName"]);
 $address = mysqli_real_escape_string($connection,$_POST["Address"]);
 $telephone = mysqli_real_escape_string($connection,$_POST["Telephone"]);
-$selectedGender = $_POST["Gender"];
+$selectedGender = $_POST["Gender"]; // Gender is default prefer not to say  
 
+// Check POST array
+// echo var_dump($_POST);
+
+// if all required fields are not empty, check email and username against database if they already exists
+    $query_check_registration = "SELECT * FROM Users WHERE username = '$username' OR userEmail = '$email'";
+    $result_check_registration = send_query($query_check_registration);
+    if (mysqli_num_rows($result_check_registration) == 0)
+    {
+        $query_register = "INSERT INTO Users (userEmail, username, userPassword, userFirstName, userLastName, userAddress, userTel, userGender)".
+        "VALUES ('$email', '$username', SHA('$password'), '$firstName', '$lastName', '$address', '$telephone', '$selectedGender')";
+        send_query($query_register);
+        success_message_registration($message = "Registration was successful! Please log in.");
+
+    }
+    else
+    {
+       alert_message_registration($message = 'Email/Username is already in the database.');
+       exit;
+    }      
 
 // TODO: Extract $_POST variables, check they're OK, and attempt to create
 // an account. Notify user of success/failure and redirect/give navigation 

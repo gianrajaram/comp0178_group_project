@@ -14,7 +14,7 @@ USE Website_auction;
 
 CREATE TABLE Users (
     userID INT(10) AUTO_INCREMENT, 
-	userEmail VARCHAR(100) NOT NULL UNIQUE CHECK (userEmail LIKE "%_@__%.__%"), 
+	userEmail VARCHAR(100) NOT NULL UNIQUE, 
 	username VARCHAR(100) NOT NULL UNIQUE, 
 	userPassword VARCHAR(42) NOT NULL, 
 	userFirstName VARCHAR(100),
