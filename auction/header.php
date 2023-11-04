@@ -98,9 +98,9 @@
             <input type="password" class="form-control" id="password" placeholder="Password">
           </div>
           <div class="form-group row">
-            <label for="accountType" class="col-sm-2 col-form-label text-right">Logging in as a:</label>
+            <label for="accountType">Logging in as a:</label>
             <div class="col-sm-10">
-              <p>Logging in:</p> <!-- New row for "Logging in" text -->
+              <p></p> 
               <div class="form-check form-check-inline">
                 <input class="form-check-input" type="radio" name="accountType" id="accountBuyer" value="buyer" checked>
                 <label class="form-check-label" for="accountBuyer">Buyer</label>
