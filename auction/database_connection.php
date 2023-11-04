@@ -2,10 +2,9 @@
 <?php
 // File with re-usable function to establish connection with the database 
 
-
-// Define function for making a sql query - adapted from Tutorial 3 slide 7 
-function send_query($query)
-{   
+//Define function for establishing connection between database and php
+function connect()
+{
     mysqli_report(MYSQLI_REPORT_OFF); // let errors be handled by error statements; without this trowing fatal exceptions despite error handling code - seems to be a problem in new php language update
     //read database host details securely
     //Beginning of adaptation from ChatGPT
@@ -29,7 +28,14 @@ function send_query($query)
             header("Location: failed_connection.php");
         }
     }
+    return $connection;
+}
 
+// Define function for making a sql query - adapted from Tutorial 3 slide 7 
+function send_query($query)
+{   
+    $connection = connect();
+    
     // send query
     $result = mysqli_query($connection, $query);
     if (!$result)
