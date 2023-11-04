@@ -97,9 +97,6 @@
             <label for="password">Password</label>
             <input type="password" class="form-control" id="password" placeholder="Password">
           </div>
-          <button type="submit" class="btn btn-primary form-control">Sign in</button>
-        </form>
-        <div class="text-center">or <a href="register.php">create an account</a></div>
           <div class="form-group row">
             <label for="accountType" class="col-sm-2 col-form-label text-right">Logging in as a:</label>
             <div class="col-sm-10">
@@ -114,6 +111,9 @@
               <small id="accountTypeHelp" class="form-text-inline text-muted"><span class="text-danger">* Required.</span></small>
           </div>
           </div>
+          <button type="submit" class="btn btn-primary form-control">Sign in</button>
+        </form>
+        <div class="text-center">or <a href="register.php">create an account</a></div>
         </div>
     </div>
   </div>
