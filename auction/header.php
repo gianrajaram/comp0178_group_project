@@ -91,17 +91,32 @@
         <form method="POST" action="login_result.php">
           <div class="form-group">
             <label for="email">Email</label>
+            <small id="accountTypeHelp" class="form-text-inline text-muted"><span class="text-danger">* Required.</span></small>
             <input type="text" class="form-control" id="email" placeholder="Email">
           </div>
           <div class="form-group">
             <label for="password">Password</label>
+            <small id="accountTypeHelp" class="form-text-inline text-muted"><span class="text-danger">* Required.</span></small>
             <input type="password" class="form-control" id="password" placeholder="Password">
           </div>
+          <div class="form-group">
+            <label for="accountType">Logging in as a:</label>
+            <div class="col-sm-10">
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="accountType" id="accountBuyer" value="buyer" checked>
+                <label class="form-check-label" for="accountBuyer">Buyer</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="accountType" id="accountSeller" value="seller">
+                <label class="form-check-label" for="accountSeller">Seller</label>
+              </div>
+            <small id="accountTypeHelp" class="form-text-inline text-muted"><span class="text-danger">* Required.</span></small>
+            </div>
+            </div>
           <button type="submit" class="btn btn-primary form-control">Sign in</button>
         </form>
         <div class="text-center">or <a href="register.php">create an account</a></div>
-      </div>
-
+        </div>
     </div>
   </div>
 </div> <!-- End modal -->
