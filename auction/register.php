@@ -27,6 +27,12 @@
     </div>
   </div>
   <div class="form-group row">
+    <label for="firstName" class="col-sm-2 col-form-label text-right">First Name</label>
+    <div class="col-sm-10">
+      <input type="text" class="form-control" id="password" placeholder="Your first name">
+    </div>
+  </div>
+  <div class="form-group row">
     <button type="submit" class="btn btn-primary form-control">Register</button>
   </div>
 </form>
