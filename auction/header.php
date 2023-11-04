@@ -97,7 +97,7 @@
             <label for="password">Password</label>
             <input type="password" class="form-control" id="password" placeholder="Password">
           </div>
-          <div class="form-group row">
+          <div class="form-group">
             <label for="accountType">Logging in as a:</label>
             <div class="col-sm-10">
               <p></p> 
