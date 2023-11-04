@@ -100,7 +100,6 @@
           <div class="form-group">
             <label for="accountType">Logging in as a:</label>
             <div class="col-sm-10">
-              <p></p> 
               <div class="form-check form-check-inline">
                 <input class="form-check-input" type="radio" name="accountType" id="accountBuyer" value="buyer" checked>
                 <label class="form-check-label" for="accountBuyer">Buyer</label>
