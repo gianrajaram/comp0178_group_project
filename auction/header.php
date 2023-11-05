@@ -1,11 +1,5 @@
 <?php
-  // FIXME: At the moment, I've allowed these values to be set manually.
-  // But eventually, with a database, these should be set automatically
-  // ONLY after the user's login credentials have been verified via a 
-  // database query.
   session_start();
-  $_SESSION['logged_in'] = false;
-  $_SESSION['account_type'] = 'seller';
 ?>
 
 
@@ -22,7 +16,7 @@
   <!-- Custom CSS file -->
   <link rel="stylesheet" href="css/custom.css">
 
-  <title>[My Auction Site] <!--CHANGEME!--></title>
+  <title>[ReWear Auctions]</title>
 
 </head>
 
@@ -31,18 +25,23 @@
 
 <!-- Navbars -->
 <nav class="navbar navbar-expand-lg navbar-light bg-light mx-2">
-  <a class="navbar-brand" href="#">ReWear Auctions</a>
+  <a class="navbar-brand" href="browse.php">ReWear Auctions</a>
   <ul class="navbar-nav ml-auto">
     <li class="nav-item">
     
 <?php
-  // Displays either login or logout on the right, depending on user's
-  // current status (session).
+  // Displays either login or logout on the right, depending on user's current status (session).
+  if (isset($_SESSION['account_type']) 
+      && ($_SESSION['account_type'] == "Buyer" 
+      OR $_SESSION['account_type'] == "Seller")){
+        echo('<li class="nav-item"><a class="nav-link" href="switch_account_type.php">Switch account type</a>
+  </li>');
+}
   if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] == true) {
     echo '<a class="nav-link" href="logout.php">Logout</a>';
   }
   else {
-    echo '<button type="button" class="btn nav-link" data-toggle="modal" data-target="#loginModal">Login</button>';
+    echo '<a href="login.php" class="btn nav-link">Login</a>';
   }
 ?>
 
@@ -51,34 +50,54 @@
 </nav>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <ul class="navbar-nav align-middle">
-	<li class="nav-item mx-1">
-      <a class="nav-link" href="browse.php">Browse</a>
-    </li>
 <?php
-  if (isset($_SESSION['account_type']) && $_SESSION['account_type'] == 'buyer') {
+// Define different privilages - what are users allowed to see according to their account type
+  if (isset($_SESSION['account_type']) && $_SESSION['account_type'] == 'Buyer') {
   echo('
-	<li class="nav-item mx-1">
-      <a class="nav-link" href="mybids.php">My Bids</a>
+  <li class="nav-item mx-1"><a class="nav-link" href="user_profile.php">My profile</a>
+  </li>
+  <li class="nav-item mx-1"><a class="nav-link" href="browse.php">Browse</a>
+  </li>
+  <li class="nav-item mx-1"><a class="nav-link" href="mybids.php">My Bids</a>
     </li>
-	<li class="nav-item mx-1">
-      <a class="nav-link" href="recommendations.php">Recommended</a>
+	<li class="nav-item mx-1"><a class="nav-link" href="recommendations.php">My recommendations</a>
     </li>');
   }
-  if (isset($_SESSION['account_type']) && $_SESSION['account_type'] == 'seller') {
-  echo('
-	<li class="nav-item mx-1">
-      <a class="nav-link" href="mylistings.php">My Listings</a>
+  else if (isset($_SESSION['account_type']) && $_SESSION['account_type'] == 'Seller') {
+    echo('
+    <li class="nav-item mx-1"><a class="nav-link" href="user_profile.php">My profile</a>
     </li>
-	<li class="nav-item ml-3">
-      <a class="nav-link btn border-light" href="create_auction.php">+ Create auction</a>
+    <li class="nav-item mx-1"><a class="nav-link" href="browse.php">Browse</a>
+    </li>
+    <li class="nav-item mx-1"><a class="nav-link" href="mylistings.php">My Listings</a>
+      </li>
+    <li class="nav-item ml-3"><a class="nav-link btn border-light" href="create_auction.php">+ Create auction</a>
+      </li>');
+  }
+  else if (isset($_SESSION['account_type']) && $_SESSION['account_type'] == 'Admin') { 
+    echo('<li class="nav-item mx-1"><a class="nav-link" href="user_profile.php">My profile</a>
+    </li>
+    <li class="nav-item mx-1"><a class="nav-link" href="browse.php">Browse</a>
+    </li>
+    <li class="nav-item mx-1"><a class="nav-link" href="admin_user_overview.php">User overview</a>
+    </li>
+    <li class="nav-item mx-1"><a class="nav-link" href="admin_auction_overview.php">Auction overview</a>
+    </li> 
+    ');
+  }
+  else {
+    echo('
+    <li class="nav-item mx-1"><a class="nav-link" href="browse.php">Browse</a>
     </li>');
   }
 ?>
   </ul>
 </nav>
 
-<!-- Login modal -->
-<div class="modal fade" id="loginModal">
+
+
+<!-- Login modal - not used - instead login.php-->
+ <div class="modal fade" id="loginModal">
   <div class="modal-dialog">
     <div class="modal-content">
 
@@ -91,14 +110,14 @@
       <div class="modal-body">
         <form method="POST" action="login_result.php">
           <div class="form-group">
-            <label for="email">Email</label>
+            <label for="username">Username</label>
             <small id="accountTypeHelp" class="form-text-inline text-muted"><span class="text-danger">* Required.</span></small>
-            <input type="text" class="form-control" id="email" placeholder="Email">
+            <input type="text" class="form-control" id="username" name ="usernameLogin" placeholder="username">
           </div>
           <div class="form-group">
             <label for="password">Password</label>
             <small id="accountTypeHelp" class="form-text-inline text-muted"><span class="text-danger">* Required.</span></small>
-            <input type="password" class="form-control" id="password" placeholder="Password">
+            <input type="password" class="form-control" id="password"  name ="passwordLogin" placeholder="Password">
           </div>
           <div class="form-group">
             <label for="accountType">Logging in as a:</label>
@@ -114,10 +133,10 @@
             <small id="accountTypeHelp" class="form-text-inline text-muted"><span class="text-danger">* Required.</span></small>
             </div>
             </div>
-          <button type="submit" class="btn btn-primary form-control">Sign in</button>
+          <button type="submit" name = "login" class="btn btn-primary form-control">Sign in</button>
         </form>
         <div class="text-center">or <a href="register.php">create an account</a></div>
         </div>
     </div>
-  </div>
-</div> <!-- End modal -->
+ </div>
+ </div> <!-- End modal -->

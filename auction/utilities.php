@@ -1,14 +1,16 @@
 <?php
-//Alert message & referal to registration page
+//Alert message while registering & referal back to registration page
 function alert_message_registration($message)
 {
   echo "<script>alert('$message');</script>";
   echo "<script>window.location.href='register.php';</script>";
 }
-function success_message_registration($message)
+
+//Alert message while logging in
+function alert_message_login($message)
 {
   echo "<script>alert('$message');</script>";
-  echo "<script>window.location.href='register.php';</script>";
+  echo "<script>window.location.href='login.php';</script>";
 }
 
 // display_time_remaining:

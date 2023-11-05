@@ -78,11 +78,11 @@
       </div>
 	</div>
   </div>
-    <button type="submit" class="btn btn-primary form-control">Register</button>
+    <button type="submit" name ="register" class="btn btn-primary form-control">Register</button>
   </div>
 </form>
 
-<div class="text-center">Already have an account? <a href="" data-toggle="modal" data-target="#loginModal">Login</a>
+<div class="text-center">Already have an account? <a href="login.php">Login</a>
 </div>
 
 <?php include_once("footer.php")?>
