@@ -22,7 +22,7 @@ CREATE TABLE Users (
 	userAddress VARCHAR(100), 
 	userTel VARCHAR(100), 
 	userGender VARCHAR(100) CHECK (userGender in ("Male", "Female", "Other", "Prefer not to say")), 
-	userAccountType VARCHAR(100) CHECK (userAccountType in ("Buyer", "Seller", "Admin", "Unspecified yet")) DEFAULT "Unspecified yet", 
+	userAccountType VARCHAR(100) DEFAULT "Unspecified yet" CHECK (userAccountType in ("Buyer", "Seller", "Admin", "Unspecified yet")), 
 	PRIMARY KEY(userID)
 	)
 	ENGINE=INNODB;
@@ -166,7 +166,7 @@ CREATE TABLE Bids (
     bidID INT(10) AUTO_INCREMENT,
     dateBid DATETIME NOT NULL DEFAULT NOW(),
     bidValue DECIMAL(10,2) NOT NULL,
-    bidStatus VARCHAR(100) NOT NULL CHECK (bidStatus in ("Running", "Lost", "Won")) DEFAULT "Running",
+    bidStatus VARCHAR(100) NOT NULL CHECK DEFAULT "Running" (bidStatus in ("Running", "Lost", "Won")),
     buyerID INT(10) NOT NULL,
     auctionID INT(10) NOT NULL,
     PRIMARY KEY (bidID),
