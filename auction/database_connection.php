@@ -51,13 +51,13 @@ function send_query($query)
 
 // Test with SELECT query
 
-// $query = "SELECT userfirstname, userlastname FROM Users";
-// $output = send_query($query); //returns mysql object
-// echo '<table border="1">';
-// while ($row = mysqli_fetch_array($output)) {
-//    echo '<tr>';
-//   echo '<td>' . $row['userfirstname'] . '</td>';
-//    echo '<td>' . $row['userlastname'] . '</td>';
+ //$query = "SELECT userfirstname, userlastname FROM Users";
+ //$output = send_query($query); //returns mysql object
+ //echo '<table border="1">';
+ //while ($row = mysqli_fetch_array($output)) {
+ //   echo '<tr>';
+ //  echo '<td>' . $row['userfirstname'] . '</td>';
+ //   echo '<td>' . $row['userlastname'] . '</td>';
 //    echo '</tr>';
 //}
 //echo '</table>';
@@ -65,7 +65,7 @@ function send_query($query)
 // Test with INSERT query
 
 //$query = "INSERT INTO Users (userEmail, username, userPassword, userFirstName, userLastName, userAddress, userTel, userGender)".
-//"VALUES ('a@gm.com', 'user121', '111', 'O', 'A', 'Imaginary Land, London E14 9RZ UK', 0792200000, 'Female')";
+//"VALUES ('asd32421111111344@gmsdaf.com', 'u232425d21111111343adsDD31', '111', 'O', 'A', 'Imaginary Land, London E14 9RZ UK', 0792200000, 'Female')";
 //send_query($query);
 
 // Test with Delete query
