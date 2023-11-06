@@ -23,8 +23,6 @@ CREATE TABLE Users (
 	userTel VARCHAR(100), 
 	userGender VARCHAR(100) CHECK (userGender in ("Male", "Female", "Other", "Prefer not to say")), 
 	userAccountType VARCHAR(100) CHECK (userAccountType in ("Buyer", "Seller", "Admin", "Unspecified yet")) DEFAULT "Unspecified yet", 
-	userBuyerRights BOOLEAN NOT NULL DEFAULT 0,
-	userSellerRights BOOLEAN NOT NULL DEFAULT 0,
 	PRIMARY KEY(userID)
 	)
 	ENGINE=INNODB;

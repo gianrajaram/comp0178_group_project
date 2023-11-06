@@ -3,7 +3,7 @@
 <div class="container">
 <h2 class="my-3">Register new account</h2>
 
-<!-- Create auction form -->
+<!-- Create registration form -->
 <form method="POST" action="process_registration.php">
   <div class="form-group row">
     <label for="emailReg" class="col-sm-2 col-form-label text-right">Email</label>
@@ -62,7 +62,7 @@
 	<div class="col-sm-10">
 	  <div class="form-check form-check-inline">
         <input class="form-check-input" type="radio" name="Gender" id="GenderFemale" value="Female">
-        <label class="form-check-label" for="GenderFermale">Female</label>
+        <label class="form-check-label" for="GenderFemale">Female</label>
       </div>
       <div class="form-check form-check-inline">
         <input class="form-check-input" type="radio" name="Gender" id="GenderMale" value="Male">
@@ -74,7 +74,7 @@
       </div>
       <div class="form-check form-check-inline">
         <input class="form-check-input" type="radio" name="Gender" id="GenderNotSay" value="Prefer not to say" checked>
-        <label class="form-check-label" for="GenderMale">Prefer not to say</label>
+        <label class="form-check-label" for="GenderNotSay">Prefer not to say</label>
       </div>
 	</div>
   </div>

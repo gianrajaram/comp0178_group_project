@@ -30,6 +30,10 @@
         <input class="form-check-input" type="radio" name="accountType" id="accountSeller" value="Seller">
         <label class="form-check-label" for="accountSeller">Seller</label>
       </div>
+      <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="accountType" id="accountSameAsLastSession" value="Same as last session">
+        <label class="form-check-label" for="accountSameAsLastSession">Same as last session</label>
+      </div>
       <small id="accountTypeHelp" class="form-text-inline text-muted"><span class="text-danger">* Required.</span></small>
 	</div>
   </div>

@@ -34,6 +34,18 @@ else if (empty($_POST["accountType"]) && (!($_POST["usernameLogin"] == "admin"))
     alert_message_login($message = 'Please choose an account type.');
     exit;
 }
+else if (($_POST["accountType"] == "Same as last session")){
+    $query_check_last_session = "SELECT userAccountType from Users WHERE username ='$username'";
+    $result_check_last_session = send_query($query_check_last_session);
+    $result_row = mysqli_fetch_array($result_check_last_session);
+    if ($result_row['userAccountType'] == "Unspecified yet"){
+        alert_message_login($message = 'This is your first log-in since registration. Please select account type to log in as.');
+        exit;
+    }
+    else{
+        $accountType = $result_row['userAccountType'];
+    }
+}
 else{
     $accountType = $_POST["accountType"];
 }

@@ -1,4 +1,27 @@
 <?php
+
+// Get profile of user in question (all columns from users table)
+// Requires header.php (for starting session) and database.php (for send_query)
+function user_profile(){
+  $profile = $_SESSION['username'];
+  $query_user_profile = "SELECT * from Users WHERE username = '$profile'";
+  $result_user_profile = send_query($query_user_profile);
+  $profile_row = mysqli_fetch_array($result_user_profile);
+  return $profile_row;
+}
+
+function user_profile_username(){
+  $profile = $_SESSION['username'];
+  $query_user_profile = "SELECT * from Users WHERE username = '$profile'";
+  $result_user_profile = send_query($query_user_profile);
+  $profile_row = mysqli_fetch_array($result_user_profile);
+  return $profile_row["username"];
+}
+
+
+
+
+
 //Alert message while registering & referal back to registration page
 function alert_message_registration($message)
 {
@@ -75,4 +98,58 @@ function print_listing_li($item_id, $title, $desc, $price, $num_bids, $end_time)
   );
 }
 
+function print_user_li_titles()
+{
+    echo('
+    <li class="list-group-item user-item">
+        <table class="user-info-table">
+            <tr>
+                <th class="title">User ID</th>
+                <th class="spacer">&emsp;</th>
+                <th class="title">Username</th>
+                <th class="spacer">&emsp;</th>
+                <th class="title">Email</th>
+                <th class="spacer">&emsp;</th>
+                <th class="title">First Name</th>
+                <th class="spacer">&emsp;</th>
+                <th class="title">Last Name</th>
+                <th class="spacer">&emsp;</th>
+                <th class="title">User Account Type</th>
+                <th class="spacer">&emsp;</th>
+                <th class="title">Actions</th>
+            </tr>
+        </table>
+    </li>');
+}
+
+function print_user_li($userID, $username, $userEmail, $userFirstName, $userLastName, $userAccountType)
+{
+    echo('
+    <li class="list-group-item user-item">
+        <table class="user-info-table">
+            <tr>
+                <td class="user-info">' . $userID . '</td>
+                <td class="spacer">&emsp;</td>
+                <td class="user-info">' . $username . '</td>
+                <td class="spacer">&emsp;</td>
+                <td class="user-info">' . $userEmail . '</td>
+                <td class="spacer">&emsp;</td>
+                <td class="user-info">' . $userFirstName . '</td>
+                <td class="spacer">&emsp;</td>
+                <td class="user-info">' . $userLastName . '</td>
+                <td class="spacer">&emsp;</td>
+                <td class="user-info">' . $userAccountType . '</td>
+                <td class="spacer">&emsp;</td>
+                <td class="user-info">
+                    <div class="button-container">
+                        <button class="btn btn-danger">Delete</button>
+                        <button class="btn btn-primary">Activate/Deactivate</button>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </li>
+    ');
+}
+ 
 ?>
