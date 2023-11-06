@@ -4,7 +4,8 @@ session_start();
 
 unset($_SESSION['logged_in']);
 unset($_SESSION['account_type']);
-setcookie(session_name(), "", time() - 360);
+unset($_SESSION['userID']);
+unset($_SESSION['username']);
 session_destroy();
 
 

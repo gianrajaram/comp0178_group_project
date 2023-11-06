@@ -22,9 +22,7 @@ CREATE TABLE Users (
 	userAddress VARCHAR(100), 
 	userTel VARCHAR(100), 
 	userGender VARCHAR(100) CHECK (userGender in ("Male", "Female", "Other", "Prefer not to say")), 
-	userAdminRights BOOLEAN NOT NULL DEFAULT 0, 
-	userBuyerRights BOOLEAN NOT NULL DEFAULT 0,
-	userSellerRights BOOLEAN NOT NULL DEFAULT 0,
+	userAccountType VARCHAR(100) CHECK (userAccountType in ("Buyer", "Seller", "Admin", "Unspecified yet")) DEFAULT "Unspecified yet", 
 	PRIMARY KEY(userID)
 	)
 	ENGINE=INNODB;
@@ -33,8 +31,8 @@ CREATE TABLE Users (
 /* Insert sample users into database - attention - no input needed for userID (auto incrementing), userAdminRights, userBuyerRights, userSellerRights */
 
 /* Admin registration */
-INSERT INTO Users (userEmail, username, userPassword, userFirstName, userLastName, userAddress, userTel, userGender, userAdminRights) VALUES
-("gbakova@yahoo.com", "admin", SHA('111'), "Gabriela", "Bakova", "Discovery Dock East, London E14 9RZ UK", 0790000000, "Female", 1);
+INSERT INTO Users (userEmail, username, userPassword, userFirstName, userLastName, userAddress, userTel, userGender, userAccountType) VALUES
+("gbakova@yahoo.com", "admin", SHA('111'), "Gabriela", "Bakova", "Discovery Dock East, London E14 9RZ UK", 0790000000, "Female", "Admin");
 
 /* Sample user registration */
 INSERT INTO Users (userEmail, username, userPassword, userFirstName, userLastName, userAddress, userTel, userGender) VALUES
