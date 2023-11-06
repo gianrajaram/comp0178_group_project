@@ -166,7 +166,7 @@ CREATE TABLE Bids (
     bidID INT(10) AUTO_INCREMENT,
     dateBid DATETIME NOT NULL DEFAULT NOW(),
     bidValue DECIMAL(10,2) NOT NULL,
-    bidStatus VARCHAR(100) NOT NULL  DEFAULT "Running" CHECK "Running" (bidStatus in ("Running", "Lost", "Won")),
+    bidStatus VARCHAR(100) NOT NULL  DEFAULT "Running" CHECK (bidStatus in ("Running", "Lost", "Won")),
     buyerID INT(10) NOT NULL,
     auctionID INT(10) NOT NULL,
     PRIMARY KEY (bidID),
