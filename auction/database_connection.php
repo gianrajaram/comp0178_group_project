@@ -64,9 +64,9 @@ function send_query($query)
 
 // Test with INSERT query
 
-$query = "INSERT INTO Users (userEmail, username, userPassword, userFirstName, userLastName, userAddress, userTel, userGender)".
-"VALUES ('assad2213242saAA24@gm.com', 'u2SAadsSADASDASDD31', '111', 'O', 'A', 'Imaginary Land, London E14 9RZ UK', 0792200000, 'Female')";
-send_query($query);
+//$query = "INSERT INTO Users (userEmail, username, userPassword, userFirstName, userLastName, userAddress, userTel, userGender)".
+//"VALUES ('asd32421111111344@gmsdaf.com', 'u232425d21111111343adsDD31', '111', 'O', 'A', 'Imaginary Land, London E14 9RZ UK', 0792200000, 'Female')";
+//send_query($query);
 
 // Test with Delete query
 
