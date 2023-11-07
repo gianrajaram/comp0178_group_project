@@ -8,6 +8,7 @@ function connect()
     mysqli_report(MYSQLI_REPORT_OFF); // let errors be handled by error statements; without this throwing fatal exceptions despite error handling code - seems to be a problem in new php language update
     //read database host details securely
     //beginning of adaptation from ChatGPT
+    // Change the current working directory to the specified directory
     $configFile = 'Database_host.txt';
     $configData = file($configFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
     $dbConfig = [];
@@ -64,9 +65,9 @@ function send_query($query)
 
 // Test with INSERT query
 
-//$query = "INSERT INTO Users (userEmail, username, userPassword, userFirstName, userLastName, userAddress, userTel, userGender)".
-//"VALUES ('asd32421111111344@gmsdaf.com', 'u232425d21111111343adsDD31', '111', 'O', 'A', 'Imaginary Land, London E14 9RZ UK', 0792200000, 'Female')";
-//send_query($query);
+$query = "INSERT INTO Users (userEmail, username, userPassword, userFirstName, userLastName, userAddress, userTel, userGender)".
+"VALUES ('5tesdsaaat4@gmsdaf.com', 'testaaastddd9est', '111', 'O', 'A', 'Imaginary Land, London E14 9RZ UK', 0792200000, 'Female')";
+send_query($query);
 
 // Test with Delete query
 
