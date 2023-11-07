@@ -1,0 +1,4 @@
+host=localhost
+username=AuctionProject
+password=london2023
+DB_name=website_auction
