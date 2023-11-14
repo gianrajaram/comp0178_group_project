@@ -42,7 +42,7 @@ function send_query($query)
     {
         die('Error making select users query'.mysqli_error($connection));
     }  
-
+    
     //close connection and return result query
     mysqli_close($connection);
     return $result; // mysqli object
