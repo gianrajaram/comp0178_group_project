@@ -125,9 +125,12 @@
   #Category condition:
   if($category != 'all') {
     $category = $_GET['cat'];
-    $query .= "AND CategoryClothsType = '" . $category . "' ";
+    $query .= "AND '" . $category . "' ";
+    # removed ->CategoryClothsType<- from after AND, resulting in no SQL error
   }
 
+
+  ###ERROR IN THIS SECTION - auctionCurrentHighestBid not defined
   #ordering -> expand based on all categories of ordering
   switch($ordering) {
     case 'pricelow':
@@ -157,43 +160,71 @@
 ?>
 
 <div class="container mt-5">
+<?php
+if (mysqli_num_rows($result)==0) {
+  echo '<p> No listings were found under the given criteria </p>';
+}
+?>
 
 <!-- TODO: If result set is empty, print an informative message. Otherwise... -->
 
 <ul class="list-group"> <!------------------------------------------------- LISTINGS -->
 
+
 <!-- TODO: Use a while loop to print a list item for each auction listing retrieved from the query -->
 
 <?php
+# Gian Testing:
+#executing query
+$result = mysqli_query($conn,$query);
+#Testing if query returns error
+if (!$result){
+  die('SQL error: '.mysqli_error($conn));
+}
+
+  while($row = mysqli_fetch_assoc($result)) {
+    $item_id = $row['auctionID'];
+    $title = $row['auctionName'];
+    $description = $row['auctionDescription'];
+    $current_price = $row['auctionCurrentHighestBid'];
+    $num_bids = $row['auctionBidCount'];
+    $end_date = new DateTime($row['auctionEndDate']);
+
+    print_listing_li($item_id, $title, $description, $current_price, $num_bids, $end_date);
+  }
+
+
+
+
   // Demonstration of what listings will look like using dummy data.
-  $item_id = "87021";
-  $title = "Dummy title";
-  $desc = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum eget rutrum ipsum. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Phasellus feugiat, ipsum vel egestas elementum, sem mi vestibulum eros, et facilisis dui nisi eget metus. In non elit felis. Ut lacus sem, pulvinar ultricies pretium sed, viverra ac sapien. Vivamus condimentum aliquam rutrum. Phasellus iaculis faucibus pellentesque. Sed sem urna, maximus vitae cursus id, malesuada nec lectus. Vestibulum scelerisque vulputate elit ut laoreet. Praesent vitae orci sed metus varius posuere sagittis non mi.";
-  $current_price = 30;
-  $num_bids = 1;
-  $end_date = new DateTime('2020-09-16T11:00:00');
+ # $item_id = "87021";
+  #$title = "Dummy title";
+ # $desc = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum eget rutrum ipsum. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Phasellus feugiat, ipsum vel egestas elementum, sem mi vestibulum eros, et facilisis dui nisi eget metus. In non elit felis. Ut lacus sem, pulvinar ultricies pretium sed, viverra ac sapien. Vivamus condimentum aliquam rutrum. Phasellus iaculis faucibus pellentesque. Sed sem urna, maximus vitae cursus id, malesuada nec lectus. Vestibulum scelerisque vulputate elit ut laoreet. Praesent vitae orci sed metus varius posuere sagittis non mi.";
+  #$current_price = 30;
+  #$num_bids = 1;
+  #$end_date = new DateTime('2020-09-16T11:00:00');
   
   // This uses a function defined in utilities.php
-  print_listing_li($item_id, $title, $desc, $current_price, $num_bids, $end_date);
+ # print_listing_li($item_id, $title, $desc, $current_price, $num_bids, $end_date);
   
-  $item_id = "516";
-  $title = "Different title";
-  $description = "Very short description.";
-  $current_price = 13.50;
-  $num_bids = 3;
-  $end_date = new DateTime('2020-11-02T00:00:00');
+ # $item_id = "516";
+ # $title = "Different title";
+ # $description = "Very short description.";
+ # $current_price = 13.50;
+ # $num_bids = 3;
+  #$end_date = new DateTime('2020-11-02T00:00:00');
   
-  print_listing_li($item_id, $title, $description, $current_price, $num_bids, $end_date);
+ # print_listing_li($item_id, $title, $description, $current_price, $num_bids, $end_date);
 
-  $item_id = "1313";
-  $title = "Gian Test";
-  $description = "desc";
-  $current_price = 21;
-  $num_bids = 2;
-  $end_date = new DateTime('2020-11-02T00:00:00');
+  #$item_id = "1313";
+ # $title = "Gian Test";
+  #$description = "desc";
+  #$current_price = 21;
+  #$num_bids = 2;
+  #$end_date = new DateTime('2020-11-02T00:00:00');
 
 
-  print_listing_li($item_id, $title, $description, $current_price, $num_bids, $end_date);
+  #print_listing_li($item_id, $title, $description, $current_price, $num_bids, $end_date);
 
   #$servername="localhost";
   #$username='AuctionProject';
