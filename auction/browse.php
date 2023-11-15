@@ -112,7 +112,17 @@
      retrieve data from the database. (If there is no form data entered,
      decide on appropriate default value/default query to make. */
   
+  ## adding a query for max bid for each auction in place of auctionCurrentHighestBid / so you need to find with a query the max Bid for each auction and order them accordingly
+
+
+
   ## building a dynamic query based on above conditions:
+
+
+
+            #$bidQuery = 'SELECT bidValue, buyerID, auctionID FROM Bids'
+
+  
   $query = 'SELECT auctionID, auctionName, auctionDescription, auctionCurrentHighestBid, auctionBidCount, auctionEndDate FROM Auctions WHERE 1';
 
 #$keyword search IN NATURAL LANGUAGE MODE -> CURRENTLY DEPENDS ON FULLTEXT MODE BEING ENABLED
