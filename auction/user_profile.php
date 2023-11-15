@@ -69,6 +69,18 @@ $profile_row = user_profile();
       </div>
 	</div>
   </div>
+    <div class="form-group row">
+    <label for="NewPassword" class="col-sm-2 col-form-label text-right">New password</label>
+    <div class="col-sm-10">
+      <input type="password" class="form-control" id="NewPassword" name= "NewPassword" value="">
+    </div>
+  </div>
+  <div class="form-group row">
+    <label for="ConfirmNewPassword" class="col-sm-2 col-form-label text-right">Confirm new password</label>
+    <div class="col-sm-10">
+      <input type="password" class="form-control" id="ConfirmNewPassword" name = "ConfirmNewPassword" value="">
+    </div>
+  </div>
     <button type="submit" name ="user_profile_change" class="btn btn-primary form-control">Change</button>
   </div>
 </form>
