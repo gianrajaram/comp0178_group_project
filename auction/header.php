@@ -58,9 +58,11 @@
   </li>
   <li class="nav-item mx-1"><a class="nav-link" href="browse.php">Browse</a>
   </li>
-  <li class="nav-item mx-1"><a class="nav-link" href="mybids.php">My Bids</a>
+  <li class="nav-item mx-1"><a class="nav-link" href="mybids.php">My bids</a>
     </li>
 	<li class="nav-item mx-1"><a class="nav-link" href="recommendations.php">My recommendations</a>
+    </li>  
+  <li class="nav-item mx-1"><a class="nav-link" href="my_wishlist.php">My wishlist</a>
     </li>');
   }
   else if (isset($_SESSION['account_type']) && $_SESSION['account_type'] == 'Seller') {
@@ -69,7 +71,7 @@
     </li>
     <li class="nav-item mx-1"><a class="nav-link" href="browse.php">Browse</a>
     </li>
-    <li class="nav-item mx-1"><a class="nav-link" href="mylistings.php">My Listings</a>
+    <li class="nav-item mx-1"><a class="nav-link" href="mylistings.php">My listings</a>
       </li>
     <li class="nav-item ml-3"><a class="nav-link btn border-light" href="create_auction.php">+ Create auction</a>
       </li>');

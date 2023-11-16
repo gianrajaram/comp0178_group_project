@@ -49,7 +49,7 @@ else if (($_POST["accountType"] == "Same as last session")){
 else{
     $accountType = $_POST["accountType"];
 }
-// Check email and password against database if they exist there
+// Check email, password and activation status against database if they exist there
 // Notify user of success/failure and redirect/give navigation options.
 $query_check_login = "SELECT * FROM Users WHERE username = '$username' AND userpassword = SHA('$password')";
 $result_check_login = send_query($query_check_login);
@@ -58,17 +58,26 @@ if (mysqli_num_rows($result_check_login) == 0){
     exit;
 }
 else if (mysqli_num_rows($result_check_login) == 1){
-    $query_update_account_type = "UPDATE Users SET userAccountType = '$accountType' WHERE username ='$username'";
-    $result_update_account_type = send_query($query_update_account_type);
-    $query_updated_user_details = "SELECT * FROM Users WHERE username = '$username'";
-    $result_updated_user_details = send_query($query_updated_user_details);
-    $row = mysqli_fetch_array($result_updated_user_details);
-    $_SESSION['logged_in'] = true;
-    $_SESSION['username'] = $username;
-    $_SESSION['account_type'] = $row['userAccountType'];
-    $_SESSION['userID'] = $row['userID'];
-    echo "<script>alert('Login is successful!');</script>";
-    echo "<script>window.location.href='browse.php';</script>";
+    $query_check_active_status = "SELECT userIsActive FROM Users WHERE username = '$username'";
+    $result_check_active_status = send_query($query_check_active_status);
+    $result_row = mysqli_fetch_array($result_check_active_status);
+    if ($result_row['userIsActive'] == "Deactivated"){
+        alert_message_login($message = 'Your account has been deactivated.');
+        exit;
+    }
+    else{
+        $query_update_account_type = "UPDATE Users SET userAccountType = '$accountType' WHERE username ='$username'";
+        $result_update_account_type = send_query($query_update_account_type);
+        $query_updated_user_details = "SELECT * FROM Users WHERE username = '$username'";
+        $result_updated_user_details = send_query($query_updated_user_details);
+        $row = mysqli_fetch_array($result_updated_user_details);
+        $_SESSION['logged_in'] = true;
+        $_SESSION['username'] = $username;
+        $_SESSION['account_type'] = $row['userAccountType'];
+        $_SESSION['userID'] = $row['userID'];
+        echo "<script>alert('Login is successful!');</script>";
+        echo "<script>window.location.href='browse.php';</script>";
+    }
 }
 else{
     $_SESSION['logged_in'] = false;

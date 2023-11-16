@@ -37,7 +37,35 @@ if (isset($_POST['user_profile_change'])) {
         $new_Gender = mysqli_real_escape_string($connection,$_POST["GenderProfile"]);
         $query_update = "UPDATE Users SET userGender = '$new_Gender' WHERE username = '$profile_username'";
         send_query($query_update);
-    }    
+    }
+    // Password - check if set, correct and update
+    if ($_POST['NewPassword'] != "" && $_POST['ConfirmNewPassword'] != "" ) {
+        $new_password = mysqli_real_escape_string($connection,$_POST["NewPassword"]);
+        $confirm_new_password = mysqli_real_escape_string($connection,$_POST["ConfirmNewPassword"]);
+        $list_common_passwords =["password", "password1", "admin", "123456789", "123abc", "password123", "123456", "guest"];
+        $min_length_password = 8; // set min length of password
+        
+        #check new password validity
+        if (!($new_password == $confirm_new_password)) {
+            alert_message_registration($message = 'Password does not match password confirmation.');   
+            exit;
+        }
+        else{
+            if (in_array($new_password, $list_common_passwords) || (strlen($new_password) < $min_length_password)){
+                alert_message_registration($message = 'Choose a stronger password (min. 8 characters)'); 
+                exit;   
+            }
+            else{
+                $password = mysqli_real_escape_string($connection,$_POST["NewPassword"]);
+                $query_update = "UPDATE Users SET userPassword = SHA('$new_password') WHERE username = '$profile_username'";
+                send_query($query_update);
+            }
+        }
+    }
+    elseif (($_POST['NewPassword']) != "" && $_POST['ConfirmNewPassword'] == ""){
+            echo "<script>alert('Please confirm password.');</script>";
+            echo "<script>window.location.href='user_profile.php';</script>";
+        }         
     echo "<script>alert('Profile was updated successfully.');</script>";
     echo "<script>window.location.href='user_profile.php';</script>";
 }
