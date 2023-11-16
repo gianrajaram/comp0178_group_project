@@ -22,10 +22,6 @@ if(isset($_SESSION['userID'])) {
   exit();
 }
 
-
-
-
-
   // This page is for showing a user the auction listings they've made.
   // It will be pretty similar to browse.php, except there is no search bar.
   // This can be started after browse.php is working with a database.
@@ -40,7 +36,6 @@ if(isset($_SESSION['userID'])) {
   // TODO: Loop through results and print them out as list items.
   
 ?>
-
 
 <div class="container my-5">
 
@@ -58,7 +53,7 @@ if(isset($_SESSION['userID'])) {
           $row["auctionID"],
           $row["auctionName"],
           $row["auctionDescription"],
-          $row["auctionStartingPrice"],
+          $row["auctionStartingPrice"], // Need to use Highest bid submitted if any otherwise starting price - create variable $highest_bid with sql query fetching the highest bid for the auction 
           $row["auctionBidCount"], // Need to create a $num_bids variable, make a query to count bids and use it here
           new DateTime($row["auctionEndDate"])
         );
