@@ -11,7 +11,7 @@
      (GET method of passing data to a page). -->
 
 
-
+<!-- added name="keyword" to <input type="text" class="form-control border-left-0" -->
 <form method="get" action="browse.php">
   <div class="row">
     <div class="col-md-5 pr-0">
@@ -23,14 +23,14 @@
               <i class="fa fa-search"></i>
             </span>
           </div>
-          <input type="text" class="form-control border-left-0" id="keyword" placeholder="Search for items">
+          <input type="text" class="form-control border-left-0" id="keyword" name="keyword" placeholder="Search for items">
         </div>
       </div>
     </div>
     <div class="col-md-3 pr-0">
       <div class="form-group">
         <label for="cat" class="sr-only">Search within:</label>
-        <select class="form-control" id="cat">
+        <select class="form-control" id="cat" name="cat">
           <option selected value="all">All categories</option>
           <option value="fill">Fill me in</option>
           <option value="with">with options</option>
@@ -41,7 +41,7 @@
     <div class="col-md-3 pr-0">
       <div class="form-inline">
         <label class="mx-2" for="order_by">Sort by:</label>
-        <select class="form-control" id="order_by">
+        <select class="form-control" id="order_by" name="order_by">
           <option selected value="pricelow">Price (low to high)</option>
           <option value="pricehigh">Price (high to low)</option>
           <option value="date">Soonest expiry</option>
@@ -59,23 +59,26 @@
 </div>
 
 <?php
-{ #GR - function to sanitise user inputted text
-  function sanitise_input($data) {
-    $data = trim($data); # removes whitespaces from the beginning and end of user input
-    $data = stripslashes($data); #removes backslashes from data
-    $data = htmlspecialchars($data); #
-    return $data;
-  }
-  # you added below 5 options as global variables double check if this is correct way of querying/would cause complications for anyone else.
-  $servername="localhost";
-  $username='AuctionProject';
-  $password='london2023';
-  $DB_name='website_auction';
-  $conn = new mysqli($servername,$username,$password,$DB_name);
+
+## adding DATABASE connection block: TO remove and change to GabiFunction
+$servername="localhost";
+$username='AuctionProject';
+$password='london2023';
+$DB_name='website_auction';
+$conn = new mysqli($servername,$username,$password,$DB_name);
+
+#GR - function to sanitise user inputted text - Best practice according to chatgpt - possibly add to utilities.php if useful elsewhere?
+function sanitise_input($data) {
+  $data = trim($data); # removes whitespaces from the beginning and end of user input
+  $data = stripslashes($data); #removes backslashes from data
+  $data = htmlspecialchars($data); #
+  return $data;
+}
+  
   if ($conn->connect_error) {
   die('Connection failed: '. $conn->connect_error);
   }
-}
+
   // Retrieve these from the URL
   if (!isset($_GET['keyword'])) {
     $keyword = "";
@@ -85,7 +88,6 @@
   else {
     $keyword = sanitise_input($_GET['keyword']); #implemented a function that will clean the data of projected user errors, resulting in a higher probability of a correct match to database
   }
-
   if (!isset($_GET['cat'])) {
     $category = "All categories";
     // TODO: Define behavior if a category has not been specified.
@@ -109,43 +111,35 @@
   }
   
     /* TODO: Use above values to construct a query. Use this query to 
-     retrieve data from the database. (If there is no form data entered,
+     retrieve data from the database. 
+     (If there is no form data entered,
      decide on appropriate default value/default query to make. */
-  
-  ## adding a query for max bid for each auction in place of auctionCurrentHighestBid / so you need to find with a query the max Bid for each auction and order them accordingly
-## target: 1. pull columns from bid table. 2. Join with $query
+     
+# initialising vairbales that will hold the rest of the queries 
+$result = null;
 
+$isFormSubmitted = isset($_GET['keyword']) || isset($_GET['cat']) || isset($_GET['order_by']);
 
-  ## building a dynamic query based on above conditions:
+if ($isFormSubmitted) {
 
+  $query = 'SELECT auctionID, auctionName, auctionDescription, categoryType, auctionBidCount, auctionEndDate FROM Auctions WHERE 1';
+  #doublecheck if countQuery is correct: Current logic <- line below is only changed for one of the 3 filtering conditions - checked, correct, theoretically else will count all rows in auctions table.
+  $countQuery = 'SELECT COUNT(*) AS total FROM Auctions WHERE 1';
 
-
-  $bidQuery = 'SELECT bidValue, buyerID, auctionID FROM Bids';
-
-
-  $query = 'SELECT auctionID, auctionName, auctionDescription, auctionCurrentHighestBid, auctionBidCount, auctionEndDate FROM Auctions WHERE 1';
-  $countQuery = 'SELECT (*) COUNT FROM Auctions WHERE 1';
-
-#$keyword search IN NATURAL LANGUAGE MODE -> CURRENTLY DEPENDS ON FULLTEXT MODE BEING ENABLED
-# else: simplify
-
-## adding count conditions -
   if (!empty($keyword)){
     $keyword = mysqli_real_escape_string($conn,$keyword);
     $query .= " AND MATCH (auctionName) AGAINST ('" . $keyword . "' IN NATURAL LANGUAGE MODE) ";
     $baseQueryCount = " AND MATCH (auctionName) AGAINST ('" . $keyword . "' IN NATURAL LANGUAGE MODE) ";
   }
   #Category condition:
-  ## adding value of category for now <- because I still need to add loop in <select>(HTML) for exact categories.
-  if($category != 'all') {
-    $category = $_GET['cat'];
-    $query .= "AND '" . $category . "' ";
-    $countQuery .= "AND '" . $category . "' ";
-    # removed ->CategoryClothsType<- from after AND, resulting in no SQL error
+  # will work correctly after adding category types to html code top of script. Same iteration for each lower level node. DOUBLE CHECK LOGIC MATCHES.
+  if ($category != 'all') {
+    $category = mysqli_real_escape_string($conn,$category);
+    $query .=  "AND categoryType = '" . $category . "' ";
+    $countQuery .=  "AND categoryType '" . $category . "' ";
   }
 
-  ###ERROR IN THIS SECTION - auctionCurrentHighestBid not defined
-  #ordering -> expand based on all categories of ordering
+  ###ERROR IN THIS SECTION - auctionCurrentHighestBid not defined -> pull and match query from Bids table using common column: auctionID
   switch($ordering) {
     case 'pricelow':
       $query .= ' ORDER BY auctionCurrentHighestBid ASC ';
@@ -156,128 +150,68 @@
     case 'date':
       $query .= ' ORDER BY auctionEndDate ASC ';
       break;
-
-  $countResult = $conn->query($countQuery);
-  if (!$countResult){
-    die('SQL error: '.myslqi_error($conn));
-
+    }
+    $result = mysqli_query($conn,$query);
+    if (!$result){
+      die('SQL error: ln160 !dollaresult '.mysqli_error($conn));
+    }
+} else {
+  $defaultQuery = 'SELECT auctionID, auctionName, auctionDescription, categoryType, auctionBidCount, auctionEndDate FROM Auctions';
+  $result = mysqli_query($conn,$defaultQuery);
+  if (!$result){
+    die('SQL error: ln167 if !dollaresult'.mysqli_error($conn));
   }
-  }
-
-
-  
-  #$query = 'SELECT auctionID, auctionName,auctionDescription,auctionCurrentHighestBid, auctionBidCount,auctionEndDate FROM Auctions';
-
-
+}
+$countResult = mysqli_query($conn,$countQuery);
+if (!countResult) {
+  die('SQL error: dollacountResult'.mysqli_error($conn));
+}
+$totalFilteredRecords = mysqli_fetch_array($countResult);
+$num_results = $totalFilteredRecord['total']; // TODO: Calculate me for real
+# GR Edit: Added condition for calculating based on each case of the dynamic SQL query.
+$results_per_page = 10;
+# GR Edit: leave as is
+$max_page = ceil($num_results / $results_per_page);
+# GR Edit: Leave as is
+?>
+<?php
   /* For the purposes of pagination, it would also be helpful to know the
      total number of results that satisfy the above query */
-  $lineInQuery = $countResult->fetch_row();
-  $num_results = $lineInQuery[0]; // TODO: Calculate me for real
-  # GR Edit: Added condition for calculating based on each case of the dynamic SQL query.
-  $results_per_page = 10;
-  # GR Edit: leave as is
-  $max_page = ceil($num_results / $results_per_page);
-  # GR Edit: Leave as is
 ?>
 
 <div class="container mt-5">
+  <!-- TODO: If result set is empty, print an informative message. Otherwise... -->
+
+  
 <?php
+#line below condition should theoretically never be zero, ENSURE LOGIC IS CONSISTENT THROUGHOUT (triple check once complete with all features)
 if (mysqli_num_rows($result)==0) {
   echo '<p> No listings were found under the given criteria </p>';
-}
-?>
+} else {
 
-<!-- TODO: If result set is empty, print an informative message. Otherwise... -->
-
-<ul class="list-group"> <!------------------------------------------------- LISTINGS -->
-
-
+  # EXITING PHP TO ADD DIVIDER FOR HTML CONTENT (so while loop appears in the correct place, under html class before next line starting with <?php )
+  
+  ?>
+<ul class="list-group"> 
+<!-- re-entering php mode -->
 <!-- TODO: Use a while loop to print a list item for each auction listing retrieved from the query -->
 
-<?php
-# Gian Testing:
-#executing query
-$result = mysqli_query($conn,$query);
-#Testing if query returns error
-if (!$result){
-  die('SQL error: '.mysqli_error($conn));
-}
 
-  while($row = mysqli_fetch_assoc($result)) {
+<?php
+# TEMPORARY VALUES auctionCurrentHighestBid and auctionBidCount currently null values in database and need to be queried
+#PLACEHOLDERS added below
+
+  while ($row = mysqli_fetch_assoc($result)){
     $item_id = $row['auctionID'];
     $title = $row['auctionName'];
     $description = $row['auctionDescription'];
-    $current_price = $row['auctionCurrentHighestBid'];
-    $num_bids = $row['auctionBidCount'];
+    $current_price = 13;
+    $num_bids = 21;
     $end_date = new DateTime($row['auctionEndDate']);
 
     print_listing_li($item_id, $title, $description, $current_price, $num_bids, $end_date);
   }
-
-
-
-
-  // Demonstration of what listings will look like using dummy data.
- # $item_id = "87021";
-  #$title = "Dummy title";
- # $desc = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum eget rutrum ipsum. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Phasellus feugiat, ipsum vel egestas elementum, sem mi vestibulum eros, et facilisis dui nisi eget metus. In non elit felis. Ut lacus sem, pulvinar ultricies pretium sed, viverra ac sapien. Vivamus condimentum aliquam rutrum. Phasellus iaculis faucibus pellentesque. Sed sem urna, maximus vitae cursus id, malesuada nec lectus. Vestibulum scelerisque vulputate elit ut laoreet. Praesent vitae orci sed metus varius posuere sagittis non mi.";
-  #$current_price = 30;
-  #$num_bids = 1;
-  #$end_date = new DateTime('2020-09-16T11:00:00');
-  
-  // This uses a function defined in utilities.php
- # print_listing_li($item_id, $title, $desc, $current_price, $num_bids, $end_date);
-  
- # $item_id = "516";
- # $title = "Different title";
- # $description = "Very short description.";
- # $current_price = 13.50;
- # $num_bids = 3;
-  #$end_date = new DateTime('2020-11-02T00:00:00');
-  
- # print_listing_li($item_id, $title, $description, $current_price, $num_bids, $end_date);
-
-  #$item_id = "1313";
- # $title = "Gian Test";
-  #$description = "desc";
-  #$current_price = 21;
-  #$num_bids = 2;
-  #$end_date = new DateTime('2020-11-02T00:00:00');
-
-
-  #print_listing_li($item_id, $title, $description, $current_price, $num_bids, $end_date);
-
-  #$servername="localhost";
-  #$username='AuctionProject';
-  #$password='london2023';
-  #$DB_name='website_auction';
-  #  $conn = new mysqli($servername,$username,$password,$DB_name);
-  #  if ($conn->connect_error) {
-   #   die('Connection failed: '. $conn->connect_error);
-   # }
-    # SQL query in below else statement pending database change -> auctionName to FULLTEXT (index), this is a pre-req for MATCH ... AGAINST in NATURAL LANGUAGE MODE to work. Query should theoretically be correct.
-   # else{
-  #  $query = 'SELECT auctionID, auctionName,auctionDescription,auctionCurrentHighestBid, auctionBidCount,auctionEndDate FROM Auctions WHERE MATCH($keyword) AGAINST (auctionName) IN NATURAL LANGUAGE MODE';
-   # $resultKeyWord = send_query($query);
-   # $searchSubset = [];
-   # while($rows = mysqli_fetch_assoc($resultKeyWord)) {
-  #    $searchSubset[] = $rows;
-   # }
-
-   # foreach ($searchSubset as $row) {
-  #  $item_id = $row['auctionID'];
-   # $title = $row['auctionName'];
-   # $description = $row['auctionDescription'];
-  #  $current_price = $row['auctionCurrentHighestBid'];
-   # $num_bids = $row['auctionBidCount'];
-   # $end_date = $row['auctionEndDate'];
-   # print_listing_li($item_id,$title,$description,$current_price,$num_bids,$end_date);
-#
-   # }
-   # }
-
-  #  mysqli_close($conn);
-   # }
+}
 ?>
 
 </ul>
@@ -338,6 +272,7 @@ if (!$result){
       </a>
     </li>');
   }
+  $conn->close();
 ?>
 
   </ul>
