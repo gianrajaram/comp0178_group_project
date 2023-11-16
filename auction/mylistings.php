@@ -46,30 +46,29 @@ if(isset($_SESSION['userID'])) {
 
   <h2 class="my-3">Your Auctions</h2>
 
-  <?php
-  // Check if there are auctions
-  if (mysqli_num_rows($result) > 0) {
-    while($row = mysqli_fetch_assoc($result)) {
-      // Display auction information
-      echo '<div class="card mb-3">';
-      echo '<div class="card-body">';
-      // title is clickable
-      echo '<h5 class="card-title"><a href="listing.php?item_id=' . $row['item_id'] . '">'. $row['auctionName'] . '</a></h5>';
-      echo '<p class="card-text">Start Date: ' . $row['auctionStartDate'] . '</p>';
-      echo '<p class="card-text">End Date: '. $row['auctionEndDate'] . '</p>';
-      echo '</div>';
-      echo '</div>';
+  <ul class="list-group">
+
+
+    <?php
+    // Check if there are auctions
+    if (mysqli_num_rows($result) > 0) {
+      while($row = mysqli_fetch_assoc($result)) {
+        // Display auction information
+        print_listing_li(
+          $row["item_id"],
+          $row["auctionName"],
+          $row["auctionDescription"],
+          $row["auctionStartingPrice"],
+          $row["auctionBidCount"],
+          new DateTime($row["auctionEndDate"])
+        );
+      }
+    } else {
+      echo '<p>No auctions found.</p>';
     }
-  } else {
-    echo '<p>No auctions found.</p>';
-  }
-  ?>
-</div>
-
-
-
-
-
+      ?>
+    </ul>
+  </div>
 
 
 
