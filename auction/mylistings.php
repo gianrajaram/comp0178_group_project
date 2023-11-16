@@ -55,11 +55,11 @@ if(isset($_SESSION['userID'])) {
       while($row = mysqli_fetch_assoc($result)) {
         // Display auction information
         print_listing_li(
-          $row["item_id"],
+          $row["auctionID"],
           $row["auctionName"],
           $row["auctionDescription"],
           $row["auctionStartingPrice"],
-          $row["auctionBidCount"],
+          $row["auctionBidCount"], // Need to create a $num_bids variable, make a query to count bids and use it here
           new DateTime($row["auctionEndDate"])
         );
       }
