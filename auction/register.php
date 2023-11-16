@@ -3,7 +3,7 @@
 <div class="container">
 <h2 class="my-3">Register new account</h2>
 
-<!-- Create registration form -->
+<!-- Registration form -->
 <form method="POST" action="process_registration.php">
   <div class="form-group row">
     <label for="emailReg" class="col-sm-2 col-form-label text-right">Email</label>

@@ -21,7 +21,8 @@ CREATE TABLE Users (
 	userLastName VARCHAR(100), 
 	userAddress VARCHAR(100), 
 	userTel VARCHAR(100), 
-	userGender VARCHAR(100) CHECK (userGender in ("Male", "Female", "Other", "Prefer not to say")), 
+	userGender VARCHAR(100) CHECK (userGender in ("Male", "Female", "Other", "Prefer not to say")),
+    userIsActive VARCHAR(100) DEFAULT "Activated" CHECK (userIsActive in ("Activated", "Deactivated")),
 	userAccountType VARCHAR(100) DEFAULT "Unspecified yet" CHECK (userAccountType in ("Buyer", "Seller", "Admin", "Unspecified yet")), 
 	PRIMARY KEY(userID)
 	)
