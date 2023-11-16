@@ -36,9 +36,15 @@ function alert_message_login($message)
   echo "<script>window.location.href='login.php';</script>";
 }
 
+//Alert message while filling out auction 
+function alert_message_auction($message)
+{
+  echo "<script>alert('$message');</script>";
+  echo "<script>window.location.href='create_auction.php';</script>";
+}
+
 // display_time_remaining:
 // Helper function to help figure out what time to display
-
 function display_time_remaining($interval) {
 
     if ($interval->days == 0 && $interval->h == 0) {
@@ -152,4 +158,11 @@ function print_user_li($userID, $username, $userEmail, $userFirstName, $userLast
     ');
 }
  
+//function to generate a unique randome filename
+function generateUniqueFilename($folder){
+  $timestamp = (new DateTime())->format('YmdHisu');
+  $uniqueID = substr(md5(uniqid()), 0, 6);
+  return $folder .'/'. $timestamp .'_'. $uniqueID;
+}
+
 ?>
