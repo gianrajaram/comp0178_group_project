@@ -143,8 +143,8 @@ send_query($query);
 
 
 // If all is successful, let user know.
-echo('<div class="text-center">Auction successfully created! <a href="mylistings.php">View your new listing.</a></div>');
-
+echo "<script>alert('Auction successfully created!');</script>";
+echo "<script>window.location.href='mylistings.php';</script>";
 
 ?>
 
