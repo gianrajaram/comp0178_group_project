@@ -113,32 +113,36 @@
      decide on appropriate default value/default query to make. */
   
   ## adding a query for max bid for each auction in place of auctionCurrentHighestBid / so you need to find with a query the max Bid for each auction and order them accordingly
-
+## target: 1. pull columns from bid table. 2. Join with $query
 
 
   ## building a dynamic query based on above conditions:
 
 
 
-            #$bidQuery = 'SELECT bidValue, buyerID, auctionID FROM Bids'
+  $bidQuery = 'SELECT bidValue, buyerID, auctionID FROM Bids';
 
-  
+
   $query = 'SELECT auctionID, auctionName, auctionDescription, auctionCurrentHighestBid, auctionBidCount, auctionEndDate FROM Auctions WHERE 1';
+  $countQuery = 'SELECT (*) COUNT FROM Auctions WHERE 1';
 
 #$keyword search IN NATURAL LANGUAGE MODE -> CURRENTLY DEPENDS ON FULLTEXT MODE BEING ENABLED
 # else: simplify
-####The !empty function in PHP returns true if $keyword has a non-null and non-empty value. This is to ensure that the additional SQL conditions are only appended if there is a keyword to search for.
+
+## adding count conditions -
   if (!empty($keyword)){
     $keyword = mysqli_real_escape_string($conn,$keyword);
-    $query .= "AND MATCH (auctionName) AGAINST ('" . $keyword . "' IN NATURAL LANGUAGE MODE) ";
+    $query .= " AND MATCH (auctionName) AGAINST ('" . $keyword . "' IN NATURAL LANGUAGE MODE) ";
+    $baseQueryCount = " AND MATCH (auctionName) AGAINST ('" . $keyword . "' IN NATURAL LANGUAGE MODE) ";
   }
   #Category condition:
+  ## adding value of category for now <- because I still need to add loop in <select>(HTML) for exact categories.
   if($category != 'all') {
     $category = $_GET['cat'];
     $query .= "AND '" . $category . "' ";
+    $countQuery .= "AND '" . $category . "' ";
     # removed ->CategoryClothsType<- from after AND, resulting in no SQL error
   }
-
 
   ###ERROR IN THIS SECTION - auctionCurrentHighestBid not defined
   #ordering -> expand based on all categories of ordering
@@ -152,6 +156,12 @@
     case 'date':
       $query .= ' ORDER BY auctionEndDate ASC ';
       break;
+
+  $countResult = $conn->query($countQuery);
+  if (!$countResult){
+    die('SQL error: '.myslqi_error($conn));
+
+  }
   }
 
 
@@ -161,8 +171,9 @@
 
   /* For the purposes of pagination, it would also be helpful to know the
      total number of results that satisfy the above query */
-  $num_results = 96; // TODO: Calculate me for real
-  # GR Edit: Calculation = total number of rows in queries_found -> count($queries_found)
+  $lineInQuery = $countResult->fetch_row();
+  $num_results = $lineInQuery[0]; // TODO: Calculate me for real
+  # GR Edit: Added condition for calculating based on each case of the dynamic SQL query.
   $results_per_page = 10;
   # GR Edit: leave as is
   $max_page = ceil($num_results / $results_per_page);
