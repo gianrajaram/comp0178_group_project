@@ -10,6 +10,10 @@ session_destroy();
 
 
 // Redirect to index
+
+
+
+//sadad
 header("Location: index.php");
 
 ?>
