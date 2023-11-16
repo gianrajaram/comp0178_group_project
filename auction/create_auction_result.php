@@ -76,7 +76,7 @@ if (empty($_POST["auctionStartPrice"])) {
 if (!empty($_POST["auctionReservePrice"])) {
     $auctionReservePrice = floatval($_POST['auctionReservePrice']);
 } else {
-    $auctionReservePrice = null;
+    $auctionReservePrice = $auctionStartingPrice;
     /*alert_message_auction($message = 'Please provide a reserve price for the auction');
     exit;*/
 }
