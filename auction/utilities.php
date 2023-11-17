@@ -152,4 +152,12 @@ function print_user_li($userID, $username, $userEmail, $userFirstName, $userLast
     ');
 }
  
+
+
+function sanitise_input($data) {
+  $data = trim($data); # removes whitespaces from the beginning and end of user input
+  $data = stripslashes($data); #removes backslashes from data
+  $data = htmlspecialchars($data); #
+  return $data;
+}
 ?>

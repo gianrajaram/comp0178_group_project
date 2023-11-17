@@ -68,12 +68,6 @@ $DB_name='website_auction';
 $conn = new mysqli($servername,$username,$password,$DB_name);
 
 #GR - function to sanitise user inputted text - Best practice according to chatgpt - possibly add to utilities.php if useful elsewhere?
-function sanitise_input($data) {
-  $data = trim($data); # removes whitespaces from the beginning and end of user input
-  $data = stripslashes($data); #removes backslashes from data
-  $data = htmlspecialchars($data); #
-  return $data;
-}
   
   if ($conn->connect_error) {
   die('Connection failed: '. $conn->connect_error);
