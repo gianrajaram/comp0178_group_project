@@ -77,8 +77,16 @@ if ($_SESSION['logged_in']) {
 
 <div class="container">
         <div class="row">
+            <style>
+                .item-img {
+                    width: 50%; /* Adjust the percentage as needed */
+                    height: auto; /* This maintains the aspect ratio */
+                }
+            </style>            
             <div class="col-sm-6">
-            <img src='images/item_images/the auctions/<?php echo $auctionID . '.png' ?>' class='img-rounded img-responsive item-img'>
+                <div style="margin-top: 20px;">
+                    <img src="images/plainblackTshirt_male.png" class='img-rounded img-responsive item-img'>
+                </div>
             </div>
 
 
@@ -129,6 +137,7 @@ if ($_SESSION['logged_in']) {
 
                 <div style="margin-top: 20px;">
                   <?php if ($auctionStatus == 'Active' && $watching == true): ?>
+                    <?php echo "This auction is already on your watchlist."?>
                     <form action="watchlist_funcsr.php" method="POST">
                       <input type="hidden" name="auctionID" value="<?php echo $auctionID; ?>">
                       <input type="hidden" name="userID" value="<?php echo $userID; ?>">
