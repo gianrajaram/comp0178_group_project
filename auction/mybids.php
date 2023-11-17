@@ -1,4 +1,5 @@
 <?php include_once("header.php")?>
+<?php require_once("database_connection.php")?>
 <?php require("utilities.php")?>
 
 <div class="container">
@@ -6,19 +7,59 @@
 <h2 class="my-3">My bids</h2>
 
 <?php
-  // This page is for showing a user the auctions they've bid on.
-  // It will be pretty similar to browse.php, except there is no search bar.
-  // This can be started after browse.php is working with a database.
-  // Feel free to extract out useful functions from browse.php and put them in
-  // the shared "utilities.php" where they can be shared by multiple files.
-  
-  
-  // TODO: Check user's credentials (cookie/session).
-  
-  // TODO: Perform a query to pull up the auctions they've bidded on.
-  
-  // TODO: Loop through results and print them out as list items.
-  
+
+// WATCHLIST NOT WISHLIST
+
+//session_start();
+
+$connection = connectMAC();
+
+$buyerID = $_SESSION['userID'];
+
+// SQL query to fetch auction names from the Watchlists for a specific buyer
+//$query = "SELECT a.auctionID, a.auctionName, MAX(b.bidValue) AS maxBidValue
+//          FROM Bids b
+//          JOIN Auctions a ON b.auctionID = a.auctionID
+//          WHERE b.buyerID = '$buyerID'
+//         GROUP BY a.auctionID, a.auctionName";
+
+$query = "SELECT a.auctionID, a.auctionName, 
+                 MAX(b1.bidValue) AS maxBuyerBidValue, 
+                 MAX(b2.bidValue) AS maxBidValue
+          FROM Auctions a
+          LEFT JOIN Bids b1 ON a.auctionID = b1.auctionID AND b1.buyerID = '$buyerID'
+          LEFT JOIN Bids b2 ON a.auctionID = b2.auctionID
+          WHERE b1.buyerID = '$buyerID'
+          GROUP BY a.auctionID, a.auctionName";
+
+$result = send_queryMAC($query);
 ?>
 
-<?php include_once("footer.php")?>
+<div class="container">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Auction Name</th>
+                <th>Your Highest Bid</th>
+                <th>Current Highest Bid</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php
+                if (mysqli_num_rows($result) > 0) {
+                    while ($row = mysqli_fetch_assoc($result)) {
+                      echo "<tr>";
+                      echo "<td><a href='listing.php?auctionID=" . htmlspecialchars($row['auctionID']) . "'>" . htmlspecialchars($row['auctionName']) . "</a></td>";
+                      echo "<td>" . htmlspecialchars($row['maxBuyerBidValue']) . "</td>";
+                      echo "<td>" . htmlspecialchars($row['maxBidValue']) . "</td>";
+                      echo "</tr>";
+                }
+            } else {
+                echo "<tr><td colspan='2'>No auctions found in your watchlist.</td></tr>";
+            }
+            ?>
+        </tbody>
+    </table>
+</div>
+
+<?php include_once("footer.php"); ?>
