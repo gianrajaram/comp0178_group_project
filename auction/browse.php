@@ -60,6 +60,13 @@
 
 <?php
 
+##  PLAN FOR FINAL STEPS
+## 1. query and input bidquery
+## 2. Cath code to loop through database to pull correct categories
+## 3. Pagination -  do we implent total count numbers on sub-page as well
+## 4. multiple buttons for categories - copy divider for it
+
+
 ## adding DATABASE connection block: TO remove and change to GabiFunction
 $servername="localhost";
 $username='AuctionProject';
@@ -202,6 +209,11 @@ if (mysqli_num_rows($result)==0) {
     $current_price = 13;
     $num_bids = 21;
     $end_date = new DateTime($row['auctionEndDate']);
+    # update $end_date to review pulling correct data
+    # 3 categories
+    # Pending - if time before start date
+    # Active - between start and end date
+    # Closed -  
 
     print_listing_li($item_id, $title, $description, $current_price, $num_bids, $end_date);
   }
