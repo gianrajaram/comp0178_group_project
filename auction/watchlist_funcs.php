@@ -1,40 +1,51 @@
 <?php
-session_start();
-include_once("header.php");
+//session_start();
+//include_once("header.php");
 require_once("database_connection.php");
-require_once("utilities.php");
+//require_once("utilities.php");
 
 $connection = connectMAC();
 
-if (!isset($_POST['functionname']) || !isset($_POST['arguments']['auctionID'])) {
-    echo 'Invalid request';
-    exit;
-}
+//if (!isset($_POST['functionname']) || !isset($_POST['auction'])) {
+//  echo 'Invalid request';
+//  return;
+//}
 
-$auctionID = $_POST['arguments']['auctionID'];
-$userID = isset($_SESSION['buyerID']) ? $_SESSION['buyerID'] : null;
+// Extract arguments from the POST variables:
+//$item_id = $_POST['arguments'];
 
-if (is_null($userID)) {
-    echo 'User ID not set in session.';
-    exit;
-}
+$auctionID = $_POST['auction'];
+$userID = $_SESSION['userID'];
 
 $res = 'fail';
-$query = '';
 if ($_POST['functionname'] == "add_to_watchlist") {
-    $query = "INSERT INTO Watchlists (buyerID, auctionID) VALUES ('$userID','$auctionID')";
-} else if ($_POST['functionname'] == "remove_from_watchlist") {
-    $query = "DELETE FROM Watchlists WHERE buyerID = '$userID' AND auctionID = '$auctionID'";
-}
-
-if (!empty($query)) {
-    $result = send_queryMAC($query);
-    if ($result === FALSE) {
-        $res = 'Query failed: ' . mysqli_error($connection);
-    } else {
-        $res = "success";
+  //  Update database and return success/failure.
+  $query = "INSERT INTO Watchlists (buyerID, auctionID) VALUES ('$userID','$auctionID')";
+    try {
+      send_queryMAC($query);
+      $res = "success";
+    } catch (Exception $e) {
+      $res = 'Dupulicate data.';
     }
+
+  //$res = "success";
+}
+else if ($_POST['functionname'] == "remove_from_watchlist") {
+  // Update database and return success/failure.
+  $query2 = "DELETE FROM Watchlists WHERE buyerID = '$userID' AND auctionID = '$auctionID'";
+    try {
+      send_queryMAC($query2);
+      $res = "success";
+    } catch (Exception $e) {
+      $res = 'Error removing from watchlist.';
+    }
+    //$res = "success";
 }
 
+// Note: Echoing from this PHP function will return the value as a string.
+// If multiple echo's in this file exist, they will concatenate together,
+// so be careful. You can also return JSON objects (in string form) using
+// echo json_encode($res).
 echo $res;
+
 ?>
