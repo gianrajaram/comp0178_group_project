@@ -21,18 +21,18 @@ CREATE TABLE Users (
 	userLastName VARCHAR(100), 
 	userAddress VARCHAR(100), 
 	userTel VARCHAR(100), 
-	userGender VARCHAR(100) CHECK (userGender in ("Male", "Female", "Other", "Prefer not to say")), 
+	userGender VARCHAR(100) CHECK (userGender in ("Male", "Female", "Other", "Prefer not to say")),
+    userIsActive VARCHAR(100) DEFAULT "Activated" CHECK (userIsActive in ("Activated", "Deactivated")),
 	userAccountType VARCHAR(100) DEFAULT "Unspecified yet" CHECK (userAccountType in ("Buyer", "Seller", "Admin", "Unspecified yet")), 
 	PRIMARY KEY(userID)
 	)
 	ENGINE=INNODB;
 
 
-/* Insert sample users into database - attention - no input needed for userID (auto incrementing), userAdminRights, userBuyerRights, userSellerRights */
-
+/* Insert sample users into database - attention - no input needed for userID (auto incrementing) */
 /* Admin registration */
 INSERT INTO Users (userEmail, username, userPassword, userFirstName, userLastName, userAddress, userTel, userGender, userAccountType) VALUES
-("gbakova@yahoo.com", "admin", SHA('111'), "Gabriela", "Bakova", "Discovery Dock East, London E14 9RZ UK", 0790000000, "Female", "Admin");
+("gbakova@yyyyyy.com", "admin", SHA('111'), "Gabriela", "Bakova", "DDE London E14 9RZ UK", 0790000000, "Female", "Admin");
 
 /* Sample user registration */
 INSERT INTO Users (userEmail, username, userPassword, userFirstName, userLastName, userAddress, userTel, userGender) VALUES
@@ -122,18 +122,15 @@ CREATE TABLE Auctions (
     auctionStartDate DATETIME NOT NULL,
     auctionEndDate DATETIME NOT NULL,
     auctionStartingPrice DOUBLE(10,2) NOT NULL, 
-    auctionCurrentHighestBid DOUBLE(10,2),
-    auctionReservePrice DOUBLE(10,2) NOT NULL,
+    auctionReservePrice DOUBLE(10,2),
     auctionName VARCHAR(100) NOT NULL,
     auctionDescription VARCHAR(500),
-    auctionBidCount INT(10),
-    auctionStatus VARCHAR(100) NOT NULL CHECK (auctionStatus in ("Running", "Closed")),
     auctionPicture VARCHAR(100),
     sellerID INT(10),
-    categoryType VARCHAR(100) NOT NULL,
-    categoryColor VARCHAR(100) NOT NULL,
-    categoryGender VARCHAR(100) NOT NULL,
-    categorySize VARCHAR(100) NOT NULL,
+    categoryType VARCHAR(100),
+    categoryColor VARCHAR(100),
+    categoryGender VARCHAR(100),
+    categorySize VARCHAR(100),
     PRIMARY KEY(auctionID),
     FOREIGN KEY (sellerID) REFERENCES Users (userID) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (categoryType) REFERENCES CategoryClothsType (categoryType) ON UPDATE CASCADE ON DELETE RESTRICT,
@@ -145,20 +142,20 @@ ENGINE=INNODB;
 
 
 /* Insert sample auctions */
-INSERT INTO Auctions (auctionStartDate, auctionEndDate, auctionStartingPrice, auctionReservePrice, auctionName, auctionDescription, auctionStatus, auctionPicture, sellerID, categoryType, categoryColor, categoryGender, categorySize) VALUES
-("2023-11-02 8:30:00", "2023-11-04 20:00:00", 20.50, 45, "Amazing VIVAIA flats", "Green flats for females, size 38 European, brand new worn once", (CASE WHEN NOW() > auctionStartDate AND NOW() < auctionEndDate THEN "Running" ELSE "Closed" END), "/auction/images/Green female shoes.png", 2, "Shoes", "Green", "Female", "N/A"),
-("2023-11-01 8:30:00", "2023-11-04 20:00:00", 5.50, 10, "Stylish black T-Shitrt for men", "Black T-shirt with red rose decoration, brand new never worn", (CASE WHEN NOW() > auctionStartDate AND NOW() < auctionEndDate THEN "Running" ELSE "Closed" END), "/auction/images/plainblackTshirt_male.png", 4, "T-shirts", "Black", "Male", "L"),
-("2023-11-01 8:30:00", "2023-11-07 20:00:00", 50, 70, "Pier One jeans", "Male light denim jeans, in good condition", (CASE WHEN NOW() > auctionStartDate AND NOW() < auctionEndDate THEN "Running" ELSE "Closed" END), "/auction/images/jeans_male.png", 4, "Trousers/Jeans", "Blue", "Male", "L"),
-("2023-11-01 8:30:00", "2023-11-08 20:00:00", 100, 150, "PERFECT KAREN MILLEN DRESS", "very stylish designer dress, worn only on one occasion and has been to dry cleaning", (CASE WHEN NOW() > auctionStartDate AND NOW() < auctionEndDate THEN "Running" ELSE "Closed" END), "/auction/images/bluedress.png", 2, "Dresses/Skirts", "Blue", "Female", "M"),
-("2023-11-01 8:30:00", "2023-11-06 20:00:00", 50, 70, "Summer colorful skirt", "skirt perfect for the summer, never worn", (CASE WHEN NOW() > auctionStartDate AND NOW() < auctionEndDate THEN "Running" ELSE "Closed" END), "/auction/images/colorfulldress.png", 2, "Dresses/Skirts", "Multi-coloured", "Female", "M"),
-("2023-11-02 08:30:00", "2023-11-04 20:00:00", 20.50, 45, "Ultimate deal for a VALENTINO BAG", "Amazing Valentino bag in very good condition", (CASE WHEN NOW() > auctionStartDate AND NOW() < auctionEndDate THEN 'Running' ELSE 'Closed' END), "/auction/images/accessories_valentino_bag.png", 2, "Accessories", "Black", "Female", "N/A"),
-("2023-11-03 08:30:00", "2023-11-05 20:00:00", 10.00, 25, "Elegant Unisex Scarf", "Stylish unisex scarf in cheerful colors, perfect for any season", (CASE WHEN NOW() > auctionStartDate AND NOW() < auctionEndDate THEN "Running" ELSE "Closed" END), "/auction/images/accessories_unisex_scarf.jpg", 3, "Accessories", "Multi-coloured", "Unisex", "N/A"),
-("2023-11-04 08:30:00", "2023-11-06 20:00:00", 15.00, 30, "Elegant White Blouse for Women", "White blouse for females, size Medium, elegant design, never worn", (CASE WHEN NOW() > auctionStartDate AND NOW() < auctionEndDate THEN "Running" ELSE "Closed" END), "/auction/images/whiteblousefemale.jpg", 3, "Blouses/Shirts", "White", "Female", "M"),
-("2023-11-05 08:30:00", "2023-11-07 20:00:00", 18.50, 35, "Stylish Blue Blouse for Women", "Blue blouse for females, size Small, elegant design, like new", (CASE WHEN NOW() > auctionStartDate AND NOW() < auctionEndDate THEN "Running" ELSE "Closed" END), "/auction/images/blueblousefemale.jpg", 3, "Blouses/Shirts", "Blue", "Female", "S"),
-("2023-11-06 08:30:00", "2023-11-08 20:00:00", 12.75, 25, "Elegant Black Skirt for Women", "Black skirt for females, size Large, perfect for formal occasions", (CASE WHEN NOW() > '2023-11-06 08:30:00' AND NOW() < '2023-11-08 20:00:00' THEN 'Running' ELSE 'Closed' END), "/auction/images/blackskirtfemale.jpg", 3, "Dresses/Skirts", "Black", "Female", "L"),
-("2023-11-07 08:30:00", "2023-11-09 20:00:00", 22.99, 40, "Classic Black Female Shoes", "Black shoes for females, size 38 European, comfortable and stylish", (CASE WHEN NOW() > auctionStartDate AND NOW() < auctionEndDate THEN "Running" ELSE "Closed" END), "/auction/images/blackshoesfemale.jpg", 2, "Shoes", "Black", "Female", "N/A"),
-("2023-11-08 08:30:00", "2023-11-10 20:00:00", 30.00, 60, "Elegant Black Dress for Women", "Black dress for females, size Medium, perfect for special occasions", (CASE WHEN NOW() > auctionStartDate AND NOW() < auctionEndDate THEN "Running" ELSE "Closed" END), "/auction/images/blackdressfemale.jpg", 2, "Dresses/Skirts", "Black", "Female", "M"),
-("2023-11-09 08:30:00", "2023-11-11 20:00:00", 40.00, 80, "Stylish Red Coat for Women", "Red coat for females, size Large, excellent condition, perfect for winter", (CASE WHEN NOW() > '2023-11-09 08:30:00' AND NOW() < '2023-11-11 20:00:00' THEN 'Running' ELSE 'Closed' END), "/auction/images/redcoatfemale.jpg", 3, "Jackets/Coats", "Red", "Female", "L")
+INSERT INTO Auctions (auctionStartDate, auctionEndDate, auctionStartingPrice, auctionReservePrice, auctionName, auctionDescription, auctionPicture, sellerID, categoryType, categoryColor, categoryGender, categorySize) VALUES
+("2023-11-02 8:30:00", "2024-11-04 20:00:00", 20.50, 45, "Amazing VIVAIA flats", "Green flats for females, size 38 European, brand new worn once", "/auction/images/Green female shoes.png", 2, "Shoes", "Green", "Female", "N/A"),
+("2023-11-01 8:30:00", "2024-11-04 20:00:00", 5.50, 10, "Stylish black T-Shitrt for men", "Black T-shirt with red rose decoration, brand new never worn", "/auction/images/plainblackTshirt_male.png", 4, "T-shirts", "Black", "Male", "L"),
+("2023-11-01 8:30:00", "2024-11-07 20:00:00", 50, 70, "Pier One jeans", "Male light denim jeans, in good condition", "/auction/images/jeans_male.png", 4, "Trousers/Jeans", "Blue", "Male", "L"),
+("2023-11-01 8:30:00", "2024-11-08 20:00:00", 100, 150, "PERFECT KAREN MILLEN DRESS", "very stylish designer dress, worn only on one occasion and has been to dry cleaning", "/auction/images/bluedress.png", 2, "Dresses/Skirts", "Blue", "Female", "M"),
+("2023-11-01 8:30:00", "2024-11-06 20:00:00", 50, 70, "Summer colorful skirt", "skirt perfect for the summer, never worn", "/auction/images/colorfulldress.png", 2, "Dresses/Skirts", "Multi-coloured", "Female", "M"),
+("2023-11-02 08:30:00", "2024-11-04 20:00:00", 20.50, 45, "Ultimate deal for a VALENTINO BAG", "Amazing Valentino bag in very good condition", "/auction/images/accessories_valentino_bag.png", 2, "Accessories", "Black", "Female", "N/A"),
+("2023-11-03 08:30:00", "2023-11-05 20:00:00", 10.00, 25, "Elegant Unisex Scarf", "Stylish unisex scarf in cheerful colors, perfect for any season", "/auction/images/accessories_unisex_scarf.jpg", 3, "Accessories", "Multi-coloured", "Unisex", "N/A"),
+("2023-11-04 08:30:00", "2023-11-06 20:00:00", 15.00, 30, "Elegant White Blouse for Women", "White blouse for females, size Medium, elegant design, never worn", "/auction/images/whiteblousefemale.jpg", 3, "Blouses/Shirts", "White", "Female", "M"),
+("2023-11-05 08:30:00", "2023-11-07 20:00:00", 18.50, 35, "Stylish Blue Blouse for Women", "Blue blouse for females, size Small, elegant design, like new", "/auction/images/blueblousefemale.jpg", 3, "Blouses/Shirts", "Blue", "Female", "S"),
+("2023-11-06 08:30:00", "2023-11-08 20:00:00", 12.75, 25, "Elegant Black Skirt for Women", "Black skirt for females, size Large, perfect for formal occasions", "/auction/images/blackskirtfemale.jpg", 3, "Dresses/Skirts", "Black", "Female", "L"),
+("2023-11-07 08:30:00", "2023-11-09 20:00:00", 22.99, 40, "Classic Black Female Shoes", "Black shoes for females, size 38 European, comfortable and stylish", "/auction/images/blackshoesfemale.jpg", 2, "Shoes", "Black", "Female", "N/A"),
+("2023-11-08 08:30:00", "2023-11-10 20:00:00", 30.00, 60, "Elegant Black Dress for Women", "Black dress for females, size Medium, perfect for special occasions", "/auction/images/blackdressfemale.jpg", 2, "Dresses/Skirts", "Black", "Female", "M"),
+("2023-11-09 08:30:00", "2023-11-11 20:00:00", 40.00, 80, "Stylish Red Coat for Women", "Red coat for females, size Large, excellent condition, perfect for winter", "/auction/images/redcoatfemale.jpg", 3, "Jackets/Coats", "Red", "Female", "L")
 ;
 
 
@@ -166,7 +163,6 @@ CREATE TABLE Bids (
     bidID INT(10) AUTO_INCREMENT,
     dateBid DATETIME NOT NULL DEFAULT NOW(),
     bidValue DECIMAL(10,2) NOT NULL,
-    bidStatus VARCHAR(100) NOT NULL  DEFAULT "Running" CHECK (bidStatus in ("Running", "Lost", "Won")),
     buyerID INT(10) NOT NULL,
     auctionID INT(10) NOT NULL,
     PRIMARY KEY (bidID),
@@ -217,7 +213,7 @@ CREATE TABLE Ratings (
     buyerID INT(10),
     PRIMARY KEY (auctionID),
     FOREIGN KEY (auctionID) REFERENCES Auctions (auctionID) ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY (buyerID) REFERENCES Users (userID) ON UPDATE CASCADE ON DELETE SET NULL
+    FOREIGN KEY (buyerID) REFERENCES Users (userID) ON UPDATE CASCADE ON DELETE CASCADE
 )
 ENGINE=INNODB;
 

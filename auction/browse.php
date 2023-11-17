@@ -10,6 +10,33 @@
      Search/sort specs are passed to this page through parameters in the URL
      (GET method of passing data to a page). -->
 
+<!-- adding code to loop through and find all categories from page -->
+
+<?php
+
+$servername="localhost";
+$username='AuctionProject';
+$password='london2023';
+$DB_name='website_auction';
+$conn = new mysqli($servername,$username,$password,$DB_name);
+
+
+
+$clothingtype = 'SELECT categoryType FROM CategoryClothsType';
+$resultClothes = mysqli_query($conn, $clothingtype);
+if (!$resultClothes){
+  die('SQL error: top of script, clothingtype code '.mysqli_error($conn));
+} else {
+  $categoriesClothes =[];
+  while ($row = mysqli_fetch_assoc($resultClothes)) {
+    $categoriesClothes[] = $row;
+}
+}
+
+
+
+
+?>
 
 <!-- added name="keyword" to <input type="text" class="form-control border-left-0" -->
 <form method="get" action="browse.php">
@@ -31,10 +58,12 @@
       <div class="form-group">
         <label for="cat" class="sr-only">Search within:</label>
         <select class="form-control" id="cat" name="cat">
-          <option selected value="all">All categories</option>
-          <option value="fill">Fill me in</option>
-          <option value="with">with options</option>
-          <option value="populated">populated from a database?</option>
+          <option value="all">All categories</option>
+          <?php
+              foreach( $categoriesClothes as $buttonCategory ) {
+                echo '<option value="'. $buttonCategory ['categoryType'] .'">'. $buttonCategory['categoryType'] .'</option>';
+              }
+              ?>
         </select>
       </div>
     </div>
@@ -65,14 +94,10 @@
 ## 2. Cath code to loop through database to pull correct categories
 ## 3. Pagination -  do we implent total count numbers on sub-page as well
 ## 4. multiple buttons for categories - copy divider for it
+## 5. MAKE SURE TO UPDATE DIE STATEMENTS
 
 
 ## adding DATABASE connection block: TO remove and change to GabiFunction
-$servername="localhost";
-$username='AuctionProject';
-$password='london2023';
-$DB_name='website_auction';
-$conn = new mysqli($servername,$username,$password,$DB_name);
 
 #GR - function to sanitise user inputted text - Best practice according to chatgpt - possibly add to utilities.php if useful elsewhere?
   
@@ -94,6 +119,8 @@ $conn = new mysqli($servername,$username,$password,$DB_name);
     // TODO: Define behavior if a category has not been specified.
   }
   else {
+
+    ### DEFINING BEHAVIOUR IF KEYWORD IS SPECIFIED behaviour if keyword is specified
     $category = $_GET['cat'];
   }
   if (!isset($_GET['order_by'])) {
@@ -122,8 +149,37 @@ $result = null;
 $isFormSubmitted = isset($_GET['keyword']) || isset($_GET['cat']) || isset($_GET['order_by']);
 
 if ($isFormSubmitted) {
+# REMOVED auctionBidCount for now -> this was moved to a different segment of the database and is working with queries.
+#INCORPORATING AUCTIONhighestbid
+#updating $query with a SQL query that uses leftjoin to connect bidValue found in Bids to the Auctions table, using the common denominator col = auctionID
+#Redundant query: $query = 'SELECT auctionID, auctionName, auctionDescription, categoryType, auctionEndDate FROM Auctions WHERE 1 ';
+#new: 
 
-  $query = 'SELECT auctionID, auctionName, auctionDescription, categoryType, auctionBidCount, auctionEndDate FROM Auctions WHERE 1';
+
+# GR 11/17 - 22:52 -> Core functions all work, add logical condition of no bid existing, in this case default to minimum price = requires adding to query below
+$query ='SELECT 
+            a.auctionID, 
+            a.auctionName,
+            a.auctionStartingPrice,
+            a.auctionDescription,
+            a.categoryType,
+            a.auctionEndDate,
+            mb.highestBid
+          FROM
+            Auctions a
+          LEFT JOIN
+            (SELECT 
+                auctionID,
+                MAX(bidValue) AS highestBid
+            FROM
+                Bids
+            GROUP BY
+                auctionID
+            ) mb ON a.auctionID = mb.auctionID
+            WHERE 1 ';
+## ABOVE LOGIC IS MISSING THE CASE WHERE THERE IS NO BID PLACED
+
+
   #doublecheck if countQuery is correct: Current logic <- line below is only changed for one of the 3 filtering conditions - checked, correct, theoretically else will count all rows in auctions table.
   $countQuery = 'SELECT COUNT(*) AS total FROM Auctions WHERE 1';
 
@@ -134,19 +190,49 @@ if ($isFormSubmitted) {
   }
   #Category condition:
   # will work correctly after adding category types to html code top of script. Same iteration for each lower level node. DOUBLE CHECK LOGIC MATCHES.
+  # double checked top of script html+php foreach loop - should be pulling the correct data
   if ($category != 'all') {
     $category = mysqli_real_escape_string($conn,$category);
     $query .=  "AND categoryType = '" . $category . "' ";
     $countQuery .=  "AND categoryType '" . $category . "' ";
   }
 
+  #LATEST UPDATE: NO LONGER ERRORS GO TO THE END OF THE PAGE AND UPDATE THE PLACEHOLDER DATA WITH QUERY RESULTS
+
+#### PULL auctionCurrentHighestBid query join and then implement to sort correctly
+# BELOW IS NOT NEEDED BECSAUSE IT IS INCORPORATED INTO $QUERY
+
+#$auctionHighestBidQuery = 'SELECT 
+#a.auctionID, 
+#a.auctionName,
+#a.auctionDescription,
+#a.categoryType,
+#a.auctionEndDate, 
+#mb.highestBid
+#FROM
+#Auctions a
+#LEFT JOIN
+#  (SELECT
+#      auctionID,
+#      MAX(bidValue) as highestBid
+#  FROM
+#      Bids
+#  GROUP BY
+#      auctionID
+#  ) mb ON a.auctionID = mb.auctionID';
+
+#$auctionHighestBid = mysqli_query($conn,$auctionHighestBidQuery);
+#if (!$auctionHighest) {
+#  die('SQL error: auctionhighestbid query '.mysqli_error($conn));
+#}
+
   ###ERROR IN THIS SECTION - auctionCurrentHighestBid not defined -> pull and match query from Bids table using common column: auctionID
   switch($ordering) {
     case 'pricelow':
-      $query .= ' ORDER BY auctionCurrentHighestBid ASC ';
+      $query .= ' ORDER BY highestBid ASC ';
       break;
     case 'pricehigh':
-      $query .= ' ORDER BY auctionCurrentHighestBid DESC ';
+      $query .= ' ORDER BY highestBid DESC ';
       break;
     case 'date':
       $query .= ' ORDER BY auctionEndDate ASC ';
@@ -157,7 +243,7 @@ if ($isFormSubmitted) {
       die('SQL error: ln160 !dollaresult '.mysqli_error($conn));
     }
 } else {
-  $defaultQuery = 'SELECT auctionID, auctionName, auctionDescription, categoryType, auctionBidCount, auctionEndDate FROM Auctions';
+  $defaultQuery = 'SELECT auctionID, auctionName, auctionDescription, categoryType, auctionEndDate FROM Auctions';
   $result = mysqli_query($conn,$defaultQuery);
   if (!$result){
     die('SQL error: ln167 if !dollaresult'.mysqli_error($conn));
@@ -200,13 +286,15 @@ if (mysqli_num_rows($result)==0) {
 
 <?php
 # TEMPORARY VALUES auctionCurrentHighestBid and auctionBidCount currently null values in database and need to be queried
+###### auctionCurrentHighestBid and auctionBidCount
+
 #PLACEHOLDERS added below
 
   while ($row = mysqli_fetch_assoc($result)){
     $item_id = $row['auctionID'];
     $title = $row['auctionName'];
     $description = $row['auctionDescription'];
-    $current_price = 13;
+    $current_price = $row['highestBid'];
     $num_bids = 21;
     $end_date = new DateTime($row['auctionEndDate']);
     # update $end_date to review pulling correct data
