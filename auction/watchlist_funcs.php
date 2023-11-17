@@ -1,27 +1,40 @@
- <?php
+<?php
+session_start();
+include_once("header.php");
+require_once("database_connection.php");
+require_once("utilities.php");
 
-if (!isset($_POST['functionname']) || !isset($_POST['arguments'])) {
-  return;
+$connection = connectMAC();
+
+if (!isset($_POST['functionname']) || !isset($_POST['arguments']['auctionID'])) {
+    echo 'Invalid request';
+    exit;
 }
 
-// Extract arguments from the POST variables:
-$item_id = $_POST['arguments'];
+$auctionID = $_POST['arguments']['auctionID'];
+$userID = isset($_SESSION['buyerID']) ? $_SESSION['buyerID'] : null;
 
+if (is_null($userID)) {
+    echo 'User ID not set in session.';
+    exit;
+}
+
+$res = 'fail';
+$query = '';
 if ($_POST['functionname'] == "add_to_watchlist") {
-  // TODO: Update database and return success/failure.
-
-  $res = "success";
-}
-else if ($_POST['functionname'] == "remove_from_watchlist") {
-  // TODO: Update database and return success/failure.
-
-  $res = "success";
+    $query = "INSERT INTO Watchlists (buyerID, auctionID) VALUES ('$userID','$auctionID')";
+} else if ($_POST['functionname'] == "remove_from_watchlist") {
+    $query = "DELETE FROM Watchlists WHERE buyerID = '$userID' AND auctionID = '$auctionID'";
 }
 
-// Note: Echoing from this PHP function will return the value as a string.
-// If multiple echo's in this file exist, they will concatenate together,
-// so be careful. You can also return JSON objects (in string form) using
-// echo json_encode($res).
+if (!empty($query)) {
+    $result = send_queryMAC($query);
+    if ($result === FALSE) {
+        $res = 'Query failed: ' . mysqli_error($connection);
+    } else {
+        $res = "success";
+    }
+}
+
 echo $res;
-
 ?>

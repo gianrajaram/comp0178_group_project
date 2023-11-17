@@ -11,7 +11,7 @@ $connection = connectMAC();
 
 $auctionID = 2; // to be dynamically adjusted 2 active 7 closed
 
-$sql_auction = "SELECT a.auctionName, a.categoryType, a.categoryColor, a.categoryGender, a.categorySize, u.username, a.auctionDescription, a.auctionStartDate, a.auctionEndDate, a.auctionStartingPrice, MAX(b.bidValue) as auctionMaxCP 
+$sql_auction = "SELECT a.auctionName, a.categoryType, a.categoryColor, a.categoryGender, a.categorySize, u.username, a.auctionDescription, a.auctionStartDate, a.auctionEndDate, a.auctionStartingPrice, MAX(b.bidValue) as auctionMaxCP, COUNT(b.auctionID) as auctionBidCount 
 FROM Auctions a
 JOIN Users u ON a.sellerID = u.userID
 LEFT JOIN Bids b ON a.auctionID = b.auctionID
@@ -27,6 +27,8 @@ $auctionName = $rows["auctionName"];
 $auctionDescription = $rows['auctionDescription'];
 $sellerUsername = $rows['username'];
 $auctionMaxCP = $rows['auctionMaxCP'];
+$auctionStartingPrice = $rows['auctionStartingPrice'];
+$auctionBidCount = $rows['auctionBidCount'];
 
 $categoryType = $rows['categoryType'];
 $categoryColor = $rows['categoryColor'];
@@ -40,6 +42,14 @@ if ($endDate > $now) {
 } else {
   $auctionStatus = 'Closed';
 }
+
+//if ($auctionBidCount === NULL || $auctionBidCount === 0 ) {
+//  $auctionHighestCP = 0;
+//}
+
+$sql_bids = "SELECT * FROM Bids WHERE auctionID = '{$auctionID}' ORDER BY dateBid DESC";
+$bids_result = mysqli_query($connection, $sql_bids);
+
 
 $has_session = false;
 $watching = false;
@@ -86,7 +96,9 @@ if (@$_SESSION['logged_in']) {
                 <div class="item-description">
                     <?php echo "Description: " . $auctionDescription ?>
                 </div>
-
+                <div class="item-count-bids">
+                    <?php echo "Bid count: " . $auctionBidCount ?>
+                </div>
                 <div class="item-current-price">
                     <?php echo "Current highest bid: " . $auctionMaxCP ?>
                 </div>
@@ -124,14 +136,105 @@ if (@$_SESSION['logged_in']) {
                       </div>
                     </form>
                   <?php endif; ?>
-a
+
                 <div style="margin-top: 20px;"> </div>
 
                 <div class="bid-history">
-                    <?php echo "Bid history"?>
-
-                    
+                    <!-- Bid History Button -->
+                    <button id="bidHistoryBtn" class="btn btn-primary" style="background-color: gray; color: white;">Bid History</button>
                 </div>
+
+                <!-- Bid History Modal -->
+                <div id="bidHistoryModal" class="modal">
+                    <div class="modal-content">
+                        <span class="close">&times;</span>
+                        <h3>Bid history</h3>
+                        <div id="bidHistoryTable">
+                            <?php if ($bids_result && mysqli_num_rows($bids_result) > 0): ?>
+                                <table>
+                                    <tr>
+                                        
+                                        <th>Bid Value</th>
+                                        <th>Date of Bid</th>
+                                    </tr>
+                                    <?php while ($bid = mysqli_fetch_assoc($bids_result)): ?>
+                                        <tr>
+                                            <td><?php echo htmlspecialchars($bid['bidValue']); ?></td>
+                                            <td><?php echo htmlspecialchars($bid['dateBid']); ?></td>
+                                        </tr>
+                                    <?php endwhile; ?>
+                                </table>
+                            <?php else: ?>
+                                <p>No bids found.</p>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+
+                <style>
+                    .modal {
+                        display: none;
+                        position: fixed;
+                        z-index: 1;
+                        left: 0;
+                        top: 0;
+                        width: 100%;
+                        height: 100%;
+                        overflow: auto;
+                        background-color: rgb(0,0,0);
+                        background-color: rgba(0,0,0,0.4);
+                    }
+                    .modal-content {
+                        background-color: #fefefe;
+                        margin: 15% auto;
+                        padding: 20px;
+                        border: 1px solid #888;
+                        width: 80%;
+                    }
+                    .modal-content table th,
+                    .modal-content table td {
+                        padding: 10px; /* Increase this value for more space */
+                        text-align: left;
+                        border-bottom: 1px solid #ddd;
+                    }
+
+                    .modal-content table {
+                        border-collapse: separate;
+                        border-spacing: 10px 0; /* Adjust horizontal and vertical spacing */
+                    }
+                    .close {
+                        color: #aaa;
+                        float: right;
+                        font-size: 28px;
+                        font-weight: bold;
+                    }
+                    .close:hover,
+                    .close:focus {
+                        color: black;
+                        text-decoration: none;
+                        cursor: pointer;
+                    }
+                </style>
+
+                <script>
+                    var modal = document.getElementById("bidHistoryModal");
+                    var btn = document.getElementById("bidHistoryBtn");
+                    var span = document.getElementsByClassName("close")[0];
+
+                    btn.onclick = function() {
+                        modal.style.display = "block";
+                    }
+
+                    span.onclick = function() {
+                        modal.style.display = "none";
+                    }
+
+                    window.onclick = function(event) {
+                        if (event.target == modal) {
+                            modal.style.display = "none";
+                        }
+                    }
+                </script>
 
             </div>
         </div>
@@ -148,7 +251,7 @@ function addToWatchlist(button) {
 
   $.ajax('watchlist_funcs.php', {
     type: "POST",
-    data: {functionname: 'add_to_watchlist', arguments: [<?php echo($auctionID);?>]},
+    data: {functionname: 'add_to_watchlist', arguments: { auctionID: <?php echo $auctionID; ?> }},
 
     success: 
       function (obj, textstatus) {
@@ -179,7 +282,7 @@ function removeFromWatchlist(button) {
   // Sends item ID as an argument to that function.
   $.ajax('watchlist_funcs.php', {
     type: "POST",
-    data: {functionname: 'remove_from_watchlist', arguments: [<?php echo($auctionID);?>]},
+    data: {functionname: 'remove_from_watchlist', arguments: { auctionID: <?php echo $auctionID; ?> }},
 
     success: 
       function (obj, textstatus) {
