@@ -10,7 +10,7 @@
 $connection = connectMAC();
 session_start();
 
-$auctionID = 3; // to be dynamically adjusted 2 active 7 closed
+$auctionID = 2; // to be dynamically adjusted 2 active 7 closed
 
 $sql_auction = "SELECT a.auctionName, a.categoryType, a.categoryColor, a.categoryGender, a.categorySize, u.username, a.auctionDescription, a.auctionStartDate, a.auctionEndDate, a.auctionStartingPrice, MAX(b.bidValue) as auctionMaxCP, COUNT(b.auctionID) as auctionBidCount 
 FROM Auctions a
@@ -52,11 +52,17 @@ $sql_bids = "SELECT * FROM Bids WHERE auctionID = '{$auctionID}' ORDER BY dateBi
 $bids_result = mysqli_query($connection, $sql_bids);
 
 
+
+
 $has_session = false;
 $watching = false;
 
-@$userID= $_SESSION['userID'];
-if (@$_SESSION['logged_in']) {
+$userID= $_SESSION['userID'];
+
+
+
+
+if ($_SESSION['logged_in']) {
     $has_session = true;
     //check if this item is in watchlist
     $sql_check_watchlist = "SELECT * FROM `Watchlists` WHERE buyerID = '{$userID}' AND auctionID = '{$auctionID}'";
@@ -109,17 +115,29 @@ if (@$_SESSION['logged_in']) {
                 </div>
 
                 <div style="margin-top: 20px;"> </div>
+                
+                <!-- new watchlist -->
+                <div style="margin-top: 20px;">
+                  <?php if ($auctionStatus == 'Active' && $watching == false): ?>
+                    <form action="watchlist_funcs.php" method="POST">
+                      <input type="hidden" name="auctionID" value="<?php echo $auctionID; ?>">
+                      <input type="hidden" name="userID" value="<?php echo $userID; ?>">
+                      <button type="submit" class="btn btn-primary form-control" name="watchlistsubmit"> Add to the watchlist </button>
+                    </form>
+                  <?php endif; ?>
+                </div>
 
-                <?php if ($auctionStatus == 'Active'): ?>
-                  <div id="watch_nowatch" <?php if ($has_session && $watching) echo ('style="display: none"'); ?>>
-                      <button type="button" class="btn btn-outline-secondary item-button" onclick="addToWatchlist()" <?php if (!isset($_SESSION['logged_in'])) echo ('disabled'); ?>>+ Add to watchlist</button>
-                  </div>
-                  <div id="watch_watching" <?php if (!$has_session || !$watching) echo ('style="display: none"'); ?>>
-                      <button type="button" class="btn btn-success item-button" disabled>Watching</button>
-                      <button type="button" class="btn btn-danger item-button" onclick="removeFromWatchlist()">Remove watch</button>
-                  </div>
-                <?php endif; ?>
+                <div style="margin-top: 20px;">
+                  <?php if ($auctionStatus == 'Active' && $watching == true): ?>
+                    <form action="watchlist_funcsr.php" method="POST">
+                      <input type="hidden" name="auctionID" value="<?php echo $auctionID; ?>">
+                      <input type="hidden" name="userID" value="<?php echo $userID; ?>">
+                      <button type="submit" class="btn btn-primary form-control" name="watchlistremove"> Remove from the watchlist </button>
+                    </form>
+                  <?php endif; ?>
+                </div>
 
+                <!-- this is for placing bid: -->
 
                 <div style="margin-top: 20px;"> </div>
                   <?php if ($auctionStatus == 'Active'): ?>
@@ -243,75 +261,3 @@ if (@$_SESSION['logged_in']) {
 
 
 <?php include_once("footer.php")?>
-
-
-<script> 
-
-function addToWatchlist(button) {
-  console.log("These print statements are helpful for debugging btw");
-
-  // This performs an asynchronous call to a PHP function using POST method.
-  // Sends item ID as an argument to that function.
-  $.ajax('watchlist_funcs.php', {
-    type: "POST",
-    data: {functionname: 'add_to_watchlist', auction: <?php echo($auctionID);?>},
-
-    success: 
-      function (obj, textstatus) {
-        // Callback function for when call is successful and returns obj
-        console.log("Success");
-        var objT = obj.trim();
- 
-        if (objT == "success") {
-          $("#watch_nowatch").hide();
-          $("#watch_watching").show();
-        }
-        else {
-          var mydiv = document.getElementById("watch_nowatch");
-          mydiv.appendChild(document.createElement("br"));
-          mydiv.appendChild(document.createTextNode("Add to watch failed. Try again later."));
-        }
-      },
-
-    error:
-      function (obj, textstatus) {
-        console.log("Error");
-      }
-  }); // End of AJAX call
-
-} // End of addToWatchlist func
-
-function removeFromWatchlist(button) {
-  // This performs an asynchronous call to a PHP function using POST method.
-  // Sends item ID as an argument to that function.
-  $.ajax('watchlist_funcs.php', {
-    type: "POST",
-    data: {functionname: 'remove_from_watchlist', auction: <?php echo($auctionID);?>},
-
-    success: 
-      function (obj, textstatus) {
-        // Callback function for when call is successful and returns obj
-        console.log("Success");
-        var objT = obj.trim();
- 
-        if (objT == "success") {
-          $("#watch_watching").hide();
-          $("#watch_nowatch").show();
-        }
-        else {
-          var mydiv = document.getElementById("watch_watching");
-          mydiv.appendChild(document.createElement("br"));
-          mydiv.appendChild(document.createTextNode("Watch removal failed. Try again later."));
-        }
-      },
-
-    error:
-      function (obj, textstatus) {
-        console.log("Error");
-      }
-  }); // End of AJAX call
-
-} // End of addToWatchlist func
-</script>
-
-
