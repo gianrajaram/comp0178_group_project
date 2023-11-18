@@ -21,7 +21,27 @@ $DB_name='website_auction';
 $conn = new mysqli($servername,$username,$password,$DB_name);
 
 
+# added error handling
+if ($conn->connect_error) {
+  die('Connection failed: ' . $conn->connect_error);
+}
 
+## initialisied variable $category which is needed to save user selection during form submission -> implemented within first HTML 
+
+if (isset($_GET['cat']) && $_GET['cat'] != '') {
+  $category = $_GET['cat']; // Assign the user-selected category
+} else {
+  $category = "all"; // Default value if no category is selected
+}
+
+## initialised $ordering variable needed to save user selection during form submission -> implemented within first HTML section
+if (isset($_GET['order_by']) && $_GET['order_by'] != '') {
+  $ordering = $_GET['order_by'];
+} else {
+  $ordering = 'pricelow'; // Default ordering
+}
+
+## initialised clothingtype variable needed for loop in html script section
 $clothingtype = 'SELECT categoryType FROM CategoryClothsType';
 $resultClothes = mysqli_query($conn, $clothingtype);
 if (!$resultClothes){
@@ -50,7 +70,7 @@ if (!$resultClothes){
               <i class="fa fa-search"></i>
             </span>
           </div>
-          <input type="text" class="form-control border-left-0" id="keyword" name="keyword" placeholder="Search for items">
+          <input type="text" class="form-control border-left-0" id="keyword" name="keyword" placeholder= "Search for items">
         </div>
       </div>
     </div>
@@ -58,10 +78,13 @@ if (!$resultClothes){
       <div class="form-group">
         <label for="cat" class="sr-only">Search within:</label>
         <select class="form-control" id="cat" name="cat">
-          <option value="all">All categories</option>
+          <!-- dynamically retain user selection in form -->
+        <option value="all" <?php echo $category === 'all' ? 'selected' : '' ?>>All categories</option>
+          <!-- REMOVED CODE FOR TESTING: <option value="all">All categories</option> -->
           <?php
               foreach( $categoriesClothes as $buttonCategory ) {
-                echo '<option value="'. $buttonCategory ['categoryType'] .'">'. $buttonCategory['categoryType'] .'</option>';
+                $isSelected = $buttonCategory['categoryType'] === $category ? 'selected' :'';
+                echo '<option value="'. $buttonCategory ['categoryType'] .'" '. $isSelected. '>'.$buttonCategory['categoryType'] .'</option>';
               }
               ?>
         </select>
@@ -71,9 +94,9 @@ if (!$resultClothes){
       <div class="form-inline">
         <label class="mx-2" for="order_by">Sort by:</label>
         <select class="form-control" id="order_by" name="order_by">
-          <option selected value="pricelow">Price (low to high)</option>
-          <option value="pricehigh">Price (high to low)</option>
-          <option value="date">Soonest expiry</option>
+        <option value="pricelow" <?php echo $ordering === 'pricelow' ? 'selected' : '' ?>>Price (low to high)</option>
+        <option value="pricehigh" <?php echo $ordering === 'pricehigh' ? 'selected' : '' ?>>Price (high to low)</option>
+       <option value="date" <?php echo $ordering === 'date' ? 'selected' : '' ?>>Soonest expiry</option>
         </select>
       </div>
     </div>
@@ -89,12 +112,12 @@ if (!$resultClothes){
 
 <?php
 
-##  PLAN FOR FINAL STEPS
-## 1. query and input bidquery
-## 2. Cath code to loop through database to pull correct categories
-## 3. Pagination -  do we implent total count numbers on sub-page as well
-## 4. multiple buttons for categories - copy divider for it
-## 5. MAKE SURE TO UPDATE DIE STATEMENTS
+##  Outstanding steps
+
+# 1. Pagination -> implement
+# 2. read through 'die' statements to return something more reasonable than info for dev -> debugging
+# 3. implement user s
+
 
 
 ## adding DATABASE connection block: TO remove and change to GabiFunction
