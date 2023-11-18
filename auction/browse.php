@@ -40,7 +40,8 @@ if (isset($_GET['cat']) && $_GET['cat'] != '') {
 if (isset($_GET['order_by']) && $_GET['order_by'] != '') {
   $ordering = $_GET['order_by'];
 } else {
-  $ordering = 'pricelow'; // Default ordering
+  $ordering = 'Price'; 
+  #$ordering = 'pricelow';
 }
 
 ## initalise variable $colour
@@ -87,7 +88,7 @@ if (!$resultColour) {
               <i class="fa fa-search"></i>
             </span>
           </div>
-          <input type="text" class="form-control border-left-0" id="keyword" name="keyword" placeholder= "Search for items">
+          <input type="text" class="form-control border-left-0" id="keyword" name="keyword" placeholder= "Search:">
         </div>
       </div>
     </div>
@@ -96,7 +97,7 @@ if (!$resultColour) {
         <label for="cat" class="sr-only">Search within:</label>
         <select class="form-control" id="cat" name="cat">
           <!-- dynamically retain user selection in form -->
-        <option value="all" <?php echo $category === 'all' ? 'selected' : '' ?>>All categories</option>
+        <option value="all" <?php echo $category === 'all' ? 'selected' : '' ?>>Category</option>
           <!-- REMOVED CODE FOR TESTING: <option value="all">All categories</option> -->
           <?php
               foreach ($categoriesClothes as $buttonCategory) {
@@ -113,7 +114,7 @@ if (!$resultColour) {
   <div class="form-group">
   <label for="colour" class="sr-only">Search within:</label>
     <select class="form-control" id="colour" name="colour">
-    <option value="all" <?php echo $colour === 'all' ? 'selected' : '' ?>>All Colours</option>
+    <option value="all" <?php echo $colour === 'all' ? 'selected' : '' ?>>Colour</option>
       <!-- double check if $buttonCategory works well-->
       <?php
       foreach ($colourType as $buttonCategory) {
@@ -129,17 +130,17 @@ if (!$resultColour) {
   <div class="form-group">
     <label for="gender" class= "sr-only" >Gender:</label>
     <select class="form-control" id="gender" name="gender">
-      <option value="all">All Genders</option>
+      <option value="all">Gender</option>
       <!-- PHP code will populate more options here -->
     </select>
   </div>
 </div>
 
-<div class="col-md-2 pr-0">
+<div class="col-md-1 pr-0">
   <div class="form-group">
     <label for="size" class= "sr-only">Size:</label>
     <select class="form-control" id="size" name="size">
-      <option value="all">All Sizes</option>
+      <option value="all">Size</option>
       <!-- PHP code will populate more options here -->
     </select>
   </div>
@@ -149,11 +150,12 @@ if (!$resultColour) {
       <!-- change form-inline, 'sort by is taking up way too much space -->
 
     <div class="col-md-2 pr-0">
-      <div class="form-inline">
-        <label class="mx-2" for="order_by">Sort by:</label>
+      <div class="form-group">
+        <label  for="order_by" class="sr-only">Sort by:</label>
         <select class="form-control" id="order_by" name="order_by">
-        <option value="pricelow" <?php echo $ordering === 'pricelow' ? 'selected' : '' ?>>Price (low to high)</option>
-        <option value="pricehigh" <?php echo $ordering === 'pricehigh' ? 'selected' : '' ?>>Price (high to low)</option>
+        <option value = "Price" >Price</option>
+        <option value="pricelow" <?php echo $ordering === 'pricelow' ? 'selected' : '' ?>>Low to High</option>
+        <option value="pricehigh" <?php echo $ordering === 'pricehigh' ? 'selected' : '' ?>>High to Low</option>
        <option value="date" <?php echo $ordering === 'date' ? 'selected' : '' ?>>Soonest expiry</option>
         </select>
       </div>
@@ -199,7 +201,7 @@ if (!$resultColour) {
     $category = $_GET['cat'];
   }
   if (!isset($_GET['order_by'])) {
-    $ordering = 'pricelow';
+    $ordering = 'Price';
     // TODO: Define behavior if an order_by value has not been specified.
   } else {
     $ordering = $_GET['order_by'];
@@ -299,7 +301,29 @@ $query ='SELECT
       die('SQL error: ln160 !dollaresult '.mysqli_error($conn));
     }
 } else {
-  $defaultQuery = 'SELECT auctionID, auctionName, auctionDescription, categoryType, categorySize, categoryColor, categoryGender, auctionEndDate FROM Auctions';
+  $defaultQuery = 'SELECT 
+  a.auctionID, 
+  a.auctionName,
+  a.auctionStartingPrice,
+  a.auctionDescription,
+  a.categoryType,
+  a.auctionEndDate,
+  a.categoryColor,
+  a.categoryGender,
+  a.categorySize,
+  mb.highestBid
+FROM
+  Auctions a
+LEFT JOIN
+  (SELECT 
+      auctionID,
+      MAX(bidValue) AS highestBid
+  FROM
+      Bids
+  GROUP BY
+      auctionID
+  ) mb ON a.auctionID = mb.auctionID';
+  
   $result = mysqli_query($conn,$defaultQuery);
   if (!$result){
     die('SQL error: ln167 if !dollaresult'.mysqli_error($conn));
