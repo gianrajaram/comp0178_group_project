@@ -112,6 +112,11 @@ if(!$resultSize) {
 
 <!-- added name="keyword" to <input type="text" class="form-control border-left-0" -->
 <form method="get" action="browse.php">
+   <!-- HIDDEN KEYWORD ELEMENT   -->
+   <?php if (isset($_GET['keyword'])): ?>
+    <input type="hidden" name="keyword" value="<?php echo htmlspecialchars($_GET['keyword']); ?>">
+  <?php endif; ?>
+
   <div class="row">
     <div class="col-md-2 pr-0">
       <div class="form-group">
@@ -122,7 +127,9 @@ if(!$resultSize) {
               <i class="fa fa-search"></i>
             </span>
           </div>
-          <input type="text" class="form-control border-left-0" id="keyword" name="keyword" placeholder= "Search:">
+             <!-- HIDDEN KEYWORD ELEMENT CONTINUED, saves value of keyword from url in case where the form is submitted multiple times eg a user searches 'stylish'    -->
+                          <!-- and wants to filter the subset of results by any other drop-down box  -->
+          <input type="text" class="form-control border-left-0" id="keyword" name="keyword" placeholder= "Search:" value ="<?php echo isset($_GET['keyword']) ? htmlspecialchars($_GET['keyword']) : ''; ?>">
         </div>
       </div>
     </div>
@@ -354,7 +361,7 @@ $query .= ' GROUP BY a.auctionID, a.auctionName, a.auctionStartingPrice, a.aucti
       $query .= ' ORDER BY COALESCE (mb.highestBid, a.auctionStartingPrice) ASC ';
       break;
     case 'pricehigh':
-      $query .= ' ORDER BY COALESCE (mb.highestBid, a.auctionStartingPrice)  DESC ';
+      $query .= ' ORDER BY COALESCE (mb.highestBid, a.auctionStartingPrice) DESC ';
       break;
     case 'date':
       $query .= ' ORDER BY auctionEndDate ASC ';
