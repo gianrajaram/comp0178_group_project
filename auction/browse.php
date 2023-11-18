@@ -30,27 +30,33 @@ if ($conn->connect_error) {
 ## DOUBLE CHECK IF && IS NEEDED
 # is this first initialisation of the variable causing errors? is this the reason server MAY be overloading causing time lag? explore adding mysqli close after each session within <?php >
 
-if (isset($_GET['cat']) && $_GET['cat'] != '') {
+if (isset($_GET['cat'])) {
   $category = $_GET['cat']; 
 } else {
   $category = "all"; 
 }
 
 ## initialised $ordering variable needed to save user selection during form submission -> implemented within first HTML section
-if (isset($_GET['order_by']) && $_GET['order_by'] != '') {
+if (isset($_GET['order_by'])) {
   $ordering = $_GET['order_by'];
 } else {
   $ordering = 'Price'; 
   #$ordering = 'pricelow';
 }
 
-## initalise variable $colour
-if (isset($_GET['colour']) && $_GET['colour'] != '') {
+## initialise variable $colour
+if (isset($_GET['colour'])) {
   $colour = $_GET['colour'];
 } else {
   $colour = 'all';
 }
 
+## initialise variable $gender
+if (isset($_GET['gender'])) {
+  $gender = $_GET['gender'];
+} else {
+  $gender = 'all';
+}
 ## initialised clothingtype variable needed for loop in html script section
 $clothingQuery = 'SELECT categoryType FROM CategoryClothsType';
 $resultClothes = mysqli_query($conn, $clothingQuery);
@@ -73,7 +79,16 @@ if (!$resultColour) {
     $colourType[] = $row;
   }
 }
-
+$genderQuery = 'SELECT categoryGender FROM CategoryGenderType';
+$resultGender = mysqli_query($conn,$genderQuery);
+if(!$resultGender){
+  die('SQL error: top of script, gendertype initialisation'.mysqli_error($conn));
+}else {
+  $genderType =[];
+  while($row = mysqli_fetch_assoc($resultGender)) {
+    $genderType[]=$row;
+  }
+}
 ?>
 
 <!-- added name="keyword" to <input type="text" class="form-control border-left-0" -->
@@ -131,6 +146,12 @@ if (!$resultColour) {
     <label for="gender" class= "sr-only" >Gender:</label>
     <select class="form-control" id="gender" name="gender">
       <option value="all">Gender</option>
+      <?php
+      foreach($genderType as $buttonCategory) {
+        $isSelected = $buttonCategory['categoryGender'] === $gender ? 'selected' : '';
+        echo '<option value="'. $buttonCategory ['categoryGender'] .'" '. $isSelected. '>'.$buttonCategory['categoryGender'] .'</option>';
+      }
+      ?>
       <!-- PHP code will populate more options here -->
     </select>
   </div>
@@ -178,6 +199,10 @@ if (!$resultColour) {
 # 2. read through 'die' statements to return something more reasonable than info for dev -> debugging
 # 3. COUNTQUERY MIGHT NEED updating to match auctions x bids? no idea check
 # 4. Added DATABASE connection block: TO remove and change to GabiFunction
+# 5. obsolete logic, defining !$isset .... $ category = 'Category not needed. Understand logic to see why and possible take out
+#     Above is likely because you shifted these to top of the page
+##    YEP tried removing category from this section, entire section can likely be taken out because it has been shifted to top of page but make sure!
+#     move keyword to top for clarity?
 
   
   if ($conn->connect_error) {
@@ -193,13 +218,15 @@ if (!$resultColour) {
   else {
     $keyword = sanitise_input($_GET['keyword']); #implemented a function that will clean the data of projected user errors, resulting in a higher probability of a correct match to database
   }
+
   if (!isset($_GET['cat'])) {
-    $category = "All categories";
+    $category = "Category";
     // TODO: Define behavior if a category has not been specified.
   } else {
     ### DEFINING BEHAVIOUR IF KEYWORD IS SPECIFIED behaviour if keyword is specified
     $category = $_GET['cat'];
   }
+
   if (!isset($_GET['order_by'])) {
     $ordering = 'Price';
     // TODO: Define behavior if an order_by value has not been specified.
@@ -212,10 +239,15 @@ if (!$resultColour) {
   } else {
     $curr_page = $_GET['page'];
   }
+
   if (!isset($_GET['colour'])) {
     $colour = 'All Colours';
   } else {
     $colour = $_GET['colour'];
+  }
+
+  if (!isset($_GET['gender'])) {
+    $gender = 'Gender';
   }
   
     /* TODO: Use above values to construct a query. Use this query to 
@@ -229,11 +261,6 @@ $result = null;
 $isFormSubmitted = isset($_GET['keyword']) || isset($_GET['cat']) || isset($_GET['colour']) || isset($_GET['order_by']);
 
 if ($isFormSubmitted) {
-# REMOVED auctionBidCount for now -> this was moved to a different segment of the database and is working with queries.
-#INCORPORATING AUCTIONhighestbid
-#updating $query with a SQL query that uses leftjoin to connect bidValue found in Bids to the Auctions table, using the common denominator col = auctionID
-#Redundant query: $query = 'SELECT auctionID, auctionName, auctionDescription, categoryType, auctionEndDate FROM Auctions WHERE 1 ';
-#new: 
 
 
 # GR 11/17 - 22:52 -> Core functions all work, add logical condition of no bid existing, in this case default to minimum price = requires adding to query below
@@ -284,7 +311,11 @@ $query ='SELECT
     $query .= "AND categoryColor = '" . $colour . "' ";
     $countQuery .= "AND categoryColor '" . $colour . "' ";
   }
-
+if ($gender != 'all') {
+  $gender = mysqli_real_escape_string($conn, $gender);
+  $query .= "AND categoryGender = '" .$gender . "' ";
+  $countQuery .= "AND categoryGender '" .$gender . "' ";
+}
   switch($ordering) {
     case 'pricelow':
       $query .= ' ORDER BY highestBid ASC ';
@@ -323,7 +354,7 @@ LEFT JOIN
   GROUP BY
       auctionID
   ) mb ON a.auctionID = mb.auctionID';
-  
+
   $result = mysqli_query($conn,$defaultQuery);
   if (!$result){
     die('SQL error: ln167 if !dollaresult'.mysqli_error($conn));
