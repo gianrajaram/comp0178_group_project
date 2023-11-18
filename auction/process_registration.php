@@ -61,18 +61,27 @@ else{
 }
 
 // Check email and username against database if they already exists
-    $query_check_registration = "SELECT * FROM Users WHERE username = '$username' OR userEmail = '$email'";
-    $result_check_registration = send_query($query_check_registration);
-    if (mysqli_num_rows($result_check_registration) == 0){
-        $query_register = "INSERT INTO Users (userEmail, username, userPassword, userFirstName, userLastName, userAddress, userTel, userGender)".
-        "VALUES ('$email', '$username', SHA('$password'), '$firstName', '$lastName', '$address', '$telephone', '$selectedGender')";
-        send_query($query_register);
-        echo "<script>alert('Registration is successful! You can now log in.');</script>";
-        echo "<script>window.location.href='login.php';</script>";
-    }
-    else{
-       alert_message_registration($message = 'Email/Username is already in the database.');
-       exit;
+$query_check_registration = "SELECT * FROM Users WHERE username = '$username' OR userEmail = '$email'";
+$result_check_registration = send_query($query_check_registration);
+if (mysqli_num_rows($result_check_registration) == 0){
+    $query_register = "INSERT INTO Users (userEmail, username, userPassword, userFirstName, userLastName, userAddress, userTel, userGender)".
+    "VALUES ('$email', '$username', SHA('$password'), '$firstName', '$lastName', '$address', '$telephone', '$selectedGender')";
+    send_query($query_register);
+    echo "<script>alert('Registration is successful! You can now log in.');</script>";
+    echo "<script>window.location.href='login.php';</script>";
+    
+    // send successful registration email
+    $name = "ReWear Auctions"; //sender’s name
+    $email = "UCL2023DatabasesAuctionReWear@gmail.com"; //sender’s e-mail address
+    $recipient = $email; //recipient
+    $mail_body= "$firstName, you successfully registered at ReWear Auctions! \n Your username is $username. Next step is to log in."; //mail body
+    $subject = "ReWear Auctions - Registration successful!"; //subject
+    $header = "From: ". $name . " <" . $email . ">\r\n";
+    mail($recipient, $subject, $mail_body, $header);
+}
+else{
+   alert_message_registration($message = 'Email/Username is already in the database.');
+   exit;
 }
     
 ?>
