@@ -295,9 +295,14 @@ $query ='SELECT
             a.categoryColor,
             a.categoryGender,
             a.categorySize,
-            mb.highestBid
+            a.auctionStartingPrice,
+            mb.highestBid,
+            COALESCE(mb.highestBid, a.auctionStartingPrice) as currentPrice,
+            COUNT(b.bidID) as numBids
           FROM
             Auctions a
+          LEFT JOIN
+          Bids b ON a.auctionID = b.auctionID
           LEFT JOIN
             (SELECT 
                 auctionID,
@@ -343,13 +348,13 @@ if ($size != 'all') {
   $query .= "AND categorySize = '" .$size . "' ";
   $countQuery .= "AND categorySize = '" .$size . "' ";
 }
-
+$query .= ' GROUP BY a.auctionID, a.auctionName, a.auctionStartingPrice, a.auctionDescription, a.categoryType, a.auctionEndDate, a.categoryColor, a.categoryGender, a.categorySize';
   switch($ordering) {
     case 'pricelow':
-      $query .= ' ORDER BY highestBid ASC ';
+      $query .= ' ORDER BY COALESCE (mb.highestBid, a.auctionStartingPrice) ASC ';
       break;
     case 'pricehigh':
-      $query .= ' ORDER BY highestBid DESC ';
+      $query .= ' ORDER BY COALESCE (mb.highestBid, a.auctionStartingPrice)  DESC ';
       break;
     case 'date':
       $query .= ' ORDER BY auctionEndDate ASC ';
@@ -359,6 +364,7 @@ if ($size != 'all') {
     if (!$result){
       die('SQL error: ln160 !dollaresult '.mysqli_error($conn));
     }
+
 } else {
   $defaultQuery = 'SELECT 
   a.auctionID, 
@@ -370,9 +376,14 @@ if ($size != 'all') {
   a.categoryColor,
   a.categoryGender,
   a.categorySize,
-  mb.highestBid
+  a.auctionStartingPrice,
+  mb.highestBid,
+  COALESCE(mb.highestBid, a.auctionStartingPrice) as currentPrice,
+  COUNT(b.bidID) as numBids
 FROM
   Auctions a
+LEFT JOIN
+Bids b ON a.auctionID = b.auctionID
 LEFT JOIN
   (SELECT 
       auctionID,
@@ -381,7 +392,10 @@ LEFT JOIN
       Bids
   GROUP BY
       auctionID
-  ) mb ON a.auctionID = mb.auctionID';
+  ) mb ON a.auctionID = mb.auctionID
+  WHERE 1 ';
+
+$defaultQuery .= ' GROUP BY a.auctionID, a.auctionName, a.auctionStartingPrice, a.auctionDescription, a.categoryType, a.auctionEndDate, a.categoryColor, a.categoryGender, a.categorySize';
 
   $result = mysqli_query($conn,$defaultQuery);
   if (!$result){
@@ -424,17 +438,13 @@ if (mysqli_num_rows($result)==0) {
 
 
 <?php
-# TEMPORARY VALUES auctionCurrentHighestBid and auctionBidCount currently null values in database and need to be queried
-###### auctionCurrentHighestBid and auctionBidCount
-
-#PLACEHOLDERS added below
-
+## have coalesced above, so can replace shorthand condition for $current_price if preferred
   while ($row = mysqli_fetch_assoc($result)){
     $item_id = $row['auctionID'];
     $title = $row['auctionName'];
     $description = $row['auctionDescription'];
-    $current_price = $row['highestBid'];
-    $num_bids = 21;
+    $current_price = isset($row['highestBid']) ? $row['highestBid'] : $row['auctionStartingPrice'];
+    $num_bids = $row['numBids'];
     $end_date = new DateTime($row['auctionEndDate']);
     # update $end_date to review pulling correct data
     # 3 categories
