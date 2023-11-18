@@ -57,6 +57,13 @@ if (isset($_GET['gender'])) {
 } else {
   $gender = 'all';
 }
+# initalise variable $size
+if (isset($_GET['size'])) {
+  $size = $_GET['size'];
+} else {
+  $size = 'all';
+}
+
 ## initialised clothingtype variable needed for loop in html script section
 $clothingQuery = 'SELECT categoryType FROM CategoryClothsType';
 $resultClothes = mysqli_query($conn, $clothingQuery);
@@ -79,14 +86,26 @@ if (!$resultColour) {
     $colourType[] = $row;
   }
 }
+
 $genderQuery = 'SELECT categoryGender FROM CategoryGenderType';
 $resultGender = mysqli_query($conn,$genderQuery);
-if(!$resultGender){
+if(!$resultGender) {
   die('SQL error: top of script, gendertype initialisation'.mysqli_error($conn));
-}else {
+} else {
   $genderType =[];
   while($row = mysqli_fetch_assoc($resultGender)) {
-    $genderType[]=$row;
+    $genderType[] = $row;
+  }
+}
+
+$sizeQuery = 'SELECT categorySize FROM CategorySizeType';
+$resultSize = mysqli_query($conn, $sizeQuery);
+if(!$resultSize) {
+  die('SQL error: top of script, categorysize initialisation'.mysqli_error($conn));
+} else {
+  $sizeType=[];
+  while($row = mysqli_fetch_assoc($resultSize)) {
+    $sizeType[] = $row;
   }
 }
 ?>
@@ -152,7 +171,6 @@ if(!$resultGender){
         echo '<option value="'. $buttonCategory ['categoryGender'] .'" '. $isSelected. '>'.$buttonCategory['categoryGender'] .'</option>';
       }
       ?>
-      <!-- PHP code will populate more options here -->
     </select>
   </div>
 </div>
@@ -162,13 +180,16 @@ if(!$resultGender){
     <label for="size" class= "sr-only">Size:</label>
     <select class="form-control" id="size" name="size">
       <option value="all">Size</option>
+      <?php
+      foreach($sizeType as $buttonCategory) {
+        $isSelected = $buttonCategory['categorySize'] === $size ? 'selected' : '';
+        echo '<option value="'. $buttonCategory ['categorySize'] .'" '.$isSelected. '>'.$buttonCategory['categorySize'] .'</option>';
+      }
+      ?>
       <!-- PHP code will populate more options here -->
     </select>
   </div>
 </div>
-
-
-      <!-- change form-inline, 'sort by is taking up way too much space -->
 
     <div class="col-md-2 pr-0">
       <div class="form-group">
@@ -258,7 +279,7 @@ if(!$resultGender){
 # initialising vairbales that will hold the rest of the queries 
 $result = null;
 
-$isFormSubmitted = isset($_GET['keyword']) || isset($_GET['cat']) || isset($_GET['colour']) || isset($_GET['order_by']);
+$isFormSubmitted = isset($_GET['keyword']) || isset($_GET['cat']) || isset($_GET['colour']) || isset ($_GET['gender']) || isset($_GET['size']) || isset($_GET['order_by']);
 
 if ($isFormSubmitted) {
 
@@ -316,6 +337,13 @@ if ($gender != 'all') {
   $query .= "AND categoryGender = '" .$gender . "' ";
   $countQuery .= "AND categoryGender '" .$gender . "' ";
 }
+
+if ($size != 'all') {
+  $size = mysqli_real_escape_string($conn, $size);
+  $query .= "AND categorySize = '" .$size . "' ";
+  $countQuery .= "AND categorySize = '" .$size . "' ";
+}
+
   switch($ordering) {
     case 'pricelow':
       $query .= ' ORDER BY highestBid ASC ';
