@@ -27,11 +27,13 @@ if ($conn->connect_error) {
 }
 
 ## initialisied variable $category which is needed to save user selection during form submission -> implemented within first HTML 
+## DOUBLE CHECK IF && IS NEEDED
+# is this first initialisation of the variable causing errors? is this the reason server MAY be overloading causing time lag? explore adding mysqli close after each session within <?php >
 
 if (isset($_GET['cat']) && $_GET['cat'] != '') {
-  $category = $_GET['cat']; // Assign the user-selected category
+  $category = $_GET['cat']; 
 } else {
-  $category = "all"; // Default value if no category is selected
+  $category = "all"; 
 }
 
 ## initialised $ordering variable needed to save user selection during form submission -> implemented within first HTML section
@@ -41,9 +43,16 @@ if (isset($_GET['order_by']) && $_GET['order_by'] != '') {
   $ordering = 'pricelow'; // Default ordering
 }
 
+## initalise variable $colour
+if (isset($_GET['colour']) && $_GET['colour'] != '') {
+  $colour = $_GET['colour'];
+} else {
+  $colour = 'all';
+}
+
 ## initialised clothingtype variable needed for loop in html script section
-$clothingtype = 'SELECT categoryType FROM CategoryClothsType';
-$resultClothes = mysqli_query($conn, $clothingtype);
+$clothingQuery = 'SELECT categoryType FROM CategoryClothsType';
+$resultClothes = mysqli_query($conn, $clothingQuery);
 if (!$resultClothes){
   die('SQL error: top of script, clothingtype code '.mysqli_error($conn));
 } else {
@@ -53,15 +62,23 @@ if (!$resultClothes){
 }
 }
 
-
-
+$colourQuery = 'SELECT categoryColor FROM CategoryColorType';
+$resultColour = mysqli_query($conn, $colourQuery);
+if (!$resultColour) {
+  die('SQL error: top of script, colourtype initialisation'.mysqli_error($conn));
+} else {
+  $colourType =[];
+  while($row = mysqli_fetch_assoc($resultColour)) {
+    $colourType[] = $row;
+  }
+}
 
 ?>
 
 <!-- added name="keyword" to <input type="text" class="form-control border-left-0" -->
 <form method="get" action="browse.php">
   <div class="row">
-    <div class="col-md-5 pr-0">
+    <div class="col-md-2 pr-0">
       <div class="form-group">
         <label for="keyword" class="sr-only">Search keyword:</label>
 	    <div class="input-group">
@@ -74,7 +91,7 @@ if (!$resultClothes){
         </div>
       </div>
     </div>
-    <div class="col-md-3 pr-0">
+    <div class="col-md-2 pr-0">
       <div class="form-group">
         <label for="cat" class="sr-only">Search within:</label>
         <select class="form-control" id="cat" name="cat">
@@ -82,7 +99,7 @@ if (!$resultClothes){
         <option value="all" <?php echo $category === 'all' ? 'selected' : '' ?>>All categories</option>
           <!-- REMOVED CODE FOR TESTING: <option value="all">All categories</option> -->
           <?php
-              foreach( $categoriesClothes as $buttonCategory ) {
+              foreach ($categoriesClothes as $buttonCategory) {
                 $isSelected = $buttonCategory['categoryType'] === $category ? 'selected' :'';
                 echo '<option value="'. $buttonCategory ['categoryType'] .'" '. $isSelected. '>'.$buttonCategory['categoryType'] .'</option>';
               }
@@ -90,7 +107,48 @@ if (!$resultClothes){
         </select>
       </div>
     </div>
-    <div class="col-md-3 pr-0">
+     <!-- populating more category options below -->
+
+    <div class="col-md-2 pr-0">
+  <div class="form-group">
+  <label for="colour" class="sr-only">Search within:</label>
+    <select class="form-control" id="colour" name="colour">
+    <option value="all" <?php echo $colour === 'all' ? 'selected' : '' ?>>All Colours</option>
+      <!-- double check if $buttonCategory works well-->
+      <?php
+      foreach ($colourType as $buttonCategory) {
+        $isSelected = $buttonCategory['categoryColor'] === $colour ? 'selected' : '';
+        echo '<option value="'. $buttonCategory ['categoryColor'] .'" '. $isSelected. '>'.$buttonCategory['categoryColor'] .'</option>';
+      }
+      ?>
+    </select>
+  </div>
+</div>
+
+<div class="col-md-2 pr-0">
+  <div class="form-group">
+    <label for="gender" class= "sr-only" >Gender:</label>
+    <select class="form-control" id="gender" name="gender">
+      <option value="all">All Genders</option>
+      <!-- PHP code will populate more options here -->
+    </select>
+  </div>
+</div>
+
+<div class="col-md-2 pr-0">
+  <div class="form-group">
+    <label for="size" class= "sr-only">Size:</label>
+    <select class="form-control" id="size" name="size">
+      <option value="all">All Sizes</option>
+      <!-- PHP code will populate more options here -->
+    </select>
+  </div>
+</div>
+
+
+      <!-- change form-inline, 'sort by is taking up way too much space -->
+
+    <div class="col-md-2 pr-0">
       <div class="form-inline">
         <label class="mx-2" for="order_by">Sort by:</label>
         <select class="form-control" id="order_by" name="order_by">
@@ -116,13 +174,9 @@ if (!$resultClothes){
 
 # 1. Pagination -> implement
 # 2. read through 'die' statements to return something more reasonable than info for dev -> debugging
-# 3. implement user s
+# 3. COUNTQUERY MIGHT NEED updating to match auctions x bids? no idea check
+# 4. Added DATABASE connection block: TO remove and change to GabiFunction
 
-
-
-## adding DATABASE connection block: TO remove and change to GabiFunction
-
-#GR - function to sanitise user inputted text - Best practice according to chatgpt - possibly add to utilities.php if useful elsewhere?
   
   if ($conn->connect_error) {
   die('Connection failed: '. $conn->connect_error);
@@ -140,25 +194,26 @@ if (!$resultClothes){
   if (!isset($_GET['cat'])) {
     $category = "All categories";
     // TODO: Define behavior if a category has not been specified.
-  }
-  else {
-
+  } else {
     ### DEFINING BEHAVIOUR IF KEYWORD IS SPECIFIED behaviour if keyword is specified
     $category = $_GET['cat'];
   }
   if (!isset($_GET['order_by'])) {
     $ordering = 'pricelow';
     // TODO: Define behavior if an order_by value has not been specified.
-  }
-  else {
+  } else {
     $ordering = $_GET['order_by'];
   }
   
   if (!isset($_GET['page'])) {
     $curr_page = 1;
-  }
-  else {
+  } else {
     $curr_page = $_GET['page'];
+  }
+  if (!isset($_GET['colour'])) {
+    $colour = 'All Colours';
+  } else {
+    $colour = $_GET['colour'];
   }
   
     /* TODO: Use above values to construct a query. Use this query to 
@@ -169,7 +224,7 @@ if (!$resultClothes){
 # initialising vairbales that will hold the rest of the queries 
 $result = null;
 
-$isFormSubmitted = isset($_GET['keyword']) || isset($_GET['cat']) || isset($_GET['order_by']);
+$isFormSubmitted = isset($_GET['keyword']) || isset($_GET['cat']) || isset($_GET['colour']) || isset($_GET['order_by']);
 
 if ($isFormSubmitted) {
 # REMOVED auctionBidCount for now -> this was moved to a different segment of the database and is working with queries.
@@ -187,6 +242,9 @@ $query ='SELECT
             a.auctionDescription,
             a.categoryType,
             a.auctionEndDate,
+            a.categoryColor,
+            a.categoryGender,
+            a.categorySize,
             mb.highestBid
           FROM
             Auctions a
@@ -219,37 +277,12 @@ $query ='SELECT
     $query .=  "AND categoryType = '" . $category . "' ";
     $countQuery .=  "AND categoryType '" . $category . "' ";
   }
+  if ($colour != 'all') {
+    $colour = mysqli_real_escape_string($conn, $colour);
+    $query .= "AND categoryColor = '" . $colour . "' ";
+    $countQuery .= "AND categoryColor '" . $colour . "' ";
+  }
 
-  #LATEST UPDATE: NO LONGER ERRORS GO TO THE END OF THE PAGE AND UPDATE THE PLACEHOLDER DATA WITH QUERY RESULTS
-
-#### PULL auctionCurrentHighestBid query join and then implement to sort correctly
-# BELOW IS NOT NEEDED BECSAUSE IT IS INCORPORATED INTO $QUERY
-
-#$auctionHighestBidQuery = 'SELECT 
-#a.auctionID, 
-#a.auctionName,
-#a.auctionDescription,
-#a.categoryType,
-#a.auctionEndDate, 
-#mb.highestBid
-#FROM
-#Auctions a
-#LEFT JOIN
-#  (SELECT
-#      auctionID,
-#      MAX(bidValue) as highestBid
-#  FROM
-#      Bids
-#  GROUP BY
-#      auctionID
-#  ) mb ON a.auctionID = mb.auctionID';
-
-#$auctionHighestBid = mysqli_query($conn,$auctionHighestBidQuery);
-#if (!$auctionHighest) {
-#  die('SQL error: auctionhighestbid query '.mysqli_error($conn));
-#}
-
-  ###ERROR IN THIS SECTION - auctionCurrentHighestBid not defined -> pull and match query from Bids table using common column: auctionID
   switch($ordering) {
     case 'pricelow':
       $query .= ' ORDER BY highestBid ASC ';
@@ -266,7 +299,7 @@ $query ='SELECT
       die('SQL error: ln160 !dollaresult '.mysqli_error($conn));
     }
 } else {
-  $defaultQuery = 'SELECT auctionID, auctionName, auctionDescription, categoryType, auctionEndDate FROM Auctions';
+  $defaultQuery = 'SELECT auctionID, auctionName, auctionDescription, categoryType, categorySize, categoryColor, categoryGender, auctionEndDate FROM Auctions';
   $result = mysqli_query($conn,$defaultQuery);
   if (!$result){
     die('SQL error: ln167 if !dollaresult'.mysqli_error($conn));
