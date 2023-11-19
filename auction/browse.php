@@ -261,21 +261,9 @@ if(!$resultSize) {
 
   // Retrieve these from the URL
 
-  http://localhost:8888/comp0178_group_project/auction/browse.php?keyword=&keyword=&keyword=&cat=all&colour=all&gender=all&size=all&order_by=Price&AIkeyword=stylish
-
-  if (!isset($_GET['keyword']) && !isset($_GET['AIkeyword'])) {
-    $keyword = "";
-    $AIkeyword = "";
-  } elseif (isset($_GET['keyword'])) {
-    $AIkeyword ="";
-    $keyword = sanitise_input($_GET['keyword']); 
+  $keyword = isset($_GET['keyword']) ? sanitise_input($_GET['keyword']) : "";
+  $AIkeyword = isset($_GET['AIkeyword']) ? sanitise_input($_GET['AIkeyword']) : "";
   
-  } elseif (isset($_GET['AIkeyword'])) {
-    $keyword ="";
-    $AIkeyword = sanitise_input($_GET['AIkeyword']); 
-  }
-
-
 
   if (!isset($_GET['cat'])) {
     $category = "Category";
@@ -321,7 +309,6 @@ $isFormSubmitted = isset($_GET['keyword']) || isset($_GET['cat']) || isset($_GET
 if ($isFormSubmitted) {
 
 
-# GR 11/17 - 22:52 -> Core functions all work, add logical condition of no bid existing, in this case default to minimum price = requires adding to query below
 $query ='SELECT 
             a.auctionID, 
             a.auctionName,
@@ -355,19 +342,23 @@ $query ='SELECT
 
   #doublecheck if countQuery is correct: Current logic <- line below is only changed for one of the 3 filtering conditions - checked, correct, theoretically else will count all rows in auctions table.
   $countQuery = 'SELECT COUNT(*) AS total FROM Auctions WHERE 1';
-  ## KEYWORD SEARCH ERROR IS NOT HERE
+
+
   if (!empty($keyword) && !empty($AIkeyword)) {
-    $keyword = "";
-    $AIkeyword = "";
-  } elseif (!empty($AIkeyword)) {
-    $AIkeyword = mysqli_real_escape_string($conn,$AIkeyword);
-    $query .= " AND MATCH (auctionDescription) AGAINST ('" . $AIkeyword . "' IN NATURAL LANGUAGE MODE) ";
-    $countQuery .= " AND MATCH (auctionDescription) AGAINST ('" . $AIkeyword . "' IN NATURAL LANGUAGE MODE) ";
-  } elseif (!empty($keyword)) {
-    $keyword = mysqli_real_escape_string($conn,$keyword);
-    $query .= " AND MATCH (auctionName) AGAINST ('" . $keyword . "' IN NATURAL LANGUAGE MODE) ";
-    $countQuery = " AND MATCH (auctionName) AGAINST ('" . $keyword . "' IN NATURAL LANGUAGE MODE) ";  
+    $combinedSearchTerm = mysqli_real_escape_string($conn, $keyword . ' ' . $AIkeyword);
+    $query .= " AND MATCH (auctionDescription) AGAINST ('" . $combinedSearchTerm . "' IN NATURAL LANGUAGE MODE) ";
+
+  } else {
+    if (!empty($AIkeyword)) {
+      $AIkeyword = mysqli_real_escape_string($conn, $AIkeyword);
+      $query .= " AND MATCH (auctionDescription) AGAINST ('" . $AIkeyword . "' IN NATURAL LANGUAGE MODE) ";
+  } 
+  if (!empty($keyword)) {
+      $keyword = mysqli_real_escape_string($conn, $keyword);
+      $query .= " AND MATCH (auctionName) AGAINST ('" . $keyword . "' IN NATURAL LANGUAGE MODE) ";
   }
+}
+  
   
   #Category condition:
   # will work correctly after adding category types to html code top of script. Same iteration for each lower level node. DOUBLE CHECK LOGIC MATCHES.
