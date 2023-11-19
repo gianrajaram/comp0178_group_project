@@ -10,25 +10,20 @@
      Search/sort specs are passed to this page through parameters in the URL
      (GET method of passing data to a page). -->
 
-<!-- adding code to loop through and find all categories from page -->
 
 <?php
-
 $servername="localhost";
 $username='AuctionProject';
 $password='london2023';
 $DB_name='website_auction';
 $conn = new mysqli($servername,$username,$password,$DB_name);
 
-
-# added error handling
 if ($conn->connect_error) {
   die('Connection failed: ' . $conn->connect_error);
 }
 
 ## initialisied variable $category which is needed to save user selection during form submission -> implemented within first HTML 
-## DOUBLE CHECK IF && IS NEEDED
-# is this first initialisation of the variable causing errors? is this the reason server MAY be overloading causing time lag? explore adding mysqli close after each session within <?php >
+## double check if this is needed here.
 
 if (isset($_GET['cat'])) {
   $category = $_GET['cat']; 
@@ -108,9 +103,6 @@ if(!$resultSize) {
     $sizeType[] = $row;
   }
 }
-
-
-
 ?>
 
 
@@ -118,8 +110,7 @@ if(!$resultSize) {
 <form method="get" action="browse.php">
    <!-- HIDDEN KEYWORD ELEMENT   -->
 
-
-  
+   <input type="hidden" name="page" value="<?php echo $curr_page; ?>">
 
   <div class="row">
     <div class="col-md-2 pr-0">
@@ -243,23 +234,11 @@ if(!$resultSize) {
 
 <?php
 
-##  Outstanding steps
-
-# 1. Pagination -> implement
-# 2. read through 'die' statements to return something more reasonable than info for dev -> debugging
-# 3. COUNTQUERY MIGHT NEED updating to match auctions x bids? no idea check
-# 4. Added DATABASE connection block: TO remove and change to GabiFunction
-# 5. obsolete logic, defining !$isset .... $ category = 'Category not needed. Understand logic to see why and possible take out
-#     Above is likely because you shifted these to top of the page
-##    YEP tried removing category from this section, entire section can likely be taken out because it has been shifted to top of page but make sure!
-#     move keyword to top for clarity?
-
   
   if ($conn->connect_error) {
   die('Connection failed: '. $conn->connect_error);
   }
 
-  // Retrieve these from the URL
 
   $keyword = isset($_GET['keyword']) ? sanitise_input($_GET['keyword']) : "";
   $AIkeyword = isset($_GET['AIkeyword']) ? sanitise_input($_GET['AIkeyword']) : "";
@@ -267,24 +246,22 @@ if(!$resultSize) {
 
   if (!isset($_GET['cat'])) {
     $category = "Category";
-    // TODO: Define behavior if a category has not been specified.
   } else {
-    ### DEFINING BEHAVIOUR IF KEYWORD IS SPECIFIED behaviour if keyword is specified
     $category = $_GET['cat'];
   }
 
   if (!isset($_GET['order_by'])) {
     $ordering = 'Price';
-    // TODO: Define behavior if an order_by value has not been specified.
   } else {
     $ordering = $_GET['order_by'];
   }
   
-  if (!isset($_GET['page'])) {
+  if (isset($_GET['page']) && is_numeric($_GET['page']) && $_GET['page'] > 0) {
+    $curr_page = (int) $_GET['page'];
+} else {
     $curr_page = 1;
-  } else {
-    $curr_page = $_GET['page'];
-  }
+}
+
 
   if (!isset($_GET['colour'])) {
     $colour = 'All Colours';
@@ -296,19 +273,18 @@ if(!$resultSize) {
     $gender = 'Gender';
   }
   
-    /* TODO: Use above values to construct a query. Use this query to 
-     retrieve data from the database. 
-     (If there is no form data entered,
-     decide on appropriate default value/default query to make. */
-     
-# initialising vairbales that will hold the rest of the queries 
+$results_per_page = 8;
+$start_from = ($curr_page - 1) * $results_per_page;
+
+
+# Possibly this should be updated? currently if user loads default then moves to second page then applies filters, it will jump back to default page
 $result = null;
+$paginationResult = null;
+
 
 $isFormSubmitted = isset($_GET['keyword']) || isset($_GET['cat']) || isset($_GET['colour']) || isset ($_GET['gender']) || isset($_GET['size']) || isset($_GET['order_by']) || isset($_GET['AIkeyword']);
 
 if ($isFormSubmitted) {
-
-
 $query ='SELECT 
             a.auctionID, 
             a.auctionName,
@@ -337,52 +313,53 @@ $query ='SELECT
                 auctionID
             ) mb ON a.auctionID = mb.auctionID
             WHERE 1 ';
-## ABOVE LOGIC IS MISSING THE CASE WHERE THERE IS NO BID PLACED
 
+  
+    $countQuery = "SELECT COUNT(DISTINCT a.auctionID) AS total FROM Auctions a LEFT JOIN Bids b ON a.auctionID = b.auctionID LEFT JOIN (SELECT auctionID, MAX(bidValue) AS highestBid FROM Bids GROUP BY auctionID) mb ON a.auctionID = mb.auctionID WHERE 1";
 
-  #doublecheck if countQuery is correct: Current logic <- line below is only changed for one of the 3 filtering conditions - checked, correct, theoretically else will count all rows in auctions table.
-  $countQuery = 'SELECT COUNT(*) AS total FROM Auctions WHERE 1';
-
-
+            
   if (!empty($keyword) && !empty($AIkeyword)) {
     $combinedSearchTerm = mysqli_real_escape_string($conn, $keyword . ' ' . $AIkeyword);
     $query .= " AND MATCH (auctionDescription) AGAINST ('" . $combinedSearchTerm . "' IN NATURAL LANGUAGE MODE) ";
+    $countQuery .= " AND MATCH (auctionDescription) AGAINST ('" . $combinedSearchTerm . "' IN NATURAL LANGUAGE MODE) ";
 
   } else {
     if (!empty($AIkeyword)) {
       $AIkeyword = mysqli_real_escape_string($conn, $AIkeyword);
       $query .= " AND MATCH (auctionDescription) AGAINST ('" . $AIkeyword . "' IN NATURAL LANGUAGE MODE) ";
+      $countQuery .= " AND MATCH (auctionDescription) AGAINST ('" . $AIkeyword . "' IN NATURAL LANGUAGE MODE) ";
+
   } 
   if (!empty($keyword)) {
       $keyword = mysqli_real_escape_string($conn, $keyword);
       $query .= " AND MATCH (auctionName) AGAINST ('" . $keyword . "' IN NATURAL LANGUAGE MODE) ";
+      $countQuery .= " AND MATCH (auctionName) AGAINST ('" . $keyword . "' IN NATURAL LANGUAGE MODE) ";
+
   }
 }
   
   
-  #Category condition:
-  # will work correctly after adding category types to html code top of script. Same iteration for each lower level node. DOUBLE CHECK LOGIC MATCHES.
-  # double checked top of script html+php foreach loop - should be pulling the correct data
   if ($category != 'all') {
     $category = mysqli_real_escape_string($conn,$category);
-    $query .=  "AND categoryType = '" . $category . "' ";
-    $countQuery .=  "AND categoryType '" . $category . "' ";
+    $query .=  " AND categoryType = '" . $category . "' ";
+    $countQuery .=  " AND categoryType = '" . $category . "' ";
+
   }
   if ($colour != 'all') {
     $colour = mysqli_real_escape_string($conn, $colour);
-    $query .= "AND categoryColor = '" . $colour . "' ";
-    $countQuery .= "AND categoryColor '" . $colour . "' ";
+    $query .= " AND categoryColor = '" . $colour . "' ";
+    $countQuery .= " AND categoryColor = '" . $colour . "' ";
   }
 if ($gender != 'all') {
   $gender = mysqli_real_escape_string($conn, $gender);
-  $query .= "AND categoryGender = '" .$gender . "' ";
-  $countQuery .= "AND categoryGender '" .$gender . "' ";
+  $query .= " AND categoryGender = '" .$gender . "' ";
+  $countQuery .= " AND categoryGender =  '" .$gender . "' ";
 }
 
 if ($size != 'all') {
   $size = mysqli_real_escape_string($conn, $size);
-  $query .= "AND categorySize = '" .$size . "' ";
-  $countQuery .= "AND categorySize = '" .$size . "' ";
+  $query .= " AND categorySize = '" .$size . "' ";
+  $countQuery .= " AND categorySize = '" .$size . "' ";
 }
 $query .= ' GROUP BY a.auctionID, a.auctionName, a.auctionStartingPrice, a.auctionDescription, a.categoryType, a.auctionEndDate, a.categoryColor, a.categoryGender, a.categorySize';
   switch($ordering) {
@@ -396,73 +373,75 @@ $query .= ' GROUP BY a.auctionID, a.auctionName, a.auctionStartingPrice, a.aucti
       $query .= ' ORDER BY auctionEndDate ASC ';
       break;
     }
-    $result = mysqli_query($conn,$query);
-    if (!$result){
-      die('SQL error: ln160 !dollaresult '.mysqli_error($conn));
-    }
+   
+    $countQuery .= ' GROUP BY a.auctionID';
+
+# adding condition to count results for pagination at end of script
+  $paginationCount = mysqli_query($conn, $countQuery);
+  if (!$paginationCount){
+  die('SQL error: ln 378 paginationresult '.mysqli_error($conn));
+  }
+
+
+  $query .= " LIMIT $start_from, $results_per_page";
+  $paginationResult = mysqli_query($conn, $query);
+  if (!$paginationResult){
+      die('SQL error: '.mysqli_error($conn));
+      
+  }
+  
 
 } else {
+  $defaultCountQuery = "SELECT COUNT(DISTINCT a.auctionID) AS total FROM Auctions a LEFT JOIN Bids b ON a.auctionID = b.auctionID LEFT JOIN (SELECT auctionID, MAX(bidValue) AS highestBid FROM Bids GROUP BY auctionID) mb ON a.auctionID = mb.auctionID WHERE 1";
+
   $defaultQuery = 'SELECT 
   a.auctionID, 
-  a.auctionName,
-  a.auctionStartingPrice,
-  a.auctionDescription,
-  a.categoryType,
-  a.auctionEndDate,
-  a.categoryColor,
-  a.categoryGender,
-  a.categorySize,
-  a.auctionStartingPrice,
-  mb.highestBid,
-  COALESCE(mb.highestBid, a.auctionStartingPrice) as currentPrice,
+  MAX(a.auctionName) as auctionName,
+  MAX(a.auctionStartingPrice) as auctionStartingPrice,
+  MAX(a.auctionDescription) as auctionDescription,
+  MAX(a.categoryType) as categoryType,
+  MAX(a.auctionEndDate) as auctionEndDate,
+  MAX(a.categoryColor) as categoryColor,
+  MAX(a.categoryGender) as categoryGender,
+  MAX(a.categorySize) as categorySize,
+  MAX(COALESCE(mb.highestBid, a.auctionStartingPrice)) as currentPrice,
   COUNT(b.bidID) as numBids
 FROM
   Auctions a
 LEFT JOIN
-Bids b ON a.auctionID = b.auctionID
+  Bids b ON a.auctionID = b.auctionID
 LEFT JOIN
   (SELECT 
-      auctionID,
-      MAX(bidValue) AS highestBid
+    auctionID,
+    MAX(bidValue) AS highestBid
   FROM
-      Bids
+    Bids
   GROUP BY
-      auctionID
+    auctionID
   ) mb ON a.auctionID = mb.auctionID
-  WHERE 1 ';
+WHERE 1 ';
 
-$defaultQuery .= ' GROUP BY a.auctionID, a.auctionName, a.auctionStartingPrice, a.auctionDescription, a.categoryType, a.auctionEndDate, a.categoryColor, a.categoryGender, a.categorySize';
 
-  $result = mysqli_query($conn,$defaultQuery);
-  if (!$result){
-    die('SQL error: ln167 if !dollaresult'.mysqli_error($conn));
-  }
+# important to add here, otherwise will cause errors
+$defaultQuery .= ' GROUP BY a.auctionID';
+$defaultCountQuery .= ' GROUP BY a.auctionID';
+# this section below is causing the error, remove it and everything works
+
+$paginationCount = mysqli_query($conn, $defaultCountQuery);
+if(!$paginationCount){
+  die('Connection failed: ' . $conn->connect_error);
 }
 
+$defaultQuery .=  " LIMIT $start_from, $results_per_page";
+$paginationResult = mysqli_query($conn, $defaultQuery);
 
-if (!empty($keyword) && !empty($AIkeyword)) {
-  $keyword = "";
-  $AIkeyword = "";
-} elseif (!empty($AIkeyword)) {
-  $AIkeyword = mysqli_real_escape_string($conn,$AIkeyword);
-  $defaultQuery  .= " AND MATCH (auctionDescription) AGAINST ('" . $AIkeyword . "' IN NATURAL LANGUAGE MODE) ";
-  $countQuery .= " AND MATCH (auctionDescription) AGAINST ('" . $AIkeyword . "' IN NATURAL LANGUAGE MODE) ";
-} elseif (!empty($keyword)) {
-  $keyword = mysqli_real_escape_string($conn,$keyword);
-  $defaultQuery .= " AND MATCH (auctionName) AGAINST ('" . $keyword . "' IN NATURAL LANGUAGE MODE) ";
-  $countQuery = " AND MATCH (auctionName) AGAINST ('" . $keyword . "' IN NATURAL LANGUAGE MODE) ";  
+
 }
-$countResult = mysqli_query($conn,$countQuery);
-if (!countResult) {
-  die('SQL error: dollacountResult'.mysqli_error($conn));
-}
-$totalFilteredRecords = mysqli_fetch_array($countResult);
-$num_results = $totalFilteredRecord['total']; // TODO: Calculate me for real
-# GR Edit: Added condition for calculating based on each case of the dynamic SQL query.
-$results_per_page = 10;
-# GR Edit: leave as is
+
+$num_results = mysqli_num_rows($paginationCount);
+
 $max_page = ceil($num_results / $results_per_page);
-# GR Edit: Leave as is
+
 ?>
 <?php
   /* For the purposes of pagination, it would also be helpful to know the
@@ -475,8 +454,8 @@ $max_page = ceil($num_results / $results_per_page);
   
 <?php
 #line below condition should theoretically never be zero, ENSURE LOGIC IS CONSISTENT THROUGHOUT (triple check once complete with all features)
-if (mysqli_num_rows($result)==0) {
-  echo '<p> No listings were found under the given criteria </p>';
+if (mysqli_num_rows($paginationResult)==0) {
+  echo '<p> ! ! ! No listings were found under the given criteria ! ! ! </p>';
 } else {
 
   # EXITING PHP TO ADD DIVIDER FOR HTML CONTENT (so while loop appears in the correct place, under html class before next line starting with <?php )
@@ -489,19 +468,13 @@ if (mysqli_num_rows($result)==0) {
 
 <?php
 ## have coalesced above, so can replace shorthand condition for $current_price if preferred
-  while ($row = mysqli_fetch_assoc($result)){
+  while ($row = mysqli_fetch_assoc($paginationResult)){
     $item_id = $row['auctionID'];
     $title = $row['auctionName'];
     $description = $row['auctionDescription'];
     $current_price = isset($row['highestBid']) ? $row['highestBid'] : $row['auctionStartingPrice'];
     $num_bids = $row['numBids'];
     $end_date = new DateTime($row['auctionEndDate']);
-    # update $end_date to review pulling correct data
-    # 3 categories
-    # Pending - if time before start date
-    # Active - between start and end date
-    # Closed -  
-
     print_listing_li($item_id, $title, $description, $current_price, $num_bids, $end_date);
   }
 }
@@ -514,15 +487,14 @@ if (mysqli_num_rows($result)==0) {
   <ul class="pagination justify-content-center">
   
 <?php
-
-  // Copy any currently-set GET variables to the URL.
   $querystring = "";
   foreach ($_GET as $key => $value) {
     if ($key != "page") {
-      $querystring .= "$key=$value&amp;";
+      $querystring .= urlencode($key) . "=" . urlencode($value) . "&amp;";
     }
   }
-  
+
+
   $high_page_boost = max(3 - $curr_page, 0);
   $low_page_boost = max(2 - ($max_page - $curr_page), 0);
   $low_page = max(1, $curr_page - 2 - $low_page_boost);
@@ -541,21 +513,16 @@ if (mysqli_num_rows($result)==0) {
   for ($i = $low_page; $i <= $high_page; $i++) {
     if ($i == $curr_page) {
       // Highlight the link
-      echo('
-    <li class="page-item active">');
+      #echo('
+    #   <li class="page-item active">');
+    echo '<li class="page-item active"><a class="page-link" href="#">' . $i . '</a></li>';
+    } else {
+      echo '<li class="page-item"><a class="page-link" href="browse.php?' . $querystring . 'page=' . $i . '">' . $i . '</a></li>';
     }
-    else {
-      // Non-highlighted link
-      echo('
-    <li class="page-item">');
-    }
-    
-    // Do this in any case
-    echo('
-      <a class="page-link" href="browse.php?' . $querystring . 'page=' . $i . '">' . $i . '</a>
-    </li>');
   }
+    
   
+
   if ($curr_page != $max_page) {
     echo('
     <li class="page-item">
