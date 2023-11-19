@@ -108,14 +108,18 @@ if(!$resultSize) {
     $sizeType[] = $row;
   }
 }
+
+
+
 ?>
+
 
 <!-- added name="keyword" to <input type="text" class="form-control border-left-0" -->
 <form method="get" action="browse.php">
    <!-- HIDDEN KEYWORD ELEMENT   -->
-   <?php if (isset($_GET['keyword'])): ?>
-    <input type="hidden" name="keyword" value="<?php echo htmlspecialchars($_GET['keyword']); ?>">
-  <?php endif; ?>
+
+
+  
 
   <div class="row">
     <div class="col-md-2 pr-0">
@@ -213,11 +217,29 @@ if(!$resultSize) {
       <button type="submit" class="btn btn-primary">Search</button>
     </div>
   </div>
-</form>
-</div> <!-- end search specs bar -->
 
+  <div class="row">
+    <div class="col-md-4 pr-0">
+  <div class="form-group">
+      <div class="form-group">
+        <label for="AIkeyword" class="sr-only">Search: </label>
+	    <div class="input-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text bg-transparent pr-0 text-muted">
+              <i class="fa fa-search"></i>
+            </span>
+          </div>
+             <!-- HIDDEN KEYWORD ELEMENT CONTINUED, saves value of keyword from url in case where the form is submitted multiple times eg a user searches 'stylish'    -->
+                          <!-- and wants to filter the subset of results by any other drop-down box  -->
+         <input type="text" class="form-control border-left-0" id="AIkeyword" name="AIkeyword" placeholder= "Explore creatively with AI search:" value ="<?php echo isset($_GET['AIkeyword']) ? htmlspecialchars($_GET['AIkeyword']) : ''; ?>">
+        </div>
+      </div>
+    </div>
 
 </div>
+
+</form>
+</div> <!-- end search specs bar -->
 
 <?php
 
@@ -238,14 +260,22 @@ if(!$resultSize) {
   }
 
   // Retrieve these from the URL
-  if (!isset($_GET['keyword'])) {
+
+  http://localhost:8888/comp0178_group_project/auction/browse.php?keyword=&keyword=&keyword=&cat=all&colour=all&gender=all&size=all&order_by=Price&AIkeyword=stylish
+
+  if (!isset($_GET['keyword']) && !isset($_GET['AIkeyword'])) {
     $keyword = "";
-    // TODO: Define behavior if a keyword has not been specified.
+    $AIkeyword = "";
+  } elseif (isset($_GET['keyword'])) {
+    $AIkeyword ="";
+    $keyword = sanitise_input($_GET['keyword']); 
+  
+  } elseif (isset($_GET['AIkeyword'])) {
+    $keyword ="";
+    $AIkeyword = sanitise_input($_GET['AIkeyword']); 
   }
-  # cleaning user input to efficiently query the database and return relevant results
-  else {
-    $keyword = sanitise_input($_GET['keyword']); #implemented a function that will clean the data of projected user errors, resulting in a higher probability of a correct match to database
-  }
+
+
 
   if (!isset($_GET['cat'])) {
     $category = "Category";
@@ -286,7 +316,7 @@ if(!$resultSize) {
 # initialising vairbales that will hold the rest of the queries 
 $result = null;
 
-$isFormSubmitted = isset($_GET['keyword']) || isset($_GET['cat']) || isset($_GET['colour']) || isset ($_GET['gender']) || isset($_GET['size']) || isset($_GET['order_by']);
+$isFormSubmitted = isset($_GET['keyword']) || isset($_GET['cat']) || isset($_GET['colour']) || isset ($_GET['gender']) || isset($_GET['size']) || isset($_GET['order_by']) || isset($_GET['AIkeyword']);
 
 if ($isFormSubmitted) {
 
@@ -325,12 +355,20 @@ $query ='SELECT
 
   #doublecheck if countQuery is correct: Current logic <- line below is only changed for one of the 3 filtering conditions - checked, correct, theoretically else will count all rows in auctions table.
   $countQuery = 'SELECT COUNT(*) AS total FROM Auctions WHERE 1';
-
-  if (!empty($keyword)){
+  ## KEYWORD SEARCH ERROR IS NOT HERE
+  if (!empty($keyword) && !empty($AIkeyword)) {
+    $keyword = "";
+    $AIkeyword = "";
+  } elseif (!empty($AIkeyword)) {
+    $AIkeyword = mysqli_real_escape_string($conn,$AIkeyword);
+    $query .= " AND MATCH (auctionDescription) AGAINST ('" . $AIkeyword . "' IN NATURAL LANGUAGE MODE) ";
+    $countQuery .= " AND MATCH (auctionDescription) AGAINST ('" . $AIkeyword . "' IN NATURAL LANGUAGE MODE) ";
+  } elseif (!empty($keyword)) {
     $keyword = mysqli_real_escape_string($conn,$keyword);
     $query .= " AND MATCH (auctionName) AGAINST ('" . $keyword . "' IN NATURAL LANGUAGE MODE) ";
-    $baseQueryCount = " AND MATCH (auctionName) AGAINST ('" . $keyword . "' IN NATURAL LANGUAGE MODE) ";
+    $countQuery = " AND MATCH (auctionName) AGAINST ('" . $keyword . "' IN NATURAL LANGUAGE MODE) ";  
   }
+  
   #Category condition:
   # will work correctly after adding category types to html code top of script. Same iteration for each lower level node. DOUBLE CHECK LOGIC MATCHES.
   # double checked top of script html+php foreach loop - should be pulling the correct data
@@ -408,6 +446,20 @@ $defaultQuery .= ' GROUP BY a.auctionID, a.auctionName, a.auctionStartingPrice, 
   if (!$result){
     die('SQL error: ln167 if !dollaresult'.mysqli_error($conn));
   }
+}
+
+
+if (!empty($keyword) && !empty($AIkeyword)) {
+  $keyword = "";
+  $AIkeyword = "";
+} elseif (!empty($AIkeyword)) {
+  $AIkeyword = mysqli_real_escape_string($conn,$AIkeyword);
+  $defaultQuery  .= " AND MATCH (auctionDescription) AGAINST ('" . $AIkeyword . "' IN NATURAL LANGUAGE MODE) ";
+  $countQuery .= " AND MATCH (auctionDescription) AGAINST ('" . $AIkeyword . "' IN NATURAL LANGUAGE MODE) ";
+} elseif (!empty($keyword)) {
+  $keyword = mysqli_real_escape_string($conn,$keyword);
+  $defaultQuery .= " AND MATCH (auctionName) AGAINST ('" . $keyword . "' IN NATURAL LANGUAGE MODE) ";
+  $countQuery = " AND MATCH (auctionName) AGAINST ('" . $keyword . "' IN NATURAL LANGUAGE MODE) ";  
 }
 $countResult = mysqli_query($conn,$countQuery);
 if (!countResult) {
