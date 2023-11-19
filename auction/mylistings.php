@@ -46,26 +46,9 @@ if(isset($_SESSION['userID'])) {
 
 
     <?php
-/*
-    $auctionID = $row["auctionID"];
-    $query_bid = "SELECT a.auctionName, a.categoryType, a.categoryColor, a.categoryGender, a.categorySize, u.username, a.auctionDescription, a.auctionStartDate, a.auctionEndDate, a.auctionStartingPrice, MAX(b.bidValue) as auctionMaxCP 
-    FROM Auctions a
-    JOIN Users u ON a.sellerID = u.userID
-    LEFT JOIN Bids b ON a.auctionID = b.auctionID
-    WHERE a.auctionID = '{$auctionID}'
-    GROUP BY a.auctionID, a.auctionName, a.categoryType, a.categoryColor, a.categoryGender, a.categorySize, u.username, a.auctionDescription, a.auctionStartDate, a.auctionEndDate, a.auctionStartingPrice";
-    $result_bid = send_query($query_bid);
-    $row = mysqli_fetch_assoc($result_bid);
-    $auctionMaxCP = $row['auctionMaxCP'];
-
-    $query_num = "SELECT COUNT(*) AS numberOfBids FROM `bids` WHERE auctionID = $auctionID";
-    $result_num = send_query($query_num);
-    $row = mysqli_fetch_assoc($result_num);
-    $num_bids = $row['numberOfBids'];
-*/
     // Check if there are auctions
     if (mysqli_num_rows($result) > 0) {
-      while($row = mysqli_fetch_assoc($result)) {
+      while($row = mysqli_fetch_assoc($result)) {       
         $auctionID = $row["auctionID"];
         $query_bid = "SELECT a.auctionName, a.categoryType, a.categoryColor, a.categoryGender, a.categorySize, u.username, a.auctionDescription, a.auctionStartDate, a.auctionEndDate, a.auctionStartingPrice, MAX(b.bidValue) as auctionMaxCP 
         FROM Auctions a
@@ -82,7 +65,7 @@ if(isset($_SESSION['userID'])) {
         $row_num = mysqli_fetch_assoc($result_num);
         $num_bids = $row_num['numberOfBids'];
         // Display auction information
-        print_listing_li(
+        print_mylisting_li(
           $row["auctionID"],
           $row["auctionName"],
           $row["auctionDescription"],

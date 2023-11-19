@@ -104,6 +104,64 @@ function print_listing_li($item_id, $title, $desc, $price, $num_bids, $end_time)
   );
 }
 
+
+
+
+function print_mylisting_li($item_id, $title, $desc, $price, $num_bids, $end_time)
+{
+  // Truncate long descriptions
+  if (strlen($desc) > 250) {
+    $desc_shortened = substr($desc, 0, 250) . '...';
+  }
+  else {
+    $desc_shortened = $desc;
+  }
+  
+  // Fix language of bid vs. bids
+  if ($num_bids == 1) {
+    $bid = ' bid';
+  }
+  else {
+    $bid = ' bids';
+  }
+  
+  // Calculate time to auction end
+  $now = new DateTime();
+  if ($now > $end_time) {
+    $time_remaining = 'This auction has ended';
+  }
+  else {
+    // Get interval:
+    $time_to_end = date_diff($now, $end_time);
+    $time_remaining = display_time_remaining($time_to_end) . ' remaining';
+  }
+  
+  // Print HTML
+  echo('
+    <li class="list-group-item d-flex justify-content-between align-items-start">
+    <div class="p-2 mr-5 flex-grow-1"><h5><a href="listing.php?item_id=' . $item_id . '">' . $title . '</a></h5>' . $desc_shortened . '</div>
+    <div class="text-center text-nowrap"><span style="font-size: 1.5em;">£' . number_format($price, 2) . '</span><br/>' . $num_bids . $bid . '<br/>' . $time_remaining . '</div>
+    <form method = "POST" action="seller_delete_auction.php" class="align-self-center">
+      <input type="hidden" name="auctionID" value="' . $item_id . '">
+      <button type="submit" class="btn btn-danger from-control">Delete</button>
+    </form>
+  </li>'
+  );
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function print_user_li_titles()
 {
     echo('
@@ -159,10 +217,10 @@ function print_user_li($userID, $username, $userEmail, $userFirstName, $userLast
 }
  
 //function to generate a unique randome filename
-function generateUniqueFilename($folder){
+function generateUniqueFilename($folder, $extention){
   $timestamp = (new DateTime())->format('YmdHisu');
   $uniqueID = substr(md5(uniqid()), 0, 6);
-  return $folder .'/'. $timestamp .'_'. $uniqueID;
+  return $folder .'/'. $timestamp .'_'. $uniqueID . "." . $extention;
 }
 
 ?>

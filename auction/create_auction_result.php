@@ -10,7 +10,7 @@ $connection = connect();
 // have the current date saved
 $currentDateTime = date('Y-m-d\TH:i');
 // save the folder wherre the images are stored
-$imageFolder = 'auction/images/';
+$imageFolder = 'images/';
 
 
 // check if each variable is filled out:
@@ -105,24 +105,28 @@ if (empty($_POST["auctionEndDate"])) {
 
 // Image upload
 
-$dir = 'C:\wamp64\www\comp0178_group_project';
+$dir = 'C:/wamp64/www/comp0178_group_project/auction/';
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    if (!empty($_FILES['auctionImage']['name'])) {
+        $originalFilename = $_FILES['auctionImage']['name'];
+        $tempFilePath = $_FILES['auctionImage']['tmp_name'];
+        $fileExtension = strtolower(pathinfo($originalFilename, PATHINFO_EXTENSION));
 
-if (!empty($_FILES['auctionImage']['name'])) {
-    $originalFilename = $_FILES['auctionImage']['name'];
-    $tempFilePath = $_FILES['auctionImage']['tmp_name'];
-    $fileExtension = pathinfo($originalFilename, PATHINFO_EXTENSION);
 
-    //generate the unique filename
-    $newFilename = generateUniqueFilename($imageFolder);
+        //generate the unique filename
+        $newFilename = generateUniqueFilename($imageFolder, $fileExtension);
+        
 
-    move_uploaded_file($tempFilePath, $dir . $newFilename);
+        move_uploaded_file($tempFilePath, $dir . $newFilename );
 
-    //Save the pathway in the database
-    $auctionPicture = mysqli_real_escape_string($connection, $newFilename);
-} else {
-    $auctionPicture = null;
-    /*alert_message_auction($message = 'Please provide an image of the item');
-    exit;*/
+        //Save the pathway in the database
+        $auctionPicture = mysqli_real_escape_string($connection, $newFilename);
+    } else {
+        echo 'File upload error: ' . $_FILES['auctionImage']['error'];
+        //$auctionPicture = null;
+        alert_message_auction($message = 'Please provide an image of the item');
+        exit;
+    }
 }
 
 // Get the seller ID
