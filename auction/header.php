@@ -85,6 +85,8 @@
     </li>
     <li class="nav-item mx-1"><a class="nav-link" href="admin_auction_overview.php">Auction overview</a>
     </li> 
+    <li class="nav-item mx-1"><a class="nav-link" href="admin_messages.php">My messages</a>
+    </li>
     ');
   }
   else {
