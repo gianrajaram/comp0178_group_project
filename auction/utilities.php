@@ -223,4 +223,12 @@ function generateUniqueFilename($folder, $extention){
   return $folder .'/'. $timestamp .'_'. $uniqueID . "." . $extention;
 }
 
+
+
+function sanitise_input($data) {
+  $data = trim($data); # removes whitespaces from the beginning and end of user input
+  $data = stripslashes($data); #removes backslashes from data
+  $data = htmlspecialchars($data); #
+  return $data;
+}
 ?>
