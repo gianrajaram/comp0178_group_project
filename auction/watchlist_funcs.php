@@ -17,7 +17,7 @@ if (isset($_POST['watchlistsubmit'])) {
   $query = "INSERT INTO Watchlists (buyerID, auctionID) VALUES ('$userID','$auctionID')";
   send_queryMAC($query);
   echo "<script>alert('Successfully added to the watchlist.');</script>";
-  echo "<script>window.location.href='browse.php';</script>";
+  echo "<script>window.location.href='my_wishlist.php';</script>";
 }
 ?>
 
