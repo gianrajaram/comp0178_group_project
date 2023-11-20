@@ -74,7 +74,7 @@ else{
         $name = "ReWear Auctions"; //sender’s name
         $email = "UCL2023DatabasesAuctionReWear@gmail.com"; //sender’s e-mail address
         $recipient = $emailReg; //recipient
-        $mail_body= "$firstName, you successfully registered at ReWear Auctions! \n Your username is $username. Next step is to log in."; //mail body
+        $mail_body= "$firstName, you successfully registered at ReWear Auctions! \nYour username is $username. Next step is to log in."; //mail body
         $subject = "ReWear Auctions - Registration successful!"; //subject
         $header = "From: ". $name . " <" . $email . ">\r\n";
         mail($recipient, $subject, $mail_body, $header);
