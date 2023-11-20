@@ -233,13 +233,6 @@ if(!$resultSize) {
 </div> <!-- end search specs bar -->
 
 <?php
-
-  
-  if ($conn->connect_error) {
-  die('Connection failed: '. $conn->connect_error);
-  }
-
-
   $keyword = isset($_GET['keyword']) ? sanitise_input($_GET['keyword']) : "";
   $AIkeyword = isset($_GET['AIkeyword']) ? sanitise_input($_GET['AIkeyword']) : "";
   
@@ -273,7 +266,7 @@ if(!$resultSize) {
     $gender = 'Gender';
   }
   
-$results_per_page = 8;
+$results_per_page = 10;
 $start_from = ($curr_page - 1) * $results_per_page;
 
 
@@ -463,8 +456,6 @@ if (mysqli_num_rows($paginationResult)==0) {
   ?>
 <ul class="list-group"> 
 <!-- re-entering php mode -->
-<!-- TODO: Use a while loop to print a list item for each auction listing retrieved from the query -->
-
 
 <?php
 ## have coalesced above, so can replace shorthand condition for $current_price if preferred
