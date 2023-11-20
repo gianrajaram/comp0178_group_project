@@ -10,7 +10,7 @@ $connection = connect();
 // have the current date saved
 $currentDateTime = date('Y-m-d\TH:i');
 // save the folder wherre the images are stored
-$imageFolder = 'images/';
+$imageFolder = 'images';
 
 
 // check if each variable is filled out:
