@@ -8,7 +8,7 @@
 <?php
 // Establish connection with database
 $connection = connectMAC();
-session_start();
+
 
 $auctionID = 2; // to be dynamically adjusted 2 active 7 closed
 
