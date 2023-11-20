@@ -35,18 +35,25 @@ $categoryType = $rows['categoryType'];
 $categoryColor = $rows['categoryColor'];
 $categoryGender = $rows['categoryGender'];
 
+$auctionStartDate = $rows['auctionStartDate'];
 $auctionEndDate = $rows['auctionEndDate'];
+$startDate = new DateTime($auctionStartDate);
 $endDate = new DateTime($auctionEndDate);
+
 $now = new DateTime();
 if ($endDate > $now) {
   $auctionStatus = 'Active';
 } else {
   $auctionStatus = 'Closed';
 }
+if ($startDate > $now) {
+  $auctionStatus = 'Pending';
+}
 
-//if ($auctionBidCount === NULL || $auctionBidCount === 0 ) {
-//  $auctionHighestCP = 0;
-//}
+
+if ($auctionMaxCP == 0 ) {
+    $auctionMaxCP = $rows['auctionStartingPrice'];
+}
 
 $sql_bids = "SELECT * FROM Bids WHERE auctionID = '{$auctionID}' ORDER BY dateBid DESC";
 $bids_result = mysqli_query($connection, $sql_bids);
@@ -76,6 +83,11 @@ if ($_SESSION['logged_in']) {
 ?>
 
 <div class="container">
+    <div style="margin-top: 30px;">
+        <div class="auction-status-info" style="font-size: 20px; font-weight: bold;">
+            <p> This auction is  <?php echo strtolower($auctionStatus) ?> !</p>
+        </div>
+    </div>
     <div class="row">
         <style>
             .item-img {
@@ -84,6 +96,7 @@ if ($_SESSION['logged_in']) {
             }
         </style>            
         <div class="col-sm-6">
+
             <div style="margin-top: 20px;">
                 <img src="images/plainblackTshirt_male.png" class='img-rounded img-responsive item-img'>
             </div>
@@ -92,7 +105,7 @@ if ($_SESSION['logged_in']) {
 
 
     <div class="col-sm-6">
-        <div style="margin-top: 30px;">
+        <div style="margin-top: 10px;">
         <div class="item-details">
             <h2 class="item-title" style="font-size: 30px; font-weight: bold;"><?php echo $auctionName ?></h2>
             <p class="item-description" style="font-size: 14px;"><?php echo $auctionDescription ?></p>

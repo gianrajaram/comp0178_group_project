@@ -17,15 +17,16 @@ $connection = connectMAC();
 $buyerID = $_SESSION['userID'];
 
 // SQL query to fetch auction names from the Watchlists for a specific buyer
-$query = "SELECT a.auctionID, a.auctionName, MAX(b.bidValue) AS maxBidValue
+$query = "SELECT a.auctionID, a.auctionName, a.auctionStartingPrice, MAX(b.bidValue) as auctionMaxCP
           FROM Watchlists w
           JOIN Auctions a ON w.auctionID = a.auctionID
           LEFT JOIN Bids b ON a.auctionID = b.auctionID
           WHERE w.buyerID = '$buyerID'
-          GROUP BY a.auctionID, a.auctionName";
+          GROUP BY a.auctionID, a.auctionName, a.auctionStartingPrice";
 
 
 $result = send_queryMAC($query);
+
 ?>
 
 <div class="container">
@@ -40,10 +41,16 @@ $result = send_queryMAC($query);
             <?php
                 if (mysqli_num_rows($result) > 0) {
                     while ($row = mysqli_fetch_assoc($result)) {
+                        $auctionMaxCP = $row['auctionMaxCP'];
+                        $auctionStartingPrice = $row['auctionStartingPrice'];
+                        if ($auctionMaxCP == 0 ) {
+                            $auctionMaxCP = $row['auctionStartingPrice'];
+                        }
+
                         echo "<tr>";
                         // Make auction names clickable links
                         echo "<td><a href='listing.php?auctionID=" . htmlspecialchars($row['auctionID']) . "'>" . htmlspecialchars($row['auctionName']) . "</a></td>";
-                        echo "<td>" . htmlspecialchars($row['maxBidValue']) . "</td>";
+                        echo "<td>" . htmlspecialchars($auctionMaxCP) . "</td>";
                         echo "</tr>";
                 }
             } else {
