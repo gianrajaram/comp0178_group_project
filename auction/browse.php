@@ -1,5 +1,6 @@
 <?php include_once("header.php")?>
 <?php require("utilities.php")?>
+<?php require('database_connection.php')?>
 
 <div class="container">
 
@@ -12,15 +13,8 @@
 
 
 <?php
-$servername="localhost";
-$username='AuctionProject';
-$password='london2023';
-$DB_name='website_auction';
-$conn = new mysqli($servername,$username,$password,$DB_name);
-
-if ($conn->connect_error) {
-  die('Connection failed: ' . $conn->connect_error);
-}
+##IMPORTANT
+$conn = connect();
 
 ## initialisied variable $category which is needed to save user selection during form submission -> implemented within first HTML 
 ## double check if this is needed here.
@@ -59,9 +53,13 @@ if (isset($_GET['size'])) {
   $size = 'all';
 }
 
+
+## mysqli_query changed to send_query  -> filtering doesn't work? why
 ## initialised clothingtype variable needed for loop in html script section
+## $conn changed to $connection
+
 $clothingQuery = 'SELECT categoryType FROM CategoryClothsType';
-$resultClothes = mysqli_query($conn, $clothingQuery);
+$resultClothes = send_query($clothingQuery);
 if (!$resultClothes){
   die('SQL error: top of script, clothingtype code '.mysqli_error($conn));
 } else {
@@ -72,7 +70,7 @@ if (!$resultClothes){
 }
 
 $colourQuery = 'SELECT categoryColor FROM CategoryColorType';
-$resultColour = mysqli_query($conn, $colourQuery);
+$resultColour = send_query( $colourQuery);
 if (!$resultColour) {
   die('SQL error: top of script, colourtype initialisation'.mysqli_error($conn));
 } else {
@@ -83,7 +81,7 @@ if (!$resultColour) {
 }
 
 $genderQuery = 'SELECT categoryGender FROM CategoryGenderType';
-$resultGender = mysqli_query($conn,$genderQuery);
+$resultGender = send_query($genderQuery);
 if(!$resultGender) {
   die('SQL error: top of script, gendertype initialisation'.mysqli_error($conn));
 } else {
@@ -94,7 +92,7 @@ if(!$resultGender) {
 }
 
 $sizeQuery = 'SELECT categorySize FROM CategorySizeType';
-$resultSize = mysqli_query($conn, $sizeQuery);
+$resultSize = send_query($sizeQuery);
 if(!$resultSize) {
   die('SQL error: top of script, categorysize initialisation'.mysqli_error($conn));
 } else {
@@ -311,6 +309,8 @@ $query ='SELECT
     $countQuery = "SELECT COUNT(DISTINCT a.auctionID) AS total FROM Auctions a LEFT JOIN Bids b ON a.auctionID = b.auctionID LEFT JOIN (SELECT auctionID, MAX(bidValue) AS highestBid FROM Bids GROUP BY auctionID) mb ON a.auctionID = mb.auctionID WHERE 1";
 
             
+
+### error is with $conn 
   if (!empty($keyword) && !empty($AIkeyword)) {
     $combinedSearchTerm = mysqli_real_escape_string($conn, $keyword . ' ' . $AIkeyword);
     $query .= " AND MATCH (auctionDescription) AGAINST ('" . $combinedSearchTerm . "' IN NATURAL LANGUAGE MODE) ";
@@ -331,7 +331,7 @@ $query ='SELECT
   }
 }
   
-  
+
   if ($category != 'all') {
     $category = mysqli_real_escape_string($conn,$category);
     $query .=  " AND categoryType = '" . $category . "' ";
@@ -370,14 +370,14 @@ $query .= ' GROUP BY a.auctionID, a.auctionName, a.auctionStartingPrice, a.aucti
     $countQuery .= ' GROUP BY a.auctionID';
 
 # adding condition to count results for pagination at end of script
-  $paginationCount = mysqli_query($conn, $countQuery);
+  $paginationCount = send_query($countQuery);
   if (!$paginationCount){
   die('SQL error: ln 378 paginationresult '.mysqli_error($conn));
   }
 
 
   $query .= " LIMIT $start_from, $results_per_page";
-  $paginationResult = mysqli_query($conn, $query);
+  $paginationResult = send_query($query);
   if (!$paginationResult){
       die('SQL error: '.mysqli_error($conn));
       
@@ -420,13 +420,17 @@ $defaultQuery .= ' GROUP BY a.auctionID';
 $defaultCountQuery .= ' GROUP BY a.auctionID';
 # this section below is causing the error, remove it and everything works
 
-$paginationCount = mysqli_query($conn, $defaultCountQuery);
+$paginationCount = send_query($defaultCountQuery);
 if(!$paginationCount){
   die('Connection failed: ' . $conn->connect_error);
 }
 
 $defaultQuery .=  " LIMIT $start_from, $results_per_page";
-$paginationResult = mysqli_query($conn, $defaultQuery);
+$paginationResult = send_query($defaultQuery);
+if(!$paginationResult){
+  die('connection failed' );
+}
+
 
 
 }
@@ -523,7 +527,6 @@ if (mysqli_num_rows($paginationResult)==0) {
       </a>
     </li>');
   }
-  $conn->close();
 ?>
 
   </ul>
