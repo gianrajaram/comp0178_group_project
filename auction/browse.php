@@ -16,6 +16,7 @@
 ##IMPORTANT
 $conn = connect();
 
+## add new button for filtering to only active auctions
 ## initialisied variable $category which is needed to save user selection during form submission -> implemented within first HTML 
 ## double check if this is needed here.
 
