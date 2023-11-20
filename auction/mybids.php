@@ -8,22 +8,12 @@
 
 <?php
 
-// WATCHLIST NOT WISHLIST
-
-//session_start();
-
 $connection = connectMAC();
 
 $buyerID = $_SESSION['userID'];
 $auctionID = isset($_GET['item_id']) ? $_GET['item_id'] : 0;
 
 
-// SQL query to fetch auction names from the Watchlists for a specific buyer
-//$query = "SELECT a.auctionID, a.auctionName, MAX(b.bidValue) AS maxBidValue
-//          FROM Bids b
-//          JOIN Auctions a ON b.auctionID = a.auctionID
-//          WHERE b.buyerID = '$buyerID'
-//         GROUP BY a.auctionID, a.auctionName";
 
 $query = "SELECT a.auctionID, a.auctionName, 
                  MAX(b1.bidValue) AS maxBuyerBidValue, 

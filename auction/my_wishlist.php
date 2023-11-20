@@ -10,13 +10,11 @@
 
 // WATCHLIST NOT WISHLIST
 
-//session_start();
-
 $connection = connectMAC();
 
 $buyerID = $_SESSION['userID'];
 
-// SQL query to fetch auction names from the Watchlists for a specific buyer
+// get auction names for the specific buyer
 $query = "SELECT a.auctionID, a.auctionName, a.auctionStartingPrice, MAX(b.bidValue) as auctionMaxCP
           FROM Watchlists w
           JOIN Auctions a ON w.auctionID = a.auctionID
@@ -48,7 +46,7 @@ $result = send_queryMAC($query);
                         }
 
                         echo "<tr>";
-                        // Make auction names clickable links
+                        // auction names into clickable links
                         echo "<td><a href='listing.php?item_id=" . htmlspecialchars($row['auctionID']) . "'>" . htmlspecialchars($row['auctionName']) . "</a></td>";
                         echo "<td>" . htmlspecialchars($auctionMaxCP) . "</td>";
                         echo "</tr>";

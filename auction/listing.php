@@ -6,20 +6,23 @@
 
 
 <?php
-// Establish connection with database
+// connection with database
 $connection = connectMAC();
 
+$userID= $_SESSION['userID'];
 
-//$auctionID = 2; // to be dynamically adjusted 2 active 7 closed
+
+//$auctionID dynamic
 $auctionID = isset($_GET['item_id']) ? $_GET['item_id'] : 0;
 //echo $auctionID;
 
-$sql_auction = "SELECT a.auctionName, a.categoryType, a.categoryColor, a.categoryGender, a.categorySize, u.username, a.auctionDescription, a.auctionStartDate, a.auctionEndDate, a.auctionPicture, a.auctionStartingPrice, MAX(b.bidValue) as auctionMaxCP, COUNT(b.auctionID) as auctionBidCount 
-FROM Auctions a
-JOIN Users u ON a.sellerID = u.userID
-LEFT JOIN Bids b ON a.auctionID = b.auctionID
-WHERE a.auctionID = '{$auctionID}'
-GROUP BY a.auctionID, a.auctionName, a.categoryType, a.categoryColor, a.categoryGender, a.categorySize, u.username, a.auctionDescription, a.auctionStartDate, a.auctionEndDate, a.auctionStartingPrice";
+$sql_auction = "SELECT a.auctionID, a.auctionName, a.categoryType, a.categoryColor, a.categoryGender, a.categorySize, u.username, a.auctionDescription, a.auctionStartDate, a.auctionEndDate, a.auctionPicture, a.auctionStartingPrice, MAX(b.bidValue) as auctionMaxCP, MAX(b1.bidValue) AS maxBuyerBidValue, COUNT(b.auctionID) as auctionBidCount
+                FROM Auctions a
+                JOIN Users u ON a.sellerID = u.userID
+                LEFT JOIN Bids b ON a.auctionID = b.auctionID
+                LEFT JOIN Bids b1 ON a.auctionID = b1.auctionID AND b1.buyerID = '{$userID}'
+                WHERE a.auctionID = '{$auctionID}'
+                GROUP BY a.auctionID, a.auctionName, a.categoryType, a.categoryColor, a.categoryGender, a.categorySize, u.username, a.auctionDescription, a.auctionStartDate, a.auctionEndDate, a.auctionStartingPrice";
 
 
 $result = send_queryMAC($sql_auction);
@@ -40,6 +43,7 @@ $categoryGender = $rows['categoryGender'];
 $auctionPicture = $rows['auctionPicture'];
 $auctionImageSrc = str_replace('/auction/', '', $auctionPicture);
 
+$maxBuyerBidValue = $rows['maxBuyerBidValue'];
 
 $auctionStartDate = $rows['auctionStartDate'];
 $auctionEndDate = $rows['auctionEndDate'];
@@ -64,13 +68,17 @@ if ($auctionMaxCP == 0 ) {
 $sql_bids = "SELECT * FROM Bids WHERE auctionID = '{$auctionID}' ORDER BY dateBid DESC";
 $bids_result = mysqli_query($connection, $sql_bids);
 
-
+$isWinner = 0;
+if ($maxBuyerBidValue == $auctionMaxCP) {
+    $isWinner = 1;
+}
+//echo $isWinner;
 
 
 $has_session = false;
 $watching = false;
 
-$userID= $_SESSION['userID'];
+
 
 
 
@@ -86,6 +94,7 @@ if ($_SESSION['logged_in']) {
     }
 }
 
+
 ?>
 
 <div class="container">
@@ -97,8 +106,8 @@ if ($_SESSION['logged_in']) {
     <div class="row">
         <style>
             .item-img {
-                width: 50%; /* Adjust the percentage as needed */
-                height: auto; /* This maintains the aspect ratio */
+                width: 50%;
+                height: auto;
             }
         </style>            
         <div class="col-sm-6">
@@ -128,6 +137,7 @@ if ($_SESSION['logged_in']) {
             
 
             <div class="auction-info">
+                <p>Seller: <a href="seller_rating_info.php?seller=<?php echo urlencode($sellerUsername); ?>"><?php echo htmlspecialchars($sellerUsername); ?></a></p>
                 <p>Bid count: <?php echo $auctionBidCount ?></p>
                 <p>Current highest bid: <?php echo $auctionMaxCP ?></p>
                 <p>Status: <?php echo $auctionStatus ?></p>
@@ -136,55 +146,81 @@ if ($_SESSION['logged_in']) {
 
         <div style="margin-top: 20px;"> </div>
         
-        <!-- new watchlist -->
+        <!-- add to the watchlist -->
         <div style="margin-top: 20px;">
             <?php if ($auctionStatus == 'Active' && $watching == false): ?>
             <form action="watchlist_funcs.php" method="POST">
                 <input type="hidden" name="auctionID" value="<?php echo $auctionID; ?>">
                 <input type="hidden" name="userID" value="<?php echo $userID; ?>">
-                <button type="submit" class="btn btn-primary form-control" name="watchlistsubmit"> Add to the watchlist </button>
+                <button type="submit" class="btn btn-primary form-control" name="watchlistsubmit" style="background-color: #ff007f; color: white; border: 2px solid #ff9a8a"> Add to the watchlist </button>
             </form>
             <?php endif; ?>
         </div>
 
+        <!-- remove from the watchlist -->
         <div style="margin-top: 20px;">
             <?php if ($auctionStatus == 'Active' && $watching == true): ?>
             <?php echo "This auction is already on your watchlist."?>
             <form action="watchlist_funcsr.php" method="POST">
                 <input type="hidden" name="auctionID" value="<?php echo $auctionID; ?>">
                 <input type="hidden" name="userID" value="<?php echo $userID; ?>">
-                <button type="submit" class="btn btn-primary form-control" name="watchlistremove"> Remove from the watchlist </button>
+                <button type="submit" class="btn btn-primary form-control" name="watchlistremove" style="background-color: #ff007f; color: white; border: 2px solid #ff9a8a"> Remove from the watchlist </button>
             </form>
             <?php endif; ?>
         </div>
 
-        <!-- this is for placing bid: -->
+        <!-- place a bid -->
 
         <div style="margin-top: 20px;"> </div>
             <?php if ($auctionStatus == 'Active'): ?>
             <form action="place_bid.php" method="POST">
                 <div class="row form-group">
                 <div class="col-sm-6">
-                    <input type="text" id="bid_price" name="bid_price" placeholder="Enter Your Bid" class="form-control input-frame">
+                    <input type="text" id="bid_price" name="bid_price" placeholder="Enter Your Bid" class="form-control input-frame" style="background-color: #f4c2c2; color: white; border: 2px solid #ff9a8a">
                     <input type="hidden" name="auctionID" value="<?php echo $auctionID; ?>">
                     <input type="hidden" name="auctionMaxCP" value="<?php echo $auctionMaxCP; ?>">
 
                     
                 </div>
     
-                <input type="submit" class="btn btn-default item-button" value="Bid Now" name="submit" id="submit" style="background-color: blue; color: white;"/>
+                <input type="submit" class="btn btn-default item-button" value="Bid Now" name="submit" id="submit" style="background-color: #ff007f; color: white; border: 2px solid #ff9a8a"/>
                 </div>
             </form>
             <?php endif; ?>
 
-        <div style="margin-top: 20px;"> </div>
+        
+        <!-- rate the auction -->
+        <div style="margin-top: 20px;">
+            <?php if ($auctionStatus == 'Closed' && $isWinner == 1): ?> <!-- change to 'Closed' -->
+            <form action="ratings_form.php" method="POST">
+                <div class="star-rating">
+                    <input type="radio" id="5-stars" name="ratingValue" value="5" /><label for="5-stars" class="star">&#9733;</label>
+                    <input type="radio" id="4-stars" name="ratingValue" value="4" /><label for="4-stars" class="star">&#9733;</label>
+                    <input type="radio" id="3-stars" name="ratingValue" value="3" /><label for="3-stars" class="star">&#9733;</label>
+                    <input type="radio" id="2-stars" name="ratingValue" value="2" /><label for="2-stars" class="star">&#9733;</label>
+                    <input type="radio" id="1-star" name="ratingValue" value="1" /><label for="1-star" class="star">&#9733;</label>
+                </div>
+                <div class="row form-group">
+                    <div class="col-sm-6">
+                        <textarea id="ratingText" name="ratingText" placeholder="Leave your comment here..." class="form-control input-frame" rows="1" style="background-color: #f4c2c2; color: white; border: 2px solid #ff9a8a"></textarea>
+                        <input type="hidden" name="auctionID" value="<?php echo $auctionID; ?>">
+                        <input type="hidden" name="userID" value="<?php echo $userID; ?>"> <!-- Assuming userID is stored in session -->
+                    </div>
 
-        <div class="bid-history">
-            <!-- Bid History Button -->
-            <button id="bidHistoryBtn" class="btn btn-primary" style="background-color: gray; color: white;">Bid History</button>
+                    <input type="submit" class="btn btn-default item-button" value="Submit Rating" name="submitRating" id="submitRating" style="background-color: #ff007f; color: white; border: 2px solid #ff9a8a"/>
+                </div>
+            </form>
+
+            <?php endif; ?>
         </div>
 
-        <!-- Bid History Modal -->
+        <!-- view bid history -->
+        <div class="bid-history">
+            <!-- Bid History Button -->
+            <button id="bidHistoryBtn" class="btn btn-primary" style="background-color: #ff007f; color: white; border: 2px solid #ff9a8a">Bid History</button>
+        </div>
+
+        <!-- bid history cont. -->
         <div id="bidHistoryModal" class="modal">
             <div class="modal-content">
                 <span class="close">&times;</span>
@@ -211,6 +247,7 @@ if ($_SESSION['logged_in']) {
             </div>
         </div>
 
+        <!-- style settings -->
         <style>
             .modal {
                 display: none;
@@ -233,14 +270,14 @@ if ($_SESSION['logged_in']) {
             }
             .modal-content table th,
             .modal-content table td {
-                padding: 10px; /* Increase this value for more space */
+                padding: 10px; 
                 text-align: left;
                 border-bottom: 1px solid #ddd;
             }
 
             .modal-content table {
                 border-collapse: separate;
-                border-spacing: 10px 0; /* Adjust horizontal and vertical spacing */
+                border-spacing: 10px 0; 
             }
             .close {
                 color: #aaa;
@@ -253,6 +290,25 @@ if ($_SESSION['logged_in']) {
                 color: black;
                 text-decoration: none;
                 cursor: pointer;
+            }
+
+            .star-rating {
+                direction: rtl; 
+                font-size: 0;
+            }
+            .star-rating input {
+                display: none;
+            }
+            .star-rating label {
+                font-size: 30px;
+                padding: 0 5px;
+                cursor: pointer;
+                color: #f4c2c2;
+            }
+            .star-rating label:hover,
+            .star-rating label:hover ~ label,
+            .star-rating input:checked ~ label {
+                color: #ff007f;
             }
         </style>
 
