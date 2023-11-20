@@ -101,6 +101,7 @@ if(!$resultSize) {
     $sizeType[] = $row;
   }
 }
+$curr_page = "";
 ?>
 
 
