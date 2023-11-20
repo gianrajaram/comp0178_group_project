@@ -1,169 +1,278 @@
+
 <?php include_once("header.php")?>
+<?php require_once("database_connection.php")?>
+
 <?php require("utilities.php")?>
 
+
 <?php
-  // Get info from the URL:
-  $item_id = $_GET['item_id'];
+// Establish connection with database
+$connection = connectMAC();
+session_start();
 
-  // TODO: Use item_id to make a query to the database.
+$auctionID = 2; // to be dynamically adjusted 2 active 7 closed
 
-  // DELETEME: For now, using placeholder data.
-  $title = "Placeholder title";
-  $description = "Description blah blah blah";
-  $current_price = 30.50;
-  $num_bids = 1;
-  $end_time = new DateTime('2020-11-02T00:00:00');
+$sql_auction = "SELECT a.auctionName, a.categoryType, a.categoryColor, a.categoryGender, a.categorySize, u.username, a.auctionDescription, a.auctionStartDate, a.auctionEndDate, a.auctionStartingPrice, MAX(b.bidValue) as auctionMaxCP, COUNT(b.auctionID) as auctionBidCount 
+FROM Auctions a
+JOIN Users u ON a.sellerID = u.userID
+LEFT JOIN Bids b ON a.auctionID = b.auctionID
+WHERE a.auctionID = '{$auctionID}'
+GROUP BY a.auctionID, a.auctionName, a.categoryType, a.categoryColor, a.categoryGender, a.categorySize, u.username, a.auctionDescription, a.auctionStartDate, a.auctionEndDate, a.auctionStartingPrice";
 
-  // TODO: Note: Auctions that have ended may pull a different set of data,
-  //       like whether the auction ended in a sale or was cancelled due
-  //       to lack of high-enough bids. Or maybe not.
-  
-  // Calculate time to auction end:
-  $now = new DateTime();
-  
-  if ($now < $end_time) {
-    $time_to_end = date_diff($now, $end_time);
-    $time_remaining = ' (in ' . display_time_remaining($time_to_end) . ')';
-  }
-  
-  // TODO: If the user has a session, use it to make a query to the database
-  //       to determine if the user is already watching this item.
-  //       For now, this is hardcoded.
-  $has_session = true;
-  $watching = false;
+
+$result = send_queryMAC($sql_auction);
+$rows = mysqli_fetch_array($result);
+//print_r($rows);
+
+$auctionName = $rows["auctionName"];
+$auctionDescription = $rows['auctionDescription'];
+$sellerUsername = $rows['username'];
+$auctionMaxCP = $rows['auctionMaxCP'];
+$auctionStartingPrice = $rows['auctionStartingPrice'];
+$auctionBidCount = $rows['auctionBidCount'];
+
+$categoryType = $rows['categoryType'];
+$categoryColor = $rows['categoryColor'];
+$categoryGender = $rows['categoryGender'];
+
+$auctionStartDate = $rows['auctionStartDate'];
+$auctionEndDate = $rows['auctionEndDate'];
+$startDate = new DateTime($auctionStartDate);
+$endDate = new DateTime($auctionEndDate);
+
+$now = new DateTime();
+if ($endDate > $now) {
+  $auctionStatus = 'Active';
+} else {
+  $auctionStatus = 'Closed';
+}
+if ($startDate > $now) {
+  $auctionStatus = 'Pending';
+}
+
+
+if ($auctionMaxCP == 0 ) {
+    $auctionMaxCP = $rows['auctionStartingPrice'];
+}
+
+$sql_bids = "SELECT * FROM Bids WHERE auctionID = '{$auctionID}' ORDER BY dateBid DESC";
+$bids_result = mysqli_query($connection, $sql_bids);
+
+
+
+
+$has_session = false;
+$watching = false;
+
+$userID= $_SESSION['userID'];
+
+
+
+
+if ($_SESSION['logged_in']) {
+    $has_session = true;
+    //check if this item is in watchlist
+    $sql_check_watchlist = "SELECT * FROM `Watchlists` WHERE buyerID = '{$userID}' AND auctionID = '{$auctionID}'";
+    $res1 = send_queryMAC($sql_check_watchlist);
+    $res2 = mysqli_fetch_array($res1);
+    if ($res2) {
+        $watching = true;
+    }
+}
+
 ?>
-
 
 <div class="container">
-
-<div class="row"> <!-- Row #1 with auction title + watch button -->
-  <div class="col-sm-8"> <!-- Left col -->
-    <h2 class="my-3"><?php echo($title); ?></h2>
-  </div>
-  <div class="col-sm-4 align-self-center"> <!-- Right col -->
-<?php
-  /* The following watchlist functionality uses JavaScript, but could
-     just as easily use PHP as in other places in the code */
-  if ($now < $end_time):
-?>
-    <div id="watch_nowatch" <?php if ($has_session && $watching) echo('style="display: none"');?> >
-      <button type="button" class="btn btn-outline-secondary btn-sm" onclick="addToWatchlist()">+ Add to watchlist</button>
-    </div>
-    <div id="watch_watching" <?php if (!$has_session || !$watching) echo('style="display: none"');?> >
-      <button type="button" class="btn btn-success btn-sm" disabled>Watching</button>
-      <button type="button" class="btn btn-danger btn-sm" onclick="removeFromWatchlist()">Remove watch</button>
-    </div>
-<?php endif /* Print nothing otherwise */ ?>
-  </div>
-</div>
-
-<div class="row"> <!-- Row #2 with auction description + bidding info -->
-  <div class="col-sm-8"> <!-- Left col with item info -->
-
-    <div class="itemDescription">
-    <?php echo($description); ?>
-    </div>
-
-  </div>
-
-  <div class="col-sm-4"> <!-- Right col with bidding info -->
-
-    <p>
-<?php if ($now > $end_time): ?>
-     This auction ended <?php echo(date_format($end_time, 'j M H:i')) ?>
-     <!-- TODO: Print the result of the auction here? -->
-<?php else: ?>
-     Auction ends <?php echo(date_format($end_time, 'j M H:i') . $time_remaining) ?></p>  
-    <p class="lead">Current bid: £<?php echo(number_format($current_price, 2)) ?></p>
-
-    <!-- Bidding form -->
-    <form method="POST" action="place_bid.php">
-      <div class="input-group">
-        <div class="input-group-prepend">
-          <span class="input-group-text">£</span>
+    <div style="margin-top: 30px;">
+        <div class="auction-status-info" style="font-size: 20px; font-weight: bold;">
+            <p> This auction is  <?php echo strtolower($auctionStatus) ?> !</p>
         </div>
-	    <input type="number" class="form-control" id="bid">
-      </div>
-      <button type="submit" class="btn btn-primary form-control">Place bid</button>
-    </form>
-<?php endif ?>
+    </div>
+    <div class="row">
+        <style>
+            .item-img {
+                width: 50%; /* Adjust the percentage as needed */
+                height: auto; /* This maintains the aspect ratio */
+            }
+        </style>            
+        <div class="col-sm-6">
 
-  
-  </div> <!-- End of right col with bidding info -->
+            <div style="margin-top: 20px;">
+                <img src="images/plainblackTshirt_male.png" class='img-rounded img-responsive item-img'>
+            </div>
+        </div>
 
-</div> <!-- End of row #2 -->
+
+
+    <div class="col-sm-6">
+        <div style="margin-top: 10px;">
+        <div class="item-details">
+            <h2 class="item-title" style="font-size: 30px; font-weight: bold;"><?php echo $auctionName ?></h2>
+            <p class="item-description" style="font-size: 14px;"><?php echo $auctionDescription ?></p>
+
+            <table class="table table-sm">
+                <tbody>
+                    <tr>
+                        <td>Type: <?php echo $categoryType ?></td>
+                        <td>Colour: <?php echo $categoryColor ?></td>
+                        <td>Gender: <?php echo $categoryGender ?></td>
+                    </tr>
+                </tbody>
+            </table>
+            
+
+            <div class="auction-info">
+                <p>Bid count: <?php echo $auctionBidCount ?></p>
+                <p>Current highest bid: <?php echo $auctionMaxCP ?></p>
+                <p>Status: <?php echo $auctionStatus ?></p>
+            </div>
+        </div> 
+
+        <div style="margin-top: 20px;"> </div>
+        
+        <!-- new watchlist -->
+        <div style="margin-top: 20px;">
+            <?php if ($auctionStatus == 'Active' && $watching == false): ?>
+            <form action="watchlist_funcs.php" method="POST">
+                <input type="hidden" name="auctionID" value="<?php echo $auctionID; ?>">
+                <input type="hidden" name="userID" value="<?php echo $userID; ?>">
+                <button type="submit" class="btn btn-primary form-control" name="watchlistsubmit"> Add to the watchlist </button>
+            </form>
+            <?php endif; ?>
+        </div>
+
+        <div style="margin-top: 20px;">
+            <?php if ($auctionStatus == 'Active' && $watching == true): ?>
+            <?php echo "This auction is already on your watchlist."?>
+            <form action="watchlist_funcsr.php" method="POST">
+                <input type="hidden" name="auctionID" value="<?php echo $auctionID; ?>">
+                <input type="hidden" name="userID" value="<?php echo $userID; ?>">
+                <button type="submit" class="btn btn-primary form-control" name="watchlistremove"> Remove from the watchlist </button>
+            </form>
+            <?php endif; ?>
+        </div>
+
+        <!-- this is for placing bid: -->
+
+        <div style="margin-top: 20px;"> </div>
+            <?php if ($auctionStatus == 'Active'): ?>
+            <form action="place_bid.php" method="POST">
+                <div class="row form-group">
+                <div class="col-sm-6">
+                    <input type="text" id="bid_price" name="bid_price" placeholder="Enter Your Bid" class="form-control input-frame">
+                    <input type="hidden" name="auctionID" value="<?php echo $auctionID; ?>">
+                    <input type="hidden" name="auctionMaxCP" value="<?php echo $auctionMaxCP; ?>">
+
+                    
+                </div>
+    
+                <input type="submit" class="btn btn-default item-button" value="Bid Now" name="submit" id="submit" style="background-color: blue; color: white;"/>
+                </div>
+            </form>
+            <?php endif; ?>
+
+        <div style="margin-top: 20px;"> </div>
+
+        <div class="bid-history">
+            <!-- Bid History Button -->
+            <button id="bidHistoryBtn" class="btn btn-primary" style="background-color: gray; color: white;">Bid History</button>
+        </div>
+
+        <!-- Bid History Modal -->
+        <div id="bidHistoryModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h3>Bid history</h3>
+                <div id="bidHistoryTable">
+                    <?php if ($bids_result && mysqli_num_rows($bids_result) > 0): ?>
+                        <table>
+                            <tr>
+                                
+                                <th>Bid Value</th>
+                                <th>Date of Bid</th>
+                            </tr>
+                            <?php while ($bid = mysqli_fetch_assoc($bids_result)): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($bid['bidValue']); ?></td>
+                                    <td><?php echo htmlspecialchars($bid['dateBid']); ?></td>
+                                </tr>
+                            <?php endwhile; ?>
+                        </table>
+                    <?php else: ?>
+                        <p>No bids found.</p>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+
+        <style>
+            .modal {
+                display: none;
+                position: fixed;
+                z-index: 1;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                overflow: auto;
+                background-color: rgb(0,0,0);
+                background-color: rgba(0,0,0,0.4);
+            }
+            .modal-content {
+                background-color: #fefefe;
+                margin: 15% auto;
+                padding: 20px;
+                border: 1px solid #888;
+                width: 80%;
+            }
+            .modal-content table th,
+            .modal-content table td {
+                padding: 10px; /* Increase this value for more space */
+                text-align: left;
+                border-bottom: 1px solid #ddd;
+            }
+
+            .modal-content table {
+                border-collapse: separate;
+                border-spacing: 10px 0; /* Adjust horizontal and vertical spacing */
+            }
+            .close {
+                color: #aaa;
+                float: right;
+                font-size: 28px;
+                font-weight: bold;
+            }
+            .close:hover,
+            .close:focus {
+                color: black;
+                text-decoration: none;
+                cursor: pointer;
+            }
+        </style>
+
+        <script>
+            var modal = document.getElementById("bidHistoryModal");
+            var btn = document.getElementById("bidHistoryBtn");
+            var span = document.getElementsByClassName("close")[0];
+
+            btn.onclick = function() {
+                modal.style.display = "block";
+            }
+
+            span.onclick = function() {
+                modal.style.display = "none";
+            }
+
+            window.onclick = function(event) {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            }
+        </script>
+
+    </div>
+</div>
 
 
 
 <?php include_once("footer.php")?>
-
-
-<script> 
-// JavaScript functions: addToWatchlist and removeFromWatchlist.
-
-function addToWatchlist(button) {
-  console.log("These print statements are helpful for debugging btw");
-
-  // This performs an asynchronous call to a PHP function using POST method.
-  // Sends item ID as an argument to that function.
-  $.ajax('watchlist_funcs.php', {
-    type: "POST",
-    data: {functionname: 'add_to_watchlist', arguments: [<?php echo($item_id);?>]},
-
-    success: 
-      function (obj, textstatus) {
-        // Callback function for when call is successful and returns obj
-        console.log("Success");
-        var objT = obj.trim();
- 
-        if (objT == "success") {
-          $("#watch_nowatch").hide();
-          $("#watch_watching").show();
-        }
-        else {
-          var mydiv = document.getElementById("watch_nowatch");
-          mydiv.appendChild(document.createElement("br"));
-          mydiv.appendChild(document.createTextNode("Add to watch failed. Try again later."));
-        }
-      },
-
-    error:
-      function (obj, textstatus) {
-        console.log("Error");
-      }
-  }); // End of AJAX call
-
-} // End of addToWatchlist func
-
-function removeFromWatchlist(button) {
-  // This performs an asynchronous call to a PHP function using POST method.
-  // Sends item ID as an argument to that function.
-  $.ajax('watchlist_funcs.php', {
-    type: "POST",
-    data: {functionname: 'remove_from_watchlist', arguments: [<?php echo($item_id);?>]},
-
-    success: 
-      function (obj, textstatus) {
-        // Callback function for when call is successful and returns obj
-        console.log("Success");
-        var objT = obj.trim();
- 
-        if (objT == "success") {
-          $("#watch_watching").hide();
-          $("#watch_nowatch").show();
-        }
-        else {
-          var mydiv = document.getElementById("watch_watching");
-          mydiv.appendChild(document.createElement("br"));
-          mydiv.appendChild(document.createTextNode("Watch removal failed. Try again later."));
-        }
-      },
-
-    error:
-      function (obj, textstatus) {
-        console.log("Error");
-      }
-  }); // End of AJAX call
-
-} // End of addToWatchlist func
-</script>
