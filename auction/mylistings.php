@@ -59,6 +59,9 @@ if(isset($_SESSION['userID'])) {
         $result_bid = send_query($query_bid);
         $row_bid = mysqli_fetch_assoc($result_bid);
         $auctionMaxCP = $row_bid['auctionMaxCP'];
+        if ($auctionMaxCP == 0) {
+          $auctionMaxCP = $row["auctionStartingPrice"];
+        }
     
         $query_num = "SELECT COUNT(*) AS numberOfBids FROM `bids` WHERE auctionID = $auctionID";
         $result_num = send_query($query_num);
