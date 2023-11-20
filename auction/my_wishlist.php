@@ -49,7 +49,7 @@ $result = send_queryMAC($query);
 
                         echo "<tr>";
                         // Make auction names clickable links
-                        echo "<td><a href='listing.php?auctionID=" . htmlspecialchars($row['auctionID']) . "'>" . htmlspecialchars($row['auctionName']) . "</a></td>";
+                        echo "<td><a href='listing.php?item_id=" . htmlspecialchars($row['auctionID']) . "'>" . htmlspecialchars($row['auctionName']) . "</a></td>";
                         echo "<td>" . htmlspecialchars($auctionMaxCP) . "</td>";
                         echo "</tr>";
                 }

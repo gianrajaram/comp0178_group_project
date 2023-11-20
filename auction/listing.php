@@ -10,9 +10,11 @@
 $connection = connectMAC();
 
 
-$auctionID = 2; // to be dynamically adjusted 2 active 7 closed
+//$auctionID = 2; // to be dynamically adjusted 2 active 7 closed
+$auctionID = isset($_GET['item_id']) ? $_GET['item_id'] : 0;
+//echo $auctionID;
 
-$sql_auction = "SELECT a.auctionName, a.categoryType, a.categoryColor, a.categoryGender, a.categorySize, u.username, a.auctionDescription, a.auctionStartDate, a.auctionEndDate, a.auctionStartingPrice, MAX(b.bidValue) as auctionMaxCP, COUNT(b.auctionID) as auctionBidCount 
+$sql_auction = "SELECT a.auctionName, a.categoryType, a.categoryColor, a.categoryGender, a.categorySize, u.username, a.auctionDescription, a.auctionStartDate, a.auctionEndDate, a.auctionPicture, a.auctionStartingPrice, MAX(b.bidValue) as auctionMaxCP, COUNT(b.auctionID) as auctionBidCount 
 FROM Auctions a
 JOIN Users u ON a.sellerID = u.userID
 LEFT JOIN Bids b ON a.auctionID = b.auctionID
@@ -34,6 +36,10 @@ $auctionBidCount = $rows['auctionBidCount'];
 $categoryType = $rows['categoryType'];
 $categoryColor = $rows['categoryColor'];
 $categoryGender = $rows['categoryGender'];
+
+$auctionPicture = $rows['auctionPicture'];
+$auctionImageSrc = str_replace('/auction/', '', $auctionPicture);
+
 
 $auctionStartDate = $rows['auctionStartDate'];
 $auctionEndDate = $rows['auctionEndDate'];
@@ -98,7 +104,7 @@ if ($_SESSION['logged_in']) {
         <div class="col-sm-6">
 
             <div style="margin-top: 20px;">
-                <img src="images/plainblackTshirt_male.png" class='img-rounded img-responsive item-img'>
+                <img src="<?php echo htmlspecialchars($auctionImageSrc); ?>" class='img-rounded img-responsive item-img'>
             </div>
         </div>
 
