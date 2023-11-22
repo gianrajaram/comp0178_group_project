@@ -452,9 +452,43 @@
     die('connection failed' );
   }
 
+## end date variable to use if listing has ended or not.
+## IN PROGRESS
+## convert to shorthand if else w ternary operator
+##
 
+### FIND SQL QUERY FOR ONLY VALID DATES 
+## fetches from database which includes 'This auction has ended' text in description but is not in my code. Understand database.
+
+
+while ($row = mysqli_fetch_assoc($paginationResult)){
+  $end_date = new DateTime($row['auctionEndDate']);
+}
+
+if (!$end_date) { 
+  $activeListing = "";
+} else {
+  $activeListing = "";
+
+}
+
+$activeListing = send_query($defaultQuery);
+    if (!activeListing){
+    die('SQL error: ln 378 paginationresult '.mysqli_error($conn));
+    }
+
+
+    $query .= " LIMIT $start_from, $results_per_page";
+    $paginationResult = send_query($query);
+    if (!$paginationResult){
+        die('SQL error: '.mysqli_error($conn));
+        
+    }
+$current_price = isset($row['highestBid']) ? $row['highestBid'] : $row['auctionStartingPrice'];
 
   }
+
+
 
   $num_results = mysqli_num_rows($paginationCount);
 
