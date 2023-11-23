@@ -14,10 +14,7 @@ if(isset($_SESSION['userID'])) {
     // check if there are any previous messages
     $query_received_messages = "SELECT senderID, userID, messageText, COUNT(*) as messageCount FROM messagesadmin WHERE userID = $senderID GROUP BY senderID";
     $result_received_messages = send_query($query_received_messages);
-    $row_nb = mysqli_fetch_assoc($result_received_messages);
-    $count = $row_nb['messageCount'];
-    $query_lastMessage = "SELECT senderID, messageTime AS latestMessageTime, messageText AS latestMessageText, COUNT(*) as messageCount FROM messagesadmin WHERE userID = 1 AND (senderID, messageTime) IN ( SELECT senderID, MAX(messageTime) AS latestMessageTime FROM messagesadmin WHERE userID = 1 GROUP BY senderID ) GROUP BY senderID, latestMessageTime, latestMessageText ORDER BY latestMessageTime DESC;";
-    $result_lastMessage = send_query($query_lastMessage);
+
 } else {
     header("Location: login.php");
     exit();
@@ -158,7 +155,9 @@ if(isset($_SESSION['userID'])) {
         .message-info-table th {
             background-color: #f2f2f2;
         }
-        
+        .unread-row {
+            background-color: yellow; /* or any other color you want */
+        }
     </style>
 </head>
 <body>
@@ -182,9 +181,11 @@ if(isset($_SESSION['userID'])) {
                     $messageText = $row_messages["messageText"];
                     $messageSenderID = $row_messages["senderID"];
 
+                    $query_update_read = "UPDATE messagesadmin SET isRead = 0 WHERE senderID = $targetUserID AND userID = $senderID";
+                    send_query($query_update_read);
 
                     echo '<div class="message-box ' . ($messageSenderID == $senderID ? 'right' : 'left') . '" style="border-color: ' . ($messageSenderID == $targetUserID ?  '#e5e5e5':'#007bff') . ';">';
-                    echo '<p class="' . ($messageSenderID == $targetUserID ? 'user-message' : 'admin-message') . '">' . ($messageSenderID == $targetUserID ? 'You: ' : 'Admin: ') . $messageText . '</p>';
+                    echo '<p class="' . ($messageSenderID == $targetUserID ? 'user-message' : 'admin-message') . '">' . ($messageSenderID == $targetUserID ? 'User ' . $targetUserID . ': ' : 'Admin: ') . $messageText . '</p>';
                     echo '</div>';
                     
 
@@ -226,13 +227,18 @@ if(isset($_SESSION['userID'])) {
         if (mysqli_num_rows($result_received_messages) > 0) {
             echo '<table class="message-info-table">';
             echo '<tr><th>Nb of Messages</th><th>User ID</th><th>Last Message</th><th>Time of Latest Message</th></tr></thead><tbody>';
-            
+            $row_nb = mysqli_fetch_assoc($result_received_messages);
+            $count = $row_nb['messageCount'];
+            $query_lastMessage = "SELECT senderID, isRead, messageTime AS latestMessageTime, messageText AS latestMessageText, COUNT(*) as messageCount FROM messagesadmin WHERE userID = 1 AND (senderID, messageTime) IN ( SELECT senderID, MAX(messageTime) AS latestMessageTime FROM messagesadmin WHERE userID = 1 GROUP BY senderID ) GROUP BY senderID, latestMessageTime, latestMessageText ORDER BY latestMessageTime DESC;";
+            $result_lastMessage = send_query($query_lastMessage);
             if ($result_lastMessage) {
                 while ($row = mysqli_fetch_assoc($result_lastMessage)) {
                     $latestMessageTime = $row['latestMessageTime'];
                     $latestMessageText = $row['latestMessageText'];
+                    $isRead = $row['isRead'];
+                    $rowClass = ($isRead ?  'unread-row':'');
                 
-                echo '<tr>';
+                echo '<tr class="'. $rowClass . '">';
                 echo '<td>'. $count .'</td>';
                 echo '<td><a href="admin_messages.php?userID=' . $row['senderID'] . '">' . $row['senderID'] . '</a></td>';
                 echo '<td>' . $latestMessageText . '</td>';
@@ -243,7 +249,7 @@ if(isset($_SESSION['userID'])) {
 
             echo '</tbody></table>';
         } else {
-            echo '<p>No messages found.</p>';
+            echo '<p>No messages yet.</p>';
         }
         
 
@@ -262,13 +268,13 @@ if(isset($_SESSION['userID'])) {
         $messageText = $_POST['newMessage'];
     
         $query_insert = "INSERT INTO messagesadmin
-                        (messageText, userID, senderID, messageTime)
+                        (messageText, userID, senderID, messageTime, isRead)
                         VALUES
-                        ('$messageText', '$targetUserID', $senderID, '$currentDateTime')";
+                        ('$messageText', '$targetUserID', $senderID, '$currentDateTime', 1)";
         send_query($query_insert);
     
         echo '<script>alert("Message sent!");</script>';
-       // echo '<script>window.location.reload();</script>';
+        //echo '<script>window.location.reload();</script>';
     }
     ?>
 
