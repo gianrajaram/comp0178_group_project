@@ -150,6 +150,20 @@ send_query($query);
 echo "<script>alert('Auction successfully created!');</script>";
 echo "<script>window.location.href='mylistings.php';</script>";
 
+// send successful auction creation email
+$querySeller = "SELECT * FROM Users WHERE userID = '$sellerID'";
+$resultSeller = send_query($querySeller);
+$rowSeller = mysqli_fetch_assoc($resultSeller);
+$emailSeller = $rowSeller['userEmail'];
+$firstNameSeller = $rowSeller['userFirstName'];
+$name = "ReWear Auctions"; //sender’s name
+$email = "UCL2023DatabasesAuctionReWear@gmail.com"; //sender’s e-mail address
+$recipient = $emailSeller; //recipient
+$mail_body= "$firstNameSeller, you successfully created and auction with the Title $auctionName and following description: $auctionDescription."; //mail body
+$subject = "ReWear Auctions - Auction submission successful!"; //subject
+$header = "From: ". $name . " <" . $email . ">\r\n";
+mail($recipient, $subject, $mail_body, $header);
+
 ?>
 
 </div>

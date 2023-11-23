@@ -44,8 +44,7 @@ if (isset($_POST['bid_price']) && $_POST['bid_price']!='') {
     $emailPreviousBidder = $rowPreviousBidder['userEmail'];
     $firstNamePreviousBidder = $rowPreviousBidder['userFirstName'];
     
-    // emails of all buyers that have put the auction in watchlist
-
+    // emails and first names of all buyers that have put the auction in watchlist
     $queryWatchlist = "SELECT U.userEmail, U.userFirstName
                 FROM Watchlists W
                 JOIN Users U ON W.buyerID = U.userID
