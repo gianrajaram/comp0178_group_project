@@ -22,29 +22,37 @@ if (isset($_POST['bid_price']) && $_POST['bid_price']!='') {
 
     // Further variables for emailing
     // bidder email and name
-    $query = "SELECT * FROM Users WHERE userID = '$userID'";
-    $result = send_query($query);
-    $row = mysqli_fetch_assoc($result);
-    $emailBidder = $row['userEmail'];
-    $firstName = $row['userFirstName'];
+    $queryBidder = "SELECT * FROM Users WHERE userID = '$userID'";
+    $resultBidder = send_query($queryBidder);
+    $rowBidder = mysqli_fetch_assoc($resultBidder);
+    $emailBidder = $rowBidder['userEmail'];
+    $firstNameBidder = $rowBidder['userFirstName'];
 
     // auction titel
-    $query = "SELECT * FROM Auctions WHERE auctionID = '$auctionID'";
-    $result = send_query($query);
-    $row = mysqli_fetch_assoc($result);
-    $auctionTitle = $row['auctionName'];
+    $queryAuctionTitle = "SELECT * FROM Auctions WHERE auctionID = '$auctionID'";
+    $resultAuctionTitle = send_query($queryAuctionTitle);
+    $rowAuctionTitle = mysqli_fetch_assoc($resultAuctionTitle);
+    $auctionTitle = $rowAuctionTitle['auctionName'];
 
     // previous highest bidder email
-    $query = "SELECT B.*, U.userEmail, U.userFirstName
+    $queryPreviousHighestBidder = "SELECT B.*, U.userEmail, U.userFirstName
                 FROM Bids B
                 JOIN Users U ON B.buyerID = U.userID
                 WHERE B.auctionID = '$auctionID' AND B.bidValue = '$auctionMaxCP'";
-    $result = send_query($query);
-    $row = mysqli_fetch_assoc($result);
-    $emailPreviousBidder = $row['userEmail'];
-    $firstNamePreviousBidder = $row['userFirstName'];
+    $resultPreviousBidder = send_query($queryPreviousHighestBidder);
+    $rowPreviousBidder = mysqli_fetch_assoc($resultPreviousBidder);
+    $emailPreviousBidder = $rowPreviousBidder['userEmail'];
+    $firstNamePreviousBidder = $rowPreviousBidder['userFirstName'];
     
     // emails of all buyers that have put the auction in watchlist
+
+    $queryWatchlist = "SELECT U.userEmail, U.userFirstName
+                FROM Watchlists W
+                JOIN Users U ON W.buyerID = U.userID
+                WHERE W.auctionID = '$auctionID'";
+    $resultWatchlistBidders = send_query($queryWatchlist);
+ 
+
 
     // Check if user is active; adjust this part according to your application logi
     $dateBid = date('Y-m-d H:i:s');
@@ -61,7 +69,7 @@ if (isset($_POST['bid_price']) && $_POST['bid_price']!='') {
         $name = "ReWear Auctions"; //sender’s name
         $email = "UCL2023DatabasesAuctionReWear@gmail.com"; //sender’s e-mail address
         $recipient = $emailBidder; //recipient
-        $mail_body= "$firstName, you successfully bidded £$bidValue on auction $auctionTitle!"; //mail body
+        $mail_body= "$firstNameBidder, you successfully bidded £$bidValue on auction $auctionTitle!"; //mail body
         $subject = "ReWear Auctions - Successful bid submission!"; //subject
         $header = "From: ". $name . " <" . $email . ">\r\n";
         mail($recipient, $subject, $mail_body, $header); 
@@ -75,6 +83,21 @@ if (isset($_POST['bid_price']) && $_POST['bid_price']!='') {
         $header = "From: ". $name . " <" . $email . ">\r\n";
         mail($recipient, $subject, $mail_body, $header);
 
+        // send email informing buyers who have put the auction in their watchlist that someone has bidded on the auction    
+
+        if (mysqli_num_rows($resultWatchlistBidders) > 0) {
+            while ($rowWatchlistBidders = mysqli_fetch_assoc($resultWatchlistBidders)) {
+                $emailWatchlistBidder = $rowWatchlistBidders['userEmail'];
+                $firstNameWatchlistBidder = $rowWatchlistBidders['userFirstName'];
+                $name = "ReWear Auctions"; //sender’s name
+                $email = "UCL2023DatabasesAuctionReWear@gmail.com"; //sender’s e-mail address
+                $recipient = $emailWatchlistBidder; //recipient
+                $mail_body= "$firstNameWatchlistBidder, there was a bid submission on auction $auctionTitle that is in your watchlist!"; //mail body
+                $subject = "ReWear Auctions - Someone bid on a watchlisted auction"; //subject
+                $header = "From: ". $name . " <" . $email . ">\r\n";
+                mail($recipient, $subject, $mail_body, $header);      
+                }
+            }
     } else {
         echo "<script>alert('Your bid was too low.');</script>";
         echo "<script>window.location.href='listing.php';</script>";
