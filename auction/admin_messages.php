@@ -274,7 +274,7 @@ if(isset($_SESSION['userID'])) {
         send_query($query_insert);
     
         echo '<script>alert("Message sent!");</script>';
-        //echo '<script>window.location.reload();</script>';
+        echo "<script>window.location.href='admin_messages.php';</script>";
     }
     ?>
 
