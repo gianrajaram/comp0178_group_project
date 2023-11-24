@@ -220,22 +220,6 @@ CREATE TABLE Ratings (
 )
 ENGINE=INNODB;
 
-CREATE TABLE Wishlists (
-    wishlistitemID INT(10) NOT NULL AUTO_INCREMENT,
-    categoryType VARCHAR(100) NOT NULL,
-    categoryColor VARCHAR(100) NOT NULL,
-    categoryGender VARCHAR(100) NOT NULL,
-    categorySize VARCHAR(100) NOT NULL,
-    buyerID INT(10) NOT NULL,
-    PRIMARY KEY (WishlistitemID),
-    FOREIGN KEY (buyerID) REFERENCES Users (userID) ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY (categoryType) REFERENCES CategoryClothsType (categoryType) ON UPDATE CASCADE ON DELETE RESTRICT,
-    FOREIGN KEY (categoryColor) REFERENCES CategoryColorType (categoryColor) ON UPDATE CASCADE ON DELETE RESTRICT,
-    FOREIGN KEY (categoryGender) REFERENCES categoryGenderType (categoryGender) ON UPDATE CASCADE ON DELETE RESTRICT,
-    FOREIGN KEY (categorySize) REFERENCES categorySizeType (categorySize) ON UPDATE CASCADE ON DELETE RESTRICT
-)
-ENGINE=INNODB;
-
 CREATE TABLE MessagesAdmin (
     messageID INT(10) NOT NULL AUTO_INCREMENT,
     messageText VARCHAR(500),
