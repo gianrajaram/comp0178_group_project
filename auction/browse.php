@@ -266,7 +266,7 @@ if(!$resultSize) {
     $gender = 'Gender';
   }
   
-$results_per_page = 10;
+$results_per_page = 2;
 $start_from = ($curr_page - 1) * $results_per_page;
 
 
