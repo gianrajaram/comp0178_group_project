@@ -134,8 +134,10 @@ if (mysqli_num_rows($result_messages)>0) {
     while($row_messages = mysqli_fetch_assoc($result_messages)) {
         $messageText = $row_messages["messageText"];
         $messageSenderID = $row_messages["senderID"];
+
         $query_update_read = "UPDATE messagesadmin SET isRead = 0 WHERE  senderID = $userID AND userID = $senderID";
         send_query($query_update_read);
+        
         echo '<div class="message-box ' . ($messageSenderID == $senderID ? 'right' : 'left') . '" style="border-color: ' . ($messageSenderID == $userID ?  '#e5e5e5':'#007bff') . ';">';
         echo '<p class="' . ($messageSenderID == $userID ? 'user-message' : 'admin-message') . '">' . ($messageSenderID == $senderID ? 'You: ' : 'Admin: ') . $messageText . '</p>';
         echo '</div>';
