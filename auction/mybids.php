@@ -8,20 +8,12 @@
 
 <?php
 
-// WATCHLIST NOT WISHLIST
-
-//session_start();
-
 $connection = connectMAC();
 
 $buyerID = $_SESSION['userID'];
+$auctionID = isset($_GET['item_id']) ? $_GET['item_id'] : 0;
 
-// SQL query to fetch auction names from the Watchlists for a specific buyer
-//$query = "SELECT a.auctionID, a.auctionName, MAX(b.bidValue) AS maxBidValue
-//          FROM Bids b
-//          JOIN Auctions a ON b.auctionID = a.auctionID
-//          WHERE b.buyerID = '$buyerID'
-//         GROUP BY a.auctionID, a.auctionName";
+
 
 $query = "SELECT a.auctionID, a.auctionName, 
                  MAX(b1.bidValue) AS maxBuyerBidValue, 
@@ -49,7 +41,7 @@ $result = send_queryMAC($query);
                 if (mysqli_num_rows($result) > 0) {
                     while ($row = mysqli_fetch_assoc($result)) {
                       echo "<tr>";
-                      echo "<td><a href='listing.php?auctionID=" . htmlspecialchars($row['auctionID']) . "'>" . htmlspecialchars($row['auctionName']) . "</a></td>";
+                      echo "<td><a href='listing.php?item_id=" . htmlspecialchars($row['auctionID']) . "'>" . htmlspecialchars($row['auctionName']) . "</a></td>";
                       echo "<td>" . htmlspecialchars($row['maxBuyerBidValue']) . "</td>";
                       echo "<td>" . htmlspecialchars($row['maxBidValue']) . "</td>";
                       echo "</tr>";

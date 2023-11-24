@@ -3,13 +3,11 @@
 require_once("utilities.php");
 ?>
 
-
-
-
 <?php
-// Establish connection with database
 
+// connection with database
 $connection = connectMAC();
+
 if (isset($_POST['watchlistremove'])) {
   $auctionID = $_POST['auctionID'];
   $userID = $_SESSION['userID'];
