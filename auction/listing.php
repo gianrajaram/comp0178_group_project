@@ -95,7 +95,7 @@ $watching = false;
 
 
 
-if ($_SESSION['logged_in']) {
+if(isset($_SESSION['userID'])) {
     $has_session = true;
     //check if this item is in watchlist
     $sql_check_watchlist = "SELECT * FROM `Watchlists` WHERE buyerID = '{$userID}' AND auctionID = '{$auctionID}'";
@@ -214,7 +214,7 @@ if ($_SESSION['logged_in']) {
                 </div>
                 <div class="row form-group">
                     <div class="col-sm-6">
-                        <textarea id="ratingText" name="ratingText" placeholder="Leave your comment here..." class="form-control input-frame" rows="1" style="background-color: white; color: white"></textarea>
+                        <textarea id="ratingText" name="ratingText" placeholder="Leave your comment here..." class="form-control input-frame" rows="1" style="background-color: white; color: grey"></textarea>
                         <input type="hidden" name="auctionID" value="<?php echo $auctionID; ?>">
                         <input type="hidden" name="userID" value="<?php echo $userID; ?>"> <!-- Assuming userID is stored in session -->
                     </div>
