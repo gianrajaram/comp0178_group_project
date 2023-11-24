@@ -32,7 +32,7 @@ CREATE TABLE Users (
 /* Insert sample users into database - attention - no input needed for userID (auto incrementing) */
 /* Admin registration */
 INSERT INTO Users (userEmail, username, userPassword, userFirstName, userLastName, userAddress, userTel, userGender, userAccountType) VALUES
-("gbakova@yyyyyy.com", "admin", SHA('111'), "Gabriela", "Bakova", "DDE London E14 9RZ UK", 0790000000, "Female", "Admin");
+("gbakova@yahoo.com", "admin", SHA('111'), "Gabriela", "Bakova", "DDE London E14 9RZ UK", 0790000000, "Female", "Admin");
 
 /* Sample user registration */
 INSERT INTO Users (userEmail, username, userPassword, userFirstName, userLastName, userAddress, userTel, userGender) VALUES
@@ -149,13 +149,13 @@ INSERT INTO Auctions (auctionStartDate, auctionEndDate, auctionStartingPrice, au
 ("2023-11-01 8:30:00", "2024-11-08 20:00:00", 100, 150, "PERFECT KAREN MILLEN DRESS", "very stylish designer dress, worn only on one occasion and has been to dry cleaning", "images/bluedress.png", 2, "Dresses/Skirts", "Blue", "Female", "M"),
 ("2023-11-01 8:30:00", "2024-11-06 20:00:00", 50, 70, "Summer colorful skirt", "skirt perfect for the summer, never worn", "images/colourfuldress.png", 2, "Dresses/Skirts", "Multi-coloured", "Female", "M"),
 ("2023-11-02 08:30:00", "2024-11-04 20:00:00", 20.50, 45, "Ultimate deal for a VALENTINO BAG", "Amazing Valentino bag in very good condition", "images/accessories_valentino_bag.png", 2, "Accessories", "Black", "Female", "N/A"),
-("2023-11-03 08:30:00", "2023-11-05 20:00:00", 10.00, 25, "Elegant Unisex Scarf", "Stylish unisex scarf in cheerful colors, perfect for any season", "images/accessories_unisex_scarf.png", 3, "Accessories", "Multi-coloured", "Unisex", "N/A"),
-("2023-11-04 08:30:00", "2023-11-06 20:00:00", 15.00, 30, "Elegant White Blouse for Women", "White blouse for females, size Medium, elegant design, never worn", "images/whiteblousefemale.png", 3, "Blouses/Shirts", "White", "Female", "M"),
-("2023-11-05 08:30:00", "2023-11-07 20:00:00", 18.50, 35, "Stylish Blue Blouse for Women", "Blue blouse for females, size Small, elegant design, like new", "images/blueblousefemale.png", 3, "Blouses/Shirts", "Blue", "Female", "S"),
-("2023-11-06 08:30:00", "2023-11-08 20:00:00", 12.75, 25, "Elegant Black Skirt for Women", "Black skirt for females, size Large, perfect for formal occasions", "images/blackskirtfemale.png", 3, "Dresses/Skirts", "Black", "Female", "L"),
-("2023-11-07 08:30:00", "2023-11-09 20:00:00", 22.99, 40, "Classic Black Female Shoes", "Black shoes for females, size 38 European, comfortable and stylish", "images/blackshoesfemale.png", 2, "Shoes", "Black", "Female", "N/A"),
-("2023-11-08 08:30:00", "2023-11-10 20:00:00", 30.00, 60, "Elegant Black Dress for Women", "Black dress for females, size Medium, perfect for special occasions", "images/blackdressfemale.png", 2, "Dresses/Skirts", "Black", "Female", "M"),
-("2023-11-09 08:30:00", "2023-11-11 20:00:00", 40.00, 80, "Stylish Red Coat for Women", "Red coat for females, size Large, excellent condition, perfect for winter", "images/redcoatfemale.png", 3, "Jackets/Coats", "Red", "Female", "L")
+("2023-11-03 08:30:00", "2023-11-05 20:00:00", 10.00, 25, "Elegant Unisex Scarf", "Stylish unisex scarf in cheerful colors, perfect for any season", "images/accessories_unisex_scarf.jpg", 3, "Accessories", "Multi-coloured", "Unisex", "N/A"),
+("2023-11-04 08:30:00", "2023-11-06 20:00:00", 15.00, 30, "Elegant White Blouse for Women", "White blouse for females, size Medium, elegant design, never worn", "images/whiteblousefemale.jpg", 3, "Blouses/Shirts", "White", "Female", "M"),
+("2023-11-05 08:30:00", "2023-11-07 20:00:00", 18.50, 35, "Stylish Blue Blouse for Women", "Blue blouse for females, size Small, elegant design, like new", "images/blueblousefemale.jpg", 3, "Blouses/Shirts", "Blue", "Female", "S"),
+("2023-11-06 08:30:00", "2023-11-08 20:00:00", 12.75, 25, "Elegant Black Skirt for Women", "Black skirt for females, size Large, perfect for formal occasions", "images/blackskirtfemale.jpg", 3, "Dresses/Skirts", "Black", "Female", "L"),
+("2023-11-07 08:30:00", "2023-11-23 19:12:00", 22.99, 40, "Classic Black Female Shoes", "Black shoes for females, size 38 European, comfortable and stylish", "images/blackshoesfemale.jpg", 2, "Shoes", "Black", "Female", "N/A"),
+("2023-11-08 08:30:00", "2023-11-23 19:12:00", 30.00, 60, "Elegant Black Dress for Women", "Black dress for females, size Medium, perfect for special occasions", "images/blackdressfemale.jpg", 2, "Dresses/Skirts", "Black", "Female", "M"),
+("2023-11-09 08:30:00", "2023-11-23 19:12:00", 40.00, 80, "Stylish Red Coat for Women", "Red coat for females, size Large, excellent condition, perfect for winter", "images/redcoatfemale.jpg", 2, "Jackets/Coats", "Red", "Female", "L")
 ;
 
 
@@ -182,7 +182,10 @@ INSERT INTO Bids (bidValue, buyerID, auctionID) VALUES
 (65,7,2),
 (69,6,2),
 (100,5,4),
-(50,8,5)
+(50,8,5),
+(40,2,12),
+(50,2,13),
+(80,1,13)
 ;
 
 CREATE TABLE Watchlists (

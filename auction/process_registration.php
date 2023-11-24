@@ -10,7 +10,7 @@ $connection = connect();
 if (isset($_POST['register'])) {
     // Email - check if in correct format
     if (filter_var($_POST["emailReg"], FILTER_VALIDATE_EMAIL)){
-        $email = mysqli_real_escape_string($connection,$_POST["emailReg"]);
+        $emailReg = mysqli_real_escape_string($connection,$_POST["emailReg"]);
     }
     else{
         alert_message_registration($message = 'Email is NOT a valid email address');
@@ -65,10 +65,19 @@ else{
     $result_check_registration = send_query($query_check_registration);
     if (mysqli_num_rows($result_check_registration) == 0){
         $query_register = "INSERT INTO Users (userEmail, username, userPassword, userFirstName, userLastName, userAddress, userTel, userGender)".
-        "VALUES ('$email', '$username', SHA('$password'), '$firstName', '$lastName', '$address', '$telephone', '$selectedGender')";
+        "VALUES ('$emailReg', '$username', SHA('$password'), '$firstName', '$lastName', '$address', '$telephone', '$selectedGender')";
         send_query($query_register);
         echo "<script>alert('Registration is successful! You can now log in.');</script>";
         echo "<script>window.location.href='login.php';</script>";
+
+        // send successful registration email
+        $name = "ReWear Auctions"; //sender’s name
+        $email = "UCL2023DatabasesAuctionReWear@gmail.com"; //sender’s e-mail address
+        $recipient = $emailReg; //recipient
+        $mail_body= "$firstName, you successfully registered at ReWear Auctions! \nYour username is $username. Next step is to log in."; //mail body
+        $subject = "ReWear Auctions - Registration successful!"; //subject
+        $header = "From: ". $name . " <" . $email . ">\r\n";
+        mail($recipient, $subject, $mail_body, $header);
     }
     else{
        alert_message_registration($message = 'Email/Username is already in the database.');
