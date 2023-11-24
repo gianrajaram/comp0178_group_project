@@ -191,7 +191,7 @@ while ($row = mysqli_fetch_assoc($resultSize)) {
                  <button class="btn btn-primary" type="button" onclick="document.getElementById('auctionImage').click()">Upload</button>
                </div>
              </div>
-             <small id="imageHelp" class="form-text text-muted">Optional. Upload an image of the item you're selling.</small>
+             <small id="imageHelp" class="form-text text-muted"><span class="text-danger">*Required. </span> Upload an image of the item you're selling.</small>
            </div>
         </div>
         <script>
