@@ -220,7 +220,7 @@ CREATE TABLE Ratings (
 )
 ENGINE=INNODB;
 
-CREATE TABLE MessagesAdmin (
+CREATE TABLE Messages (
     messageID INT(10) NOT NULL AUTO_INCREMENT,
     messageText VARCHAR(500),
     userID INT(10),

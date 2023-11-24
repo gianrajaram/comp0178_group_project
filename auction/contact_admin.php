@@ -122,7 +122,7 @@ if(isset($_SESSION['userID'])) {
     $senderID = $_SESSION['userID'];
     $userID = 1; // the admin
     // check if there are any previous messages
-    $query_messages = "SELECT * FROM `messagesadmin` WHERE (userID = $userID AND senderID = $senderID) OR (userID = $senderID AND senderID = $userID) ORDER BY messageTime";
+    $query_messages = "SELECT * FROM `messages` WHERE (userID = $userID AND senderID = $senderID) OR (userID = $senderID AND senderID = $userID) ORDER BY messageTime";
     $result_messages = send_query($query_messages);
 } else {
   header("Location: login.php");
@@ -135,7 +135,7 @@ if (mysqli_num_rows($result_messages)>0) {
         $messageText = $row_messages["messageText"];
         $messageSenderID = $row_messages["senderID"];
 
-        $query_update_read = "UPDATE messagesadmin SET isRead = 0 WHERE  senderID = $userID AND userID = $senderID";
+        $query_update_read = "UPDATE messages SET isRead = 0 WHERE  senderID = $userID AND userID = $senderID";
         send_query($query_update_read);
         
         echo '<div class="message-box ' . ($messageSenderID == $senderID ? 'right' : 'left') . '" style="border-color: ' . ($messageSenderID == $userID ?  '#e5e5e5':'#007bff') . ';">';
@@ -198,7 +198,7 @@ $currentDateTime = date('Y-m-d\TH:i');
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Assuming you're using POST method to submit the form
     $messageText = $_POST['textMessage'];
-    $query_insert = "INSERT INTO messagesadmin
+    $query_insert = "INSERT INTO messages
                     (messageText, userID, senderID, messageTime, isRead)
                     VALUES
                     ('$messageText', '$userID', $senderID, '$currentDateTime', 1)";
