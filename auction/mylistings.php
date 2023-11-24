@@ -17,7 +17,7 @@ if(isset($_SESSION['userID'])) {
   //$userID = 2;
   $query = "SELECT * FROM auctions WHERE sellerID = $userID";
   $result = send_query($query);
-  $row = mysqli_fetch_assoc($result);
+
 } else {
   header("Location: login.php");
   exit();
@@ -48,7 +48,9 @@ if(isset($_SESSION['userID'])) {
     <?php
     // Check if there are auctions
     if (mysqli_num_rows($result) > 0) {
-      while($row = mysqli_fetch_assoc($result)) {       
+      while($row = mysqli_fetch_assoc($result)) {  
+
+        //var_dump($row);     
         $auctionID = $row["auctionID"];
         $query_bid = "SELECT a.auctionName, a.categoryType, a.categoryColor, a.categoryGender, a.categorySize, u.username, a.auctionDescription, a.auctionStartDate, a.auctionEndDate, a.auctionStartingPrice, MAX(b.bidValue) as auctionMaxCP 
         FROM Auctions a
@@ -62,7 +64,7 @@ if(isset($_SESSION['userID'])) {
         if ($auctionMaxCP == 0) {
           $auctionMaxCP = $row["auctionStartingPrice"];
         }
-    
+
         $query_num = "SELECT COUNT(*) AS numberOfBids FROM `bids` WHERE auctionID = $auctionID";
         $result_num = send_query($query_num);
         $row_num = mysqli_fetch_assoc($result_num);
@@ -74,7 +76,8 @@ if(isset($_SESSION['userID'])) {
           $row["auctionDescription"],
           $auctionMaxCP, // Need to use Highest bid submitted if any otherwise starting price - create variable $highest_bid with sql query fetching the highest bid for the auction 
           $num_bids, // Need to create a $num_bids variable, make a query to count bids and use it here
-          new DateTime($row["auctionEndDate"])
+          new DateTime($row["auctionEndDate"]),
+          $row["auctionPicture"],
         );
       }
     } else {
