@@ -9,7 +9,9 @@
 // connection with database
 $connection = connectMAC();
 
-$userID= $_SESSION['userID'];
+if(isset($_SESSION['userID'])) {
+    $userID= $_SESSION['userID'];
+}
 
 
 //$auctionID dynamic
@@ -148,7 +150,7 @@ if ($_SESSION['logged_in']) {
         
         <!-- add to the watchlist -->
         <div style="margin-top: 20px;">
-            <?php if ($auctionStatus == 'Active' && $watching == false && $userID != $sellerID && $has_session == true): ?>
+            <?php if ($auctionStatus == 'Active' && $watching == false && $has_session == true && $userID != $sellerID): ?>
             <form action="watchlist_funcs.php" method="POST">
                 <input type="hidden" name="auctionID" value="<?php echo $auctionID; ?>">
                 <input type="hidden" name="userID" value="<?php echo $userID; ?>">
@@ -159,7 +161,7 @@ if ($_SESSION['logged_in']) {
 
         <!-- remove from the watchlist -->
         <div style="margin-top: 20px;">
-            <?php if ($auctionStatus == 'Active' && $watching == true && $userID != $sellerID && $has_session == true): ?>
+            <?php if ($auctionStatus == 'Active' && $watching == true && $has_session == true && $userID != $sellerID): ?>
             <?php echo "This auction is already on your watchlist."?>
             <form action="watchlist_funcsr.php" method="POST">
                 <input type="hidden" name="auctionID" value="<?php echo $auctionID; ?>">
@@ -172,7 +174,7 @@ if ($_SESSION['logged_in']) {
         <!-- place a bid -->
 
         <div style="margin-top: 20px;"> </div>
-            <?php if ($auctionStatus == 'Active' && $userID != $sellerID && $has_session == true): ?>
+            <?php if ($auctionStatus == 'Active' && $has_session == true && $userID != $sellerID): ?>
             <form action="place_bid.php" method="POST">
                 <div class="row form-group">
                 <div class="col-sm-6">
@@ -191,7 +193,7 @@ if ($_SESSION['logged_in']) {
         
         <!-- rate the auction -->
         <div style="margin-top: 20px;">
-            <?php if ($auctionStatus == 'Closed' && $isWinner == 1 && $userID != $sellerID && $has_session == true): ?> <!-- change to 'Closed' -->
+            <?php if ($auctionStatus == 'Closed' && $isWinner == 1 && $has_session == true && $userID != $sellerID): ?> <!-- change to 'Closed' -->
             <form action="ratings_form.php" method="POST">
                 <div class="star-rating">
                     <input type="radio" id="5-stars" name="ratingValue" value="5" /><label for="5-stars" class="star">&#9733;</label>
