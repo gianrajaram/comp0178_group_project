@@ -27,13 +27,20 @@ else{
     $password = mysqli_real_escape_string($connection,$_POST["passwordLogin"]);
 }
 // Acount type
+// If the user is admin, he can use the account type option empty and still log in
 if(empty($_POST["accountType"]) && ($_POST["usernameLogin"] == "admin")){
     $accountType = "Admin";
 }
+// If the user is admin, even if he chooses an account option by mistake - don't allow to overwrite his admin account type
+else if ((($_POST["accountType"] == "Seller") || ($_POST["accountType"] == "Buyer") || ($_POST["accountType"] == "Same as last session")) && (($_POST["usernameLogin"] == "admin"))){
+    $accountType = "Admin";
+}
+// if the user is not admin, he must choose an account type
 else if (empty($_POST["accountType"]) && (!($_POST["usernameLogin"] == "admin"))){
     alert_message_login($message = 'Please choose an account type.');
     exit;
 }
+// user chooses account type "Same as last session" - check if he has logged in before and has an account type
 else if (($_POST["accountType"] == "Same as last session")){
     $query_check_last_session = "SELECT userAccountType from Users WHERE username ='$username'";
     $result_check_last_session = send_query($query_check_last_session);
@@ -45,7 +52,7 @@ else if (($_POST["accountType"] == "Same as last session")){
     else{
         $accountType = $result_row['userAccountType'];
     }
-}
+} 
 else{
     $accountType = $_POST["accountType"];
 }
