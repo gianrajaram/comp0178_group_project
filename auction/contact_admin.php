@@ -205,10 +205,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     send_query($query_insert);
 
     echo '<script>alert("Message sent!");</script>';
-    //echo '<script>window.location.reload();</script>';
+    
 }
 
-
+echo '<script>window.location.reload();</script>';
 
 
 
