@@ -1,3 +1,4 @@
+
 <?php include_once("header.php")?>
 <?php require("utilities.php")?>
 <?php require('database_connection.php')?>
@@ -19,39 +20,23 @@ $conn = connect();
 ## initialisied variable $category which is needed to save user selection during form submission -> implemented within first HTML 
 ## double check if this is needed here.
 
-if (isset($_GET['cat'])) {
-  $category = $_GET['cat']; 
-} else {
-  $category = "all"; 
-}
+$category = isset($_GET['cat']) ? $_GET['cat'] : 'all';
 
-## initialised $ordering variable needed to save user selection during form submission -> implemented within first HTML section
-if (isset($_GET['order_by'])) {
-  $ordering = $_GET['order_by'];
-} else {
-  $ordering = 'Price'; 
-  #$ordering = 'pricelow';
-}
 
-## initialise variable $colour
-if (isset($_GET['colour'])) {
-  $colour = $_GET['colour'];
-} else {
-  $colour = 'all';
-}
+$ordering = isset($_GET['order_by']) ? $_GET['order_by'] : 'Price';
 
-## initialise variable $gender
-if (isset($_GET['gender'])) {
-  $gender = $_GET['gender'];
-} else {
-  $gender = 'all';
-}
-# initalise variable $size
-if (isset($_GET['size'])) {
-  $size = $_GET['size'];
-} else {
-  $size = 'all';
-}
+
+$colour = isset($_GET['colour']) ? $_GET['colour'] : 'all';
+
+$gender = isset($_GET['gender']) ? $_GET['gender'] : 'all';
+
+$size = isset($_GET['size']) ? $_GET['size'] : 'all';
+
+$activeListing = isset($_GET['active']) ? $_GET['active'] : 'all';
+
+$curr_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+
+
 
 
 ## mysqli_query changed to send_query  -> filtering doesn't work? why
@@ -228,7 +213,24 @@ if(!$resultSize) {
 </div>
 
 </form>
+
+<div class="col-md-2 pr-0">
+        <div class="form-group">
+          <label  for="active" class="sr-only">Active listing filter</label>
+          <select class="form-control" id="active" name="active">
+          <option value = "all" >All listings</option>
+          <option value='active' <?php echo $activeListing === 'active' ? 'selected' : '' ?>>Show active listings only </option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+  </div> <!-- end search specs bar -->
+
 </div> <!-- end search specs bar -->
+
+
+             <!-- changing ACTIVE currently updates price, why tf is that the case for stylish black t-shirtrs -->
 
 <?php
   $keyword = isset($_GET['keyword']) ? sanitise_input($_GET['keyword']) : "";
@@ -272,6 +274,7 @@ $start_from = ($curr_page - 1) * $results_per_page;
 $result = null;
 $paginationResult = null;
 
+$currentDateTime = date('Y-m-d H:i:s');
 
 $isFormSubmitted = isset($_GET['keyword']) || isset($_GET['cat']) || isset($_GET['colour']) || isset ($_GET['gender']) || isset($_GET['size']) || isset($_GET['order_by']) || isset($_GET['AIkeyword']);
 
@@ -348,6 +351,12 @@ if ($gender != 'all') {
   $query .= " AND categoryGender = '" .$gender . "' ";
   $countQuery .= " AND categoryGender =  '" .$gender . "' ";
 }
+if ($activeListing === 'active') {
+  $activeListing = mysqli_real_escape_string($conn, $activeListing);
+  $query .= " AND a.auctionEndDate > '" . $currentDateTime . "' ";
+  $countQuery .= " AND a.auctionEndDate > '" . $currentDateTime . "' ";
+
+}
 
 if ($size != 'all') {
   $size = mysqli_real_escape_string($conn, $size);
@@ -367,7 +376,19 @@ $query .= ' GROUP BY a.auctionID, a.auctionName, a.auctionStartingPrice, a.aucti
       break;
     }
    
+  
+
+
+
     $countQuery .= ' GROUP BY a.auctionID';
+
+
+
+
+
+
+
+
 
 # adding condition to count results for pagination at end of script
   $paginationCount = send_query($countQuery);
@@ -375,17 +396,18 @@ $query .= ' GROUP BY a.auctionID, a.auctionName, a.auctionStartingPrice, a.aucti
   die('SQL error: ln 378 paginationresult '.mysqli_error($conn));
   }
 
-
-  $query .= " LIMIT $start_from, $results_per_page";
   $paginationResult = send_query($query);
   if (!$paginationResult){
       die('SQL error: '.mysqli_error($conn));
-      
   }
+
+  
   
 
 } else {
   $defaultCountQuery = "SELECT COUNT(DISTINCT a.auctionID) AS total FROM Auctions a LEFT JOIN Bids b ON a.auctionID = b.auctionID LEFT JOIN (SELECT auctionID, MAX(bidValue) AS highestBid FROM Bids GROUP BY auctionID) mb ON a.auctionID = mb.auctionID WHERE 1";
+
+
 
   $defaultQuery = 'SELECT 
   a.auctionID, 
@@ -425,7 +447,6 @@ if(!$paginationCount){
   die('Connection failed: ' . $conn->connect_error);
 }
 
-$defaultQuery .=  " LIMIT $start_from, $results_per_page";
 $paginationResult = send_query($defaultQuery);
 if(!$paginationResult){
   die('connection failed' );
@@ -447,7 +468,6 @@ $max_page = ceil($num_results / $results_per_page);
 
 <div class="container mt-5">
   <!-- TODO: If result set is empty, print an informative message. Otherwise... -->
-
   
 <?php
 #line below condition should theoretically never be zero, ENSURE LOGIC IS CONSISTENT THROUGHOUT (triple check once complete with all features)
@@ -467,6 +487,7 @@ if (mysqli_num_rows($paginationResult)==0) {
     $item_id = $row['auctionID'];
     $title = $row['auctionName'];
     $description = $row['auctionDescription'];
+    # logical outlier here for Stylish black T-Shitrt for men - > investigate
     $current_price = isset($row['highestBid']) ? $row['highestBid'] : $row['auctionStartingPrice'];
     $num_bids = $row['numBids'];
     $end_date = new DateTime($row['auctionEndDate']);
