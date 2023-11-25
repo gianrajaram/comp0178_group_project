@@ -57,7 +57,7 @@ $curr_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 
 
   
-$results_per_page = 1;
+$results_per_page = 10;
 $start_from = ($curr_page - 1) * $results_per_page;
 
 
@@ -123,6 +123,10 @@ GROUP BY
 a.auctionID";
 
 
+
+$recQuery .= " LIMIT $start_from, $results_per_page";
+
+
 $paginationResult = mysqli_query($conn, $recQuery);
 if (!$paginationResult) {
   die('SQL error: ' . mysqli_error($conn));
@@ -142,8 +146,11 @@ if (!$paginationCountResult) {
 # this section below is causing the error, remove it and everything works
 
 
-
-$num_results = mysqli_num_rows($paginationCount);
+if ($row = mysqli_fetch_assoc($paginationCountResult)) {
+  $num_results = $row['total'];
+} else {
+  die('Error fetching total count: ' . mysqli_error($conn));
+}
 
 $max_page = ceil($num_results / $results_per_page);
 

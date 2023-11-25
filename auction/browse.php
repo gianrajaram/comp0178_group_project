@@ -1,48 +1,50 @@
-
 <?php include_once("header.php")?>
 <?php require("utilities.php")?>
 <?php require('database_connection.php')?>
 
+
 <div class="container">
-
 <h2 class="my-3">Browse listings</h2>
-
 <div id="searchSpecs">
-<!-- When this form is submitted, this PHP page is what processes it.
-     Search/sort specs are passed to this page through parameters in the URL
-     (GET method of passing data to a page). -->
+
+<!-- GPT4 used primarily for debugging & logic testing throughout the script. I have added specific comments for
+any segment of the script where AI generated code appears. 
+Specific methods suggested initially by GPT4, then learned and used throughout the script include:
+- learning mysqli[...] functions
+- php shorthand "if-else" ternary operator eg: $ordering = isset($_GET['order_by']) ? $_GET['order_by'] : 'Price';
+- "hiding" variables to URL allowing for dynamic filtering & pagination
+- "Where 1" SQL element, allowing for dynamic query construction
+- NATURAL LANGUAGE MODE SQL match + database FULLTEXT mode requirement   -->
+
 
 
 <?php
-##IMPORTANT
 $conn = connect();
+## initialising variables in PHP script prior to appearing in the first HTML section, because some are used there and would otherwise cause errors.
+## if not used in HTML section, variables are needed for $isFormSubmmited IF-ELSE section, or pagination
 
-## initialisied variable $category which is needed to save user selection during form submission -> implemented within first HTML 
-## double check if this is needed here.
 
+$keyword = isset($_GET['keyword']) ? sanitise_input($_GET['keyword']) : "";
+$AIkeyword = isset($_GET['AIkeyword']) ? sanitise_input($_GET['AIkeyword']) : "";
 $category = isset($_GET['cat']) ? $_GET['cat'] : 'all';
-
-
 $ordering = isset($_GET['order_by']) ? $_GET['order_by'] : 'Price';
-
-
 $colour = isset($_GET['colour']) ? $_GET['colour'] : 'all';
-
 $gender = isset($_GET['gender']) ? $_GET['gender'] : 'all';
-
 $size = isset($_GET['size']) ? $_GET['size'] : 'all';
-
 $activeListing = isset($_GET['active']) ? $_GET['active'] : 'all';
 
-$curr_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+## resolving logic outlier of user navigating to page 3 then searching
+$isFormSubmitted = isset($_GET['keyword']) || isset($_GET['cat']) || isset($_GET['colour']) || isset ($_GET['gender']) || isset($_GET['size']) || isset($_GET['order_by']) || isset($_GET['AIkeyword']);
+
+
+$curr_page = $isFormSubmitted ? 1 : (isset($_GET['page']) ? (int)$_GET['page'] : 1);
+
+
+## 
 
 
 
-
-## mysqli_query changed to send_query  -> filtering doesn't work? why
-## initialised clothingtype variable needed for loop in html script section
-## $conn changed to $connection
-
+## below 4 queries necessary for foreach HTML section
 $clothingQuery = 'SELECT categoryType FROM CategoryClothsType';
 $resultClothes = send_query($clothingQuery);
 if (!$resultClothes){
@@ -64,7 +66,6 @@ if (!$resultColour) {
     $colourType[] = $row;
   }
 }
-
 $genderQuery = 'SELECT categoryGender FROM CategoryGenderType';
 $resultGender = send_query($genderQuery);
 if(!$resultGender) {
@@ -75,7 +76,6 @@ if(!$resultGender) {
     $genderType[] = $row;
   }
 }
-
 $sizeQuery = 'SELECT categorySize FROM CategorySizeType';
 $resultSize = send_query($sizeQuery);
 if(!$resultSize) {
@@ -89,12 +89,10 @@ if(!$resultSize) {
 ?>
 
 
-<!-- added name="keyword" to <input type="text" class="form-control border-left-0" -->
 <form method="get" action="browse.php">
-   <!-- HIDDEN KEYWORD ELEMENT   -->
-
+   <!-- HIDDEN KEYWORD ELEMENT - necessary for UX, allowing for pagination to work in accordance with submitted form filtering 
+  GPT 4-->
    <input type="hidden" name="page" value="<?php echo $curr_page; ?>">
-
   <div class="row">
     <div class="col-md-2 pr-0">
       <div class="form-group">
@@ -105,8 +103,7 @@ if(!$resultSize) {
               <i class="fa fa-search"></i>
             </span>
           </div>
-             <!-- HIDDEN KEYWORD ELEMENT CONTINUED, saves value of keyword from url in case where the form is submitted multiple times eg a user searches 'stylish'    -->
-                          <!-- and wants to filter the subset of results by any other drop-down box  -->
+        
           <input type="text" class="form-control border-left-0" id="keyword" name="keyword" placeholder= "Search:" value ="<?php echo isset($_GET['keyword']) ? htmlspecialchars($_GET['keyword']) : ''; ?>">
         </div>
       </div>
@@ -115,9 +112,8 @@ if(!$resultSize) {
       <div class="form-group">
         <label for="cat" class="sr-only">Search within:</label>
         <select class="form-control" id="cat" name="cat">
-          <!-- dynamically retain user selection in form -->
+          <!-- PHP ternary operator and below line of code created using GPT4 -->
         <option value="all" <?php echo $category === 'all' ? 'selected' : '' ?>>Category</option>
-          <!-- REMOVED CODE FOR TESTING: <option value="all">All categories</option> -->
           <?php
               foreach ($categoriesClothes as $buttonCategory) {
                 $isSelected = $buttonCategory['categoryType'] === $category ? 'selected' :'';
@@ -127,14 +123,12 @@ if(!$resultSize) {
         </select>
       </div>
     </div>
-     <!-- populating more category options below -->
 
     <div class="col-md-2 pr-0">
   <div class="form-group">
   <label for="colour" class="sr-only">Search within:</label>
     <select class="form-control" id="colour" name="colour">
     <option value="all" <?php echo $colour === 'all' ? 'selected' : '' ?>>Colour</option>
-      <!-- double check if $buttonCategory works well-->
       <?php
       foreach ($colourType as $buttonCategory) {
         $isSelected = $buttonCategory['categoryColor'] === $colour ? 'selected' : '';
@@ -171,11 +165,9 @@ if(!$resultSize) {
         echo '<option value="'. $buttonCategory ['categorySize'] .'" '.$isSelected. '>'.$buttonCategory['categorySize'] .'</option>';
       }
       ?>
-      <!-- PHP code will populate more options here -->
     </select>
   </div>
 </div>
-
     <div class="col-md-2 pr-0">
       <div class="form-group">
         <label  for="order_by" class="sr-only">Sort by:</label>
@@ -203,13 +195,10 @@ if(!$resultSize) {
               <i class="fa fa-search"></i>
             </span>
           </div>
-             <!-- HIDDEN KEYWORD ELEMENT CONTINUED, saves value of keyword from url in case where the form is submitted multiple times eg a user searches 'stylish'    -->
-                          <!-- and wants to filter the subset of results by any other drop-down box  -->
          <input type="text" class="form-control border-left-0" id="AIkeyword" name="AIkeyword" placeholder= "Explore creatively with AI search:" value ="<?php echo isset($_GET['AIkeyword']) ? htmlspecialchars($_GET['AIkeyword']) : ''; ?>">
         </div>
       </div>
     </div>
-
 </div>
 
 </form>
@@ -224,61 +213,22 @@ if(!$resultSize) {
         </div>
       </div>
     </div>
-
-  </div> <!-- end search specs bar -->
-
+  </div> 
 </div> <!-- end search specs bar -->
 
-
-             <!-- changing ACTIVE currently updates price, why tf is that the case for stylish black t-shirtrs -->
-
 <?php
-  $keyword = isset($_GET['keyword']) ? sanitise_input($_GET['keyword']) : "";
-  $AIkeyword = isset($_GET['AIkeyword']) ? sanitise_input($_GET['AIkeyword']) : "";
-  
 
-  if (!isset($_GET['cat'])) {
-    $category = "Category";
-  } else {
-    $category = $_GET['cat'];
-  }
-
-  if (!isset($_GET['order_by'])) {
-    $ordering = 'Price';
-  } else {
-    $ordering = $_GET['order_by'];
-  }
-  
-  if (isset($_GET['page']) && is_numeric($_GET['page']) && $_GET['page'] > 0) {
-    $curr_page = (int) $_GET['page'];
-} else {
-    $curr_page = 1;
-}
-
-
-  if (!isset($_GET['colour'])) {
-    $colour = 'All Colours';
-  } else {
-    $colour = $_GET['colour'];
-  }
-
-  if (!isset($_GET['gender'])) {
-    $gender = 'Gender';
-  }
-  
-$results_per_page = 2;
-$start_from = ($curr_page - 1) * $results_per_page;
-
-
-# Possibly this should be updated? currently if user loads default then moves to second page then applies filters, it will jump back to default page
 $result = null;
-$paginationResult = null;
+$results_per_page = 10;
 
+$start_from = ($curr_page - 1) * $results_per_page;
 $currentDateTime = date('Y-m-d H:i:s');
 
-$isFormSubmitted = isset($_GET['keyword']) || isset($_GET['cat']) || isset($_GET['colour']) || isset ($_GET['gender']) || isset($_GET['size']) || isset($_GET['order_by']) || isset($_GET['AIkeyword']);
+# conditional operator || solution borrowed from GPT4
+
 
 if ($isFormSubmitted) {
+  ## GPT 4 used for query construction
 $query ='SELECT 
             a.auctionID, 
             a.auctionName,
@@ -308,12 +258,9 @@ $query ='SELECT
             ) mb ON a.auctionID = mb.auctionID
             WHERE 1 ';
 
-  
     $countQuery = "SELECT COUNT(DISTINCT a.auctionID) AS total FROM Auctions a LEFT JOIN Bids b ON a.auctionID = b.auctionID LEFT JOIN (SELECT auctionID, MAX(bidValue) AS highestBid FROM Bids GROUP BY auctionID) mb ON a.auctionID = mb.auctionID WHERE 1";
 
             
-
-### error is with $conn 
   if (!empty($keyword) && !empty($AIkeyword)) {
     $combinedSearchTerm = mysqli_real_escape_string($conn, $keyword . ' ' . $AIkeyword);
     $query .= " AND MATCH (auctionDescription) AGAINST ('" . $combinedSearchTerm . "' IN NATURAL LANGUAGE MODE) ";
@@ -375,86 +322,69 @@ $query .= ' GROUP BY a.auctionID, a.auctionName, a.auctionStartingPrice, a.aucti
       $query .= ' ORDER BY auctionEndDate ASC ';
       break;
     }
-   
-  
-
-
 
     $countQuery .= ' GROUP BY a.auctionID';
+    $query .= " LIMIT $start_from, $results_per_page";
 
-
-
-
-
-
-
-
-
-# adding condition to count results for pagination at end of script
   $paginationCount = send_query($countQuery);
   if (!$paginationCount){
   die('SQL error: ln 378 paginationresult '.mysqli_error($conn));
   }
 
-  $paginationResult = send_query($query);
-  if (!$paginationResult){
+  $result = send_query($query);
+  if (!$result){
       die('SQL error: '.mysqli_error($conn));
   }
-
-  
-  
-
 } else {
+  ## GPT 4 used query construction.
   $defaultCountQuery = "SELECT COUNT(DISTINCT a.auctionID) AS total FROM Auctions a LEFT JOIN Bids b ON a.auctionID = b.auctionID LEFT JOIN (SELECT auctionID, MAX(bidValue) AS highestBid FROM Bids GROUP BY auctionID) mb ON a.auctionID = mb.auctionID WHERE 1";
-
-
-
-  $defaultQuery = 'SELECT 
+  $defaultQuery = "SELECT 
   a.auctionID, 
-  MAX(a.auctionName) as auctionName,
-  MAX(a.auctionStartingPrice) as auctionStartingPrice,
-  MAX(a.auctionDescription) as auctionDescription,
-  MAX(a.categoryType) as categoryType,
-  MAX(a.auctionEndDate) as auctionEndDate,
-  MAX(a.categoryColor) as categoryColor,
-  MAX(a.categoryGender) as categoryGender,
-  MAX(a.categorySize) as categorySize,
-  MAX(COALESCE(mb.highestBid, a.auctionStartingPrice)) as currentPrice,
+  a.auctionName,
+  a.auctionStartingPrice,
+  a.auctionDescription,
+  a.categoryType,
+  a.auctionEndDate,
+  a.categoryColor,
+  a.categoryGender,
+  a.categorySize,
+  a.auctionStartingPrice,
+  mb.highestBid,
+  COALESCE(mb.highestBid, a.auctionStartingPrice) as currentPrice,
   COUNT(b.bidID) as numBids
 FROM
   Auctions a
 LEFT JOIN
-  Bids b ON a.auctionID = b.auctionID
+Bids b ON a.auctionID = b.auctionID
 LEFT JOIN
   (SELECT 
-    auctionID,
-    MAX(bidValue) AS highestBid
+      auctionID,
+      MAX(bidValue) AS highestBid
   FROM
-    Bids
+      Bids
   GROUP BY
-    auctionID
+      auctionID
   ) mb ON a.auctionID = mb.auctionID
-WHERE 1 ';
+  WHERE 1";
 
 
-# important to add here, otherwise will cause errors
 $defaultQuery .= ' GROUP BY a.auctionID';
 $defaultCountQuery .= ' GROUP BY a.auctionID';
 # this section below is causing the error, remove it and everything works
+$defaultQuery .= " LIMIT $start_from, $results_per_page";
 
 $paginationCount = send_query($defaultCountQuery);
 if(!$paginationCount){
   die('Connection failed: ' . $conn->connect_error);
 }
 
-$paginationResult = send_query($defaultQuery);
-if(!$paginationResult){
+$result = send_query($defaultQuery);
+if(!$result){
   die('connection failed' );
 }
-
-
-
 }
+
+
 
 $num_results = mysqli_num_rows($paginationCount);
 
@@ -462,28 +392,21 @@ $max_page = ceil($num_results / $results_per_page);
 
 ?>
 <?php
-  /* For the purposes of pagination, it would also be helpful to know the
-     total number of results that satisfy the above query */
+
 ?>
 
 <div class="container mt-5">
-  <!-- TODO: If result set is empty, print an informative message. Otherwise... -->
   
 <?php
-#line below condition should theoretically never be zero, ENSURE LOGIC IS CONSISTENT THROUGHOUT (triple check once complete with all features)
-if (mysqli_num_rows($paginationResult)==0) {
+if (mysqli_num_rows($result)==0) {
   echo '<p> ! ! ! No listings were found under the given criteria ! ! ! </p>';
 } else {
-
-  # EXITING PHP TO ADD DIVIDER FOR HTML CONTENT (so while loop appears in the correct place, under html class before next line starting with <?php )
-  
+  ## exiting PHP mode tp include HTML line below
   ?>
 <ul class="list-group"> 
-<!-- re-entering php mode -->
-
+<!-- re-entering PHP -->
 <?php
-## have coalesced above, so can replace shorthand condition for $current_price if preferred
-  while ($row = mysqli_fetch_assoc($paginationResult)){
+  while ($row = mysqli_fetch_assoc($result)){
     $item_id = $row['auctionID'];
     $title = $row['auctionName'];
     $description = $row['auctionDescription'];
@@ -504,18 +427,17 @@ if (mysqli_num_rows($paginationResult)==0) {
   
 <?php
   $querystring = "";
+
   foreach ($_GET as $key => $value) {
     if ($key != "page") {
       $querystring .= urlencode($key) . "=" . urlencode($value) . "&amp;";
     }
   }
-
-
   $high_page_boost = max(3 - $curr_page, 0);
   $low_page_boost = max(2 - ($max_page - $curr_page), 0);
   $low_page = max(1, $curr_page - 2 - $low_page_boost);
   $high_page = min($max_page, $curr_page + 2 + $high_page_boost);
-  
+
   if ($curr_page != 1) {
     echo('
     <li class="page-item">
@@ -528,17 +450,13 @@ if (mysqli_num_rows($paginationResult)==0) {
     
   for ($i = $low_page; $i <= $high_page; $i++) {
     if ($i == $curr_page) {
-      // Highlight the link
-      #echo('
-    #   <li class="page-item active">');
+      # below line adapted from GPT4
     echo '<li class="page-item active"><a class="page-link" href="#">' . $i . '</a></li>';
     } else {
       echo '<li class="page-item"><a class="page-link" href="browse.php?' . $querystring . 'page=' . $i . '">' . $i . '</a></li>';
     }
   }
     
-  
-
   if ($curr_page != $max_page) {
     echo('
     <li class="page-item">
@@ -549,13 +467,7 @@ if (mysqli_num_rows($paginationResult)==0) {
     </li>');
   }
 ?>
-
   </ul>
 </nav>
-
-
 </div>
-
-
-
 <?php include_once("footer.php")?>
