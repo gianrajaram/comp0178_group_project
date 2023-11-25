@@ -408,6 +408,7 @@ if (mysqli_num_rows($result)==0) {
 <ul class="list-group"> 
 <!-- re-entering PHP -->
 <?php
+
   while ($row = mysqli_fetch_assoc($result)){
     $item_id = $row['auctionID'];
     $title = $row['auctionName'];
@@ -417,7 +418,7 @@ if (mysqli_num_rows($result)==0) {
     $num_bids = $row['numBids'];
     $end_date = new DateTime($row['auctionEndDate']);
     $auctionPicture = $row['auctionPicture'];
-    print_listing_li($item_id, $title, $description, $current_price, $num_bids, $end_date,$auctionPicture);
+    print_mylisting_li($item_id, $title, $description, $current_price, $num_bids, $end_date,$auctionPicture);
   }
 }
 
