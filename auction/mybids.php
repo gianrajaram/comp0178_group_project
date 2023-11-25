@@ -3,7 +3,6 @@
 <?php require("utilities.php")?>
 
 <div class="container">
-
 <h2 class="my-3">My bids</h2>
 
 <?php
@@ -12,8 +11,6 @@ $connection = connectMAC();
 
 $buyerID = $_SESSION['userID'];
 $auctionID = isset($_GET['item_id']) ? $_GET['item_id'] : 0;
-
-
 
 $query = "SELECT a.auctionID, a.auctionName, 
                  MAX(b1.bidValue) AS maxBuyerBidValue, 

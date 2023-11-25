@@ -4,7 +4,6 @@
 
 <div class="container">
 
-
 <?php
 $connection = connectMAC();
 
@@ -20,11 +19,11 @@ if ($row = mysqli_fetch_assoc($result)) {
     $sellerID = $row['userID'];
 }
 
-// q for user's auctions
+// query for user's auctions
 $auctionsQuery = "SELECT auctionID, auctionName FROM Auctions WHERE sellerID = '$sellerID'";
 $auctionsResult = send_queryMAC($auctionsQuery);
 
-// q for user's ratings
+// query for user's ratings
 $ratingsQuery = "SELECT r.auctionID, r.ratingValue, r.ratingText, a.auctionName
                  FROM Ratings r
                  JOIN Auctions a ON r.auctionID = a.auctionID
@@ -45,8 +44,6 @@ if ($avgRow = mysqli_fetch_assoc($avgResult)) {
 ?>
 
 <div style="margin-top: 20px;"> </div>
-
-
 
 <!-- User's Ratings Table -->
 <div class="container">
@@ -80,7 +77,6 @@ if ($avgRow = mysqli_fetch_assoc($avgResult)) {
 </div>
 
 <!-- User's Auctions Table -->
-
 <div class="container">
     <h3><?php echo $sellerUsername; ?>'s Auctions</h3>
     <table class="table">
@@ -96,7 +92,7 @@ if ($avgRow = mysqli_fetch_assoc($avgResult)) {
                     while ($row = mysqli_fetch_assoc($auctionsResult)) {
 
                         echo "<tr>";
-                        // auction names into clickable links
+                        // turn auction names into clickable links
                         echo "<td><a href='listing.php?item_id=" . htmlspecialchars($row['auctionID']) . "'>" . htmlspecialchars($row['auctionName']) . "</a></td>";
                         echo "</tr>";
                 }

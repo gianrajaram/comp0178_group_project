@@ -1,11 +1,10 @@
 <?php include_once("header.php")?>
-<?php require_once("database_connection.php");
-require_once("utilities.php");
-?>
+<?php require_once("database_connection.php")?>
+<?php require_once("utilities.php") ?>
 
 <?php
 
-//  connection w database
+// establish connection with the database
 $connection = connectMAC();
 
 if (isset($_POST['watchlistsubmit'])) {
@@ -18,4 +17,3 @@ if (isset($_POST['watchlistsubmit'])) {
   echo "<script>window.location.href='my_wishlist.php';</script>";
 }
 ?>
-

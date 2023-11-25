@@ -1,21 +1,15 @@
-
 <?php include_once("header.php")?>
 <?php require_once("database_connection.php")?>
-
 <?php require("utilities.php")?>
-
 
 <?php
 // connection with database
 $connection = connectMAC();
 
-
-
-
-//$auctionID dynamic
+// $auctionID dynamic
 $auctionID = isset($_GET['item_id']) ? $_GET['item_id'] : 0;
-//echo $auctionID;
 
+// check if the user is logged in
 if(isset($_SESSION['userID'])) {
     $userID= $_SESSION['userID'];
 
@@ -39,7 +33,6 @@ if(isset($_SESSION['userID'])) {
 
 $result = send_queryMAC($sql_auction);
 $rows = mysqli_fetch_array($result);
-//print_r($rows);
 $sellerID = $rows['sellerID']; 
 $auctionName = $rows["auctionName"];
 $auctionDescription = $rows['auctionDescription'];
@@ -48,21 +41,18 @@ $sellerUsername = $rows['username'];
 $auctionMaxCP = $rows['auctionMaxCP'];
 $auctionStartingPrice = $rows['auctionStartingPrice'];
 $auctionBidCount = $rows['auctionBidCount'];
-
 $categoryType = $rows['categoryType'];
 $categoryColor = $rows['categoryColor'];
 $categoryGender = $rows['categoryGender'];
-
 $auctionPicture = $rows['auctionPicture'];
 $auctionImageSrc = str_replace('/auction/', '', $auctionPicture);
-
 $maxBuyerBidValue = $rows['maxBuyerBidValue'];
-
 $auctionStartDate = $rows['auctionStartDate'];
 $auctionEndDate = $rows['auctionEndDate'];
 $startDate = new DateTime($auctionStartDate);
 $endDate = new DateTime($auctionEndDate);
 
+// establish auction status
 $now = new DateTime();
 if ($endDate > $now) {
   $auctionStatus = 'Active';
@@ -73,7 +63,6 @@ if ($startDate > $now) {
   $auctionStatus = 'Pending';
 }
 
-
 if ($auctionMaxCP == 0 ) {
     $auctionMaxCP = $rows['auctionStartingPrice'];
 }
@@ -81,20 +70,14 @@ if ($auctionMaxCP == 0 ) {
 $sql_bids = "SELECT * FROM Bids WHERE auctionID = '{$auctionID}' ORDER BY dateBid DESC";
 $bids_result = mysqli_query($connection, $sql_bids);
 
+// establish if the user is the winner
 $isWinner = 0;
 if ($maxBuyerBidValue == $auctionMaxCP && $maxBuyerBidValue >= $auctionReservePrice) {
     $isWinner = 1;
 }
-//echo $isWinner;
-
 
 $has_session = false;
 $watching = false;
-
-
-
-
-
 
 if(isset($_SESSION['userID'])) {
     $has_session = true;
@@ -106,7 +89,6 @@ if(isset($_SESSION['userID'])) {
         $watching = true;
     }
 }
-
 
 ?>
 
@@ -129,8 +111,6 @@ if(isset($_SESSION['userID'])) {
                 <img src="<?php echo htmlspecialchars($auctionImageSrc); ?>" class='img-rounded img-responsive item-img'>
             </div>
         </div>
-
-
 
     <div class="col-sm-6">
         <div style="margin-top: 10px;">
@@ -183,7 +163,6 @@ if(isset($_SESSION['userID'])) {
         </div>
 
         <!-- place a bid -->
-
         <div style="margin-top: 20px;"> </div>
             <?php if ($auctionStatus == 'Active' && $has_session == true && $userID != $sellerID): ?>
             <form action="place_bid.php" method="POST">
@@ -201,10 +180,9 @@ if(isset($_SESSION['userID'])) {
             </form>
             <?php endif; ?>
 
-        
         <!-- rate the auction -->
         <div style="margin-top: 20px;">
-            <?php if ($auctionStatus == 'Closed' && $isWinner == 1 && $has_session == true && $userID != $sellerID): ?> <!-- change to 'Closed' -->
+            <?php if ($auctionStatus == 'Closed' && $isWinner == 1 && $has_session == true && $userID != $sellerID): ?>
             <form action="ratings_form.php" method="POST">
                 <div class="star-rating">
                     <input type="radio" id="5-stars" name="ratingValue" value="5" /><label for="5-stars" class="star">&#9733;</label>
@@ -215,9 +193,9 @@ if(isset($_SESSION['userID'])) {
                 </div>
                 <div class="row form-group">
                     <div class="col-sm-6">
-                        <textarea id="ratingText" name="ratingText" placeholder="Leave your comment here..." class="form-control input-frame" rows="1" style="background-color: white; color: grey"></textarea>
+                        <textarea id="ratingText" name="ratingText" placeholder="Leave your comment here" class="form-control input-frame" rows="1" style="background-color: white; color: grey"></textarea>
                         <input type="hidden" name="auctionID" value="<?php echo $auctionID; ?>">
-                        <input type="hidden" name="userID" value="<?php echo $userID; ?>"> <!-- Assuming userID is stored in session -->
+                        <input type="hidden" name="userID" value="<?php echo $userID; ?>">
                     </div>
 
                     <input type="submit" class="btn btn-default item-button" value="Submit Rating" name="submitRating" id="submitRating" style="background-color: blue; color: white"/>
@@ -260,7 +238,7 @@ if(isset($_SESSION['userID'])) {
             </div>
         </div>
 
-        <!-- style settings -->
+        <!-- style settings; adopted from ChatGPT -->
         <style>
             .modal {
                 display: none;
@@ -287,7 +265,6 @@ if(isset($_SESSION['userID'])) {
                 text-align: left;
                 border-bottom: 1px solid #ddd;
             }
-
             .modal-content table {
                 border-collapse: separate;
                 border-spacing: 10px 0; 
@@ -304,7 +281,6 @@ if(isset($_SESSION['userID'])) {
                 text-decoration: none;
                 cursor: pointer;
             }
-
             .star-rating {
                 direction: rtl; 
                 font-size: 0;
@@ -346,7 +322,5 @@ if(isset($_SESSION['userID'])) {
 
     </div>
 </div>
-
-
 
 <?php include_once("footer.php")?>

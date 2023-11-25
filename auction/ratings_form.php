@@ -1,13 +1,9 @@
-
-
 <?php include_once("header.php")?>
-<?php require_once("database_connection.php");
-require_once("utilities.php");
-?>
-
+<?php require_once("database_connection.php")?>
+<?php require_once("utilities.php")?>
 
 <?php
-// connection with database
+// establish connection with the database
 $connection = connectMAC();
 
 if (isset($_POST['submitRating'])) {

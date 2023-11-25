@@ -1,11 +1,7 @@
 
 <?php include_once("header.php")?>
-<?php require_once("database_connection.php");
-require_once("utilities.php");
-?>
-
-
-
+<?php require_once("database_connection.php") ?>
+<?php require_once("utilities.php")?>
 
 <?php
 
@@ -42,8 +38,6 @@ if (isset($_POST['bid_price']) && $_POST['bid_price']!='') {
 
     
 } else {
-
     echo "<script>alert('User ID is not set. Please log in.');</script>";
-
 }
 ?>
