@@ -240,6 +240,7 @@ $query ='SELECT
             a.categoryGender,
             a.categorySize,
             a.auctionStartingPrice,
+            a.auctionPicture,
             mb.highestBid,
             COALESCE(mb.highestBid, a.auctionStartingPrice) as currentPrice,
             COUNT(b.bidID) as numBids
@@ -349,6 +350,7 @@ $query .= ' GROUP BY a.auctionID, a.auctionName, a.auctionStartingPrice, a.aucti
   a.categoryGender,
   a.categorySize,
   a.auctionStartingPrice,
+  a.auctionPicture,
   mb.highestBid,
   COALESCE(mb.highestBid, a.auctionStartingPrice) as currentPrice,
   COUNT(b.bidID) as numBids
@@ -414,9 +416,12 @@ if (mysqli_num_rows($result)==0) {
     $current_price = isset($row['highestBid']) ? $row['highestBid'] : $row['auctionStartingPrice'];
     $num_bids = $row['numBids'];
     $end_date = new DateTime($row['auctionEndDate']);
-    print_listing_li($item_id, $title, $description, $current_price, $num_bids, $end_date);
+    $auctionPicture = $row['auctionPicture'];
+    print_listing_li($item_id, $title, $description, $current_price, $num_bids, $end_date,$auctionPicture);
   }
 }
+
+
 ?>
 
 </ul>
