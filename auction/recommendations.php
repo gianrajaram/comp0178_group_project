@@ -132,8 +132,7 @@ if (mysqli_num_rows($result)==0) {
     $current_price = isset($row['highestBid']) ? $row['highestBid'] : $row['auctionStartingPrice'];
     $num_bids = $row['numBids'];
     $end_date = new DateTime($row['auctionEndDate']);
-    $auctionPicture = $row['auctionPicture'];
-    print_listing_li($item_id, $title, $description, $current_price, $num_bids, $end_date, $auctionPicture);
+    print_listing_li($item_id, $title, $description, $current_price, $num_bids, $end_date);
   }
 }
 ?>
