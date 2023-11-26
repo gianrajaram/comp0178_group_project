@@ -29,7 +29,7 @@ session_start();
 $curr_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 
 
-$results_per_page = 1;
+$results_per_page = 10;
 $start_from = ($curr_page - 1) * $results_per_page;
 
 
