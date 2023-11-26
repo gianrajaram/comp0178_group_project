@@ -36,13 +36,7 @@ $activeListing = isset($_GET['active']) ? $_GET['active'] : 'all';
 ## resolving logic outlier of user navigating to page 3 then searching
 $isFormSubmitted = isset($_GET['keyword']) || isset($_GET['cat']) || isset($_GET['colour']) || isset ($_GET['gender']) || isset($_GET['size']) || isset($_GET['order_by']) || isset($_GET['AIkeyword']);
 
-
 $curr_page = $isFormSubmitted ? 1 : (isset($_GET['page']) ? (int)$_GET['page'] : 1);
-
-
-## 
-
-
 
 ## below 4 queries necessary for foreach HTML section
 $clothingQuery = 'SELECT categoryType FROM CategoryClothsType';
@@ -224,9 +218,6 @@ $results_per_page = 10;
 $start_from = ($curr_page - 1) * $results_per_page;
 $currentDateTime = date('Y-m-d H:i:s');
 
-# conditional operator || solution borrowed from GPT4
-
-
 if ($isFormSubmitted) {
   ## GPT 4 used for query construction
 $query ='SELECT 
@@ -260,7 +251,7 @@ $query ='SELECT
             WHERE 1 ';
 
     $countQuery = "SELECT COUNT(DISTINCT a.auctionID) AS total FROM Auctions a LEFT JOIN Bids b ON a.auctionID = b.auctionID LEFT JOIN (SELECT auctionID, MAX(bidValue) AS highestBid FROM Bids GROUP BY auctionID) mb ON a.auctionID = mb.auctionID WHERE 1";
-
+  ## end of GPT 4 used for query construction
             
   if (!empty($keyword) && !empty($AIkeyword)) {
     $combinedSearchTerm = mysqli_real_escape_string($conn, $keyword . ' ' . $AIkeyword);

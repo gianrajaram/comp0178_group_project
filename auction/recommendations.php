@@ -14,8 +14,6 @@
 
 ## adapted from browse.php
 
-session_start();
-
 $userID = isset($_SESSION['userID']) ? intval($_SESSION['userID']) : 0;
 $conn = connect();
 ?>
@@ -36,7 +34,7 @@ $start_from = ($curr_page - 1) * $results_per_page;
 $result = null;
 $currentDateTime = date('Y-m-d H:i:s');
 
-  ## GPT 4 used for query construction 
+## GPT 4 used for query construction 
 $recCountQuery = $countQuery = "SELECT 
 COUNT(DISTINCT a.auctionID) AS total
 FROM
@@ -62,6 +60,7 @@ a.categoryColor,
 a.categoryGender,
 a.categorySize,
 a.auctionPicture,
+mb.highestBid,
 MAX(COALESCE(mb.highestBid, a.auctionStartingPrice)) as currentPrice,
 COUNT(DISTINCT b.bidID) as numBids
 FROM
@@ -88,6 +87,7 @@ GROUP BY
 a.auctionID";
 
 $recQuery .= " LIMIT $start_from, $results_per_page";
+## end of GPT 4 adaptation
 
 
 $result = mysqli_query($conn, $recQuery);
