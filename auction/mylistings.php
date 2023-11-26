@@ -74,7 +74,8 @@ if(isset($_SESSION['userID'])) {
           $row["auctionDescription"],
           $auctionMaxCP, // Need to use Highest bid submitted if any otherwise starting price - create variable $highest_bid with sql query fetching the highest bid for the auction 
           $num_bids, // Need to create a $num_bids variable, make a query to count bids and use it here
-          new DateTime($row["auctionEndDate"])
+          new DateTime($row["auctionEndDate"]),
+          $row["auctionPicture"]
         );
       }
     } else {
