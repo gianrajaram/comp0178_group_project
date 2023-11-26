@@ -2,7 +2,6 @@
 <?php require("utilities.php")?>
 <?php require('database_connection.php')?>
 
-
 <div class="container">
 
 <h2 class="my-3">Recommendations for you</h2>
@@ -24,10 +23,13 @@ $conn = connect();
 
 <?php
 
+## Adapted from browse.php - GPT comment section relevant to this page too
+
+session_start();
 $curr_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 
 
-$results_per_page = 10;
+$results_per_page = 1;
 $start_from = ($curr_page - 1) * $results_per_page;
 
 
@@ -35,61 +37,78 @@ $result = null;
 $currentDateTime = date('Y-m-d H:i:s');
 
 ## GPT 4 used for query construction 
-$recCountQuery = $countQuery = "SELECT 
-COUNT(DISTINCT a.auctionID) AS total
+
+$userBidCheckQuery = "SELECT COUNT(*) as bidCount FROM Bids WHERE buyerID = $userID";
+$userBidCheckResult = mysqli_query($conn, $userBidCheckQuery);
+$userBidRow = mysqli_fetch_assoc($userBidCheckResult);
+
+
+#handling case where user has not bid on anything
+
+if ($userBidRow['bidCount'] == 0) {
+
+} else {
+$recCountQuery = "SELECT 
+COUNT(DISTINCT a.auctionID) AS totalAuctions
 FROM
 Auctions a
 JOIN 
-Bids b ON a.auctionID = b.auctionID
+Bids b2 ON a.auctionID = b2.auctionID
 WHERE 
-b.buyerID != $userID
+b2.buyerID IN (
+    SELECT DISTINCT b1.buyerID
+    FROM Bids b1
+    WHERE b1.auctionID IN (
+        SELECT DISTINCT b3.auctionID
+        FROM Bids b3
+        WHERE b3.buyerID = $userID
+    )
+)
 AND NOT EXISTS (
- SELECT 1
-  FROM Bids b2
-  WHERE b2.auctionID = a.auctionID AND b2.buyerID = $userID
-)";
-
-
-$recQuery = "SELECT 
-a.auctionID, 
-a.auctionName, 
-a.auctionStartingPrice,
-a.auctionDescription,
-a.categoryType,
-a.auctionEndDate,
-a.categoryColor,
-a.categoryGender,
-a.categorySize,
-a.auctionPicture,
-mb.highestBid,
-MAX(COALESCE(mb.highestBid, a.auctionStartingPrice)) as currentPrice,
-COUNT(DISTINCT b.bidID) as numBids
-FROM
-Auctions a
-JOIN 
-Bids b ON a.auctionID = b.auctionID
-LEFT JOIN (
-SELECT 
-  auctionID, 
-  MAX(bidValue) AS highestBid
-FROM 
-  Bids 
-GROUP BY 
-  auctionID
-) mb ON a.auctionID = mb.auctionID
-WHERE 
-b.buyerID != $userID
-AND NOT EXISTS (
- SELECT 1
-  FROM Bids b2
-  WHERE b2.auctionID = a.auctionID AND b2.buyerID = $userID
+    SELECT 1
+    FROM Bids b4
+    WHERE b4.auctionID = a.auctionID AND b4.buyerID = $userID
 )
 GROUP BY
 a.auctionID";
 
-$recQuery .= " LIMIT $start_from, $results_per_page";
-## end of GPT 4 adaptation
+## GPT 4 used for query construction 
+$recQuery = "SELECT 
+    a.auctionID,
+    a.auctionName,
+    GREATEST(a.auctionStartingPrice, COALESCE(MAX(b2.bidValue), a.auctionStartingPrice)) AS highestBid,
+    a.auctionDescription,
+    a.categoryType,
+    a.auctionEndDate,
+    a.categoryColor,
+    a.categoryGender,
+    a.categorySize,
+    a.auctionPicture,
+    COUNT(b2.bidID) AS numBids
+FROM
+    Auctions a
+LEFT JOIN Bids b2 ON a.auctionID = b2.auctionID
+WHERE 
+    b2.buyerID IN (
+        SELECT DISTINCT b1.buyerID
+        FROM Bids b1
+        WHERE b1.auctionID IN (
+            SELECT DISTINCT b3.auctionID
+            FROM Bids b3
+            WHERE b3.buyerID = $userID
+        )
+    )
+    AND NOT EXISTS (
+        SELECT 1
+        FROM Bids b4
+        WHERE b4.auctionID = a.auctionID AND b4.buyerID = $userID
+    )
+GROUP BY
+    a.auctionID";
 
+
+#
+$recQuery .= " LIMIT $start_from, $results_per_page";
 
 $result = mysqli_query($conn, $recQuery);
 if (!$result) {
@@ -103,15 +122,14 @@ if (!$paginationCountResult) {
 }
 
 
-
 if ($row = mysqli_fetch_assoc($paginationCountResult)) {
-  $num_results = $row['total'];
+  $num_results = $row['totalAuctions'];
 } else {
   die('Error fetching total count: ' . mysqli_error($conn));
 }
 
 $max_page = ceil($num_results / $results_per_page);
-
+}
 ?>
 <?php
   
@@ -123,6 +141,7 @@ $max_page = ceil($num_results / $results_per_page);
 if (mysqli_num_rows($result)==0) {
   echo '<p> ! ! ! There currently are no recommendations available. Please check back soon ! ! ! </p>';
 } else {
+
 ?>
 <ul class="list-group"> 
 <?php
@@ -176,8 +195,6 @@ if (mysqli_num_rows($result)==0) {
     }
   }
     
-  
-
   if ($curr_page != $max_page) {
     echo('
     <li class="page-item">
