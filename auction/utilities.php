@@ -97,7 +97,7 @@ function print_listing_li($item_id, $title, $desc, $price, $num_bids, $end_time,
   
   // Print HTML
   echo('
-    <li class="list-group-item d-flex justify-content-between">
+    <li class="list-group-item d-flex justify-content-between align-items-start">
     <div class="p-2 mr-3">
     <img src="' . $auctionPicture . '" alt="' . $title . ' Image" style=" max-width:100px; max-height:100px;">
   </div>
@@ -106,7 +106,6 @@ function print_listing_li($item_id, $title, $desc, $price, $num_bids, $end_time,
   </li>'
   );
 }
-
 
 
 
