@@ -107,6 +107,11 @@ if(isset($_SESSION['userID'])) {
     }
 }
 
+// Check if auction has been rated if auction is closed
+$checkQueryIsRated = "SELECT COUNT(*) as count FROM Ratings WHERE auctionID = '$auctionID'";
+$checkResultIsRated = send_query($checkQueryIsRated);
+$rowIsRated = mysqli_fetch_assoc($checkResultIsRated);
+
 
 ?>
 
@@ -204,7 +209,7 @@ if(isset($_SESSION['userID'])) {
         
         <!-- rate the auction -->
         <div style="margin-top: 20px;">
-            <?php if ($auctionStatus == 'Closed' && $isWinner == 1 && $has_session == true && $userID != $sellerID): ?> <!-- change to 'Closed' -->
+            <?php if ($auctionStatus == 'Closed' && $isWinner == 1 && $has_session == true && $userID != $sellerID && $rowIsRated['count'] == 0): ?> <!-- change to 'Closed' -->
             <form action="ratings_form.php" method="POST">
                 <div class="star-rating">
                     <input type="radio" id="5-stars" name="ratingValue" value="5" /><label for="5-stars" class="star">&#9733;</label>
