@@ -49,6 +49,7 @@ AND NOT EXISTS (
   WHERE b2.auctionID = a.auctionID AND b2.buyerID = $userID
 )";
 
+
 $recQuery = "SELECT 
 a.auctionID, 
 a.auctionName, 
