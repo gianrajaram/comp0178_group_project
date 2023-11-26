@@ -47,7 +47,7 @@ $result = send_queryMAC($query);
                       echo "</tr>";
                 }
             } else {
-                echo "<tr><td colspan='2'>No auctions found in your watchlist.</td></tr>";
+                echo "<tr><td colspan='2'>You don't have any bids.</td></tr>";
             }
             ?>
         </tbody>
