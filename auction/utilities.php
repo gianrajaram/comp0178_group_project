@@ -153,17 +153,6 @@ function print_mylisting_li($item_id, $title, $desc, $price, $num_bids, $end_tim
         <button type="submit" class="btn btn-danger from-control">Delete</button>
       </form>
     </li>'
-      <div class="p-2 mr-3">
-        <img src="' . $auctionPicture . '" alt="' . $title . ' Image" style=" max-width:100px; max-height:100px;">
-      </div>
-      
-      <div class="p-2 mr-5 flex-grow-1"><h5><a href="listing.php?item_id=' . $item_id . '">' . $title . '</a></h5>' . $desc_shortened . '</div>
-      <div class="text-center text-nowrap"><span style="font-size: 1.5em;">£' . number_format($price, 2) . '</span><br/>' . $num_bids . $bid . '<br/>' . $time_remaining . '</div>
-      <form method = "POST" action="seller_delete_auction.php" class="align-self-center">
-        <input type="hidden" name="auctionID" value="' . $item_id . '">
-        <button type="submit" class="btn btn-danger from-control">Delete</button>
-      </form>
-    </li>'
   );
 }
 
