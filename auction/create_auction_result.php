@@ -8,7 +8,7 @@ require_once("utilities.php")?>
 <?php
 $connection = connect();
 // have the current date saved
-$currentDateTime = date('Y-m-d\TH:i');
+$currentDateTime = new DateTime();
 // save the folder wherre the images are stored
 $imageFolder = 'images';
 
@@ -87,7 +87,10 @@ if (empty($_POST["auctionStartDate"])) {
     exit;
 } else {
     $auctionStartDate = new DateTime($_POST['auctionStartDate']);
-
+    if (($auctionStartDate->format('Y-m-d')) < ($currentDateTime->format('Y-m-d'))) {
+        alert_message_auction($message = "Start date must be in the future");
+        exit; 
+    }
     $auctionStatus = ($auctionStartDate > $currentDateTime) ? 'Closed' : 'Running';
 }
 
@@ -97,8 +100,8 @@ if (empty($_POST["auctionEndDate"])) {
     exit;
 } else {
     $auctionEndDate = new DateTime($_POST['auctionEndDate']);
-    if ($auctionEndDate <= $currentDateTime) {
-    alert_message_auction($message = "End date must be in the future");
+    if ($auctionEndDate <= $auctionStartDate) {
+    alert_message_auction($message = "End date must be after start date");
     exit; 
     }
 } 
