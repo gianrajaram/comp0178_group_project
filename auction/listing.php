@@ -265,7 +265,7 @@ $rowIsRated = mysqli_fetch_assoc($checkResultIsRated);
             </div>
         </div>
 
-        <!-- style settings -->
+        <!-- style settings; adopted from ChatGPT -->
         <style>
             .modal {
                 display: none;
