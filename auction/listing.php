@@ -1,24 +1,21 @@
 
 <?php include_once("header.php")?>
 <?php require_once("database_connection.php")?>
-
 <?php require("utilities.php")?>
 
 
 <?php
-// connection with database
+
+// establish connection with the database
 $connection = connectMAC();
 
-
-
-
-//$auctionID dynamic
+// get the $auctionID dynamically
 $auctionID = isset($_GET['item_id']) ? $_GET['item_id'] : 0;
-//echo $auctionID;
 
+// query for the auction details, dependent on whether the user is logged in or not
 if(isset($_SESSION['userID'])) {
-    $userID= $_SESSION['userID'];
 
+    $userID= $_SESSION['userID'];
 
     $sql_auction = "SELECT a.auctionID, a.sellerID, a.auctionName, a.auctionReservePrice, a.categoryType, a.categoryColor, a.categoryGender, a.categorySize, u.username, a.auctionDescription, a.auctionStartDate, a.auctionEndDate, a.auctionPicture, a.auctionStartingPrice, MAX(b.bidValue) as auctionMaxCP, MAX(b1.bidValue) AS maxBuyerBidValue, COUNT(b.auctionID) as auctionBidCount
                     FROM Auctions a
@@ -39,7 +36,6 @@ if(isset($_SESSION['userID'])) {
 
 $result = send_queryMAC($sql_auction);
 $rows = mysqli_fetch_array($result);
-//print_r($rows);
 $sellerID = $rows['sellerID']; 
 $auctionName = $rows["auctionName"];
 $auctionDescription = $rows['auctionDescription'];
@@ -48,21 +44,18 @@ $sellerUsername = $rows['username'];
 $auctionMaxCP = $rows['auctionMaxCP'];
 $auctionStartingPrice = $rows['auctionStartingPrice'];
 $auctionBidCount = $rows['auctionBidCount'];
-
 $categoryType = $rows['categoryType'];
 $categoryColor = $rows['categoryColor'];
 $categoryGender = $rows['categoryGender'];
-
 $auctionPicture = $rows['auctionPicture'];
 $auctionImageSrc = str_replace('/auction/', '', $auctionPicture);
-
 $maxBuyerBidValue = $rows['maxBuyerBidValue'];
-
 $auctionStartDate = $rows['auctionStartDate'];
 $auctionEndDate = $rows['auctionEndDate'];
 $startDate = new DateTime($auctionStartDate);
 $endDate = new DateTime($auctionEndDate);
 
+// check the auction status
 $now = new DateTime();
 if ($endDate > $now) {
   $auctionStatus = 'Active';
@@ -81,24 +74,18 @@ if ($auctionMaxCP == 0 ) {
 $sql_bids = "SELECT * FROM Bids WHERE auctionID = '{$auctionID}' ORDER BY dateBid DESC";
 $bids_result = mysqli_query($connection, $sql_bids);
 
+// check if the user is the winner
 $isWinner = 0;
 if ($maxBuyerBidValue == $auctionMaxCP && $maxBuyerBidValue >= $auctionReservePrice) {
     $isWinner = 1;
 }
-//echo $isWinner;
-
 
 $has_session = false;
 $watching = false;
 
-
-
-
-
-
+//check if this item is already in watchlist and save the result in $watching
 if(isset($_SESSION['userID'])) {
     $has_session = true;
-    //check if this item is in watchlist
     $sql_check_watchlist = "SELECT * FROM `Watchlists` WHERE buyerID = '{$userID}' AND auctionID = '{$auctionID}'";
     $res1 = send_queryMAC($sql_check_watchlist);
     $res2 = mysqli_fetch_array($res1);
@@ -107,20 +94,21 @@ if(isset($_SESSION['userID'])) {
     }
 }
 
-// Check if auction has been rated if auction is closed
+// check if auction has already been rated, if auction is closed
 $checkQueryIsRated = "SELECT COUNT(*) as count FROM Ratings WHERE auctionID = '$auctionID'";
 $checkResultIsRated = send_query($checkQueryIsRated);
 $rowIsRated = mysqli_fetch_assoc($checkResultIsRated);
 
-
 ?>
 
 <div class="container">
+
     <div style="margin-top: 30px;">
         <div class="auction-status-info" style="font-size: 20px; font-weight: bold;">
             <p> This auction is  <?php echo strtolower($auctionStatus) ?> !</p>
         </div>
     </div>
+
     <div class="row">
         <style>
             .item-img {
@@ -134,8 +122,6 @@ $rowIsRated = mysqli_fetch_assoc($checkResultIsRated);
                 <img src="<?php echo htmlspecialchars($auctionImageSrc); ?>" class='img-rounded img-responsive item-img'>
             </div>
         </div>
-
-
 
     <div class="col-sm-6">
         <div style="margin-top: 10px;">
@@ -188,7 +174,6 @@ $rowIsRated = mysqli_fetch_assoc($checkResultIsRated);
         </div>
 
         <!-- place a bid -->
-
         <div style="margin-top: 20px;"> </div>
             <?php if ($auctionStatus == 'Active' && $has_session == true && $userID != $sellerID): ?>
             <form action="place_bid.php" method="POST">
@@ -208,8 +193,9 @@ $rowIsRated = mysqli_fetch_assoc($checkResultIsRated);
 
         
         <!-- rate the auction -->
+        <!-- star-rating adapted from ChatGPT-->
         <div style="margin-top: 20px;">
-            <?php if ($auctionStatus == 'Closed' && $isWinner == 1 && $has_session == true && $userID != $sellerID && $rowIsRated['count'] == 0): ?> <!-- change to 'Closed' -->
+            <?php if ($auctionStatus == 'Closed' && $isWinner == 1 && $has_session == true && $userID != $sellerID && $rowIsRated['count'] == 0): ?>
             <form action="ratings_form.php" method="POST">
                 <div class="star-rating">
                     <input type="radio" id="5-stars" name="ratingValue" value="5" /><label for="5-stars" class="star">&#9733;</label>
@@ -222,7 +208,7 @@ $rowIsRated = mysqli_fetch_assoc($checkResultIsRated);
                     <div class="col-sm-6">
                         <textarea id="ratingText" name="ratingText" placeholder="Leave your comment here..." class="form-control input-frame" rows="1" style="background-color: white; color: grey"></textarea>
                         <input type="hidden" name="auctionID" value="<?php echo $auctionID; ?>">
-                        <input type="hidden" name="userID" value="<?php echo $userID; ?>"> <!-- Assuming userID is stored in session -->
+                        <input type="hidden" name="userID" value="<?php echo $userID; ?>">
                     </div>
 
                     <input type="submit" class="btn btn-default item-button" value="Submit Rating" name="submitRating" id="submitRating" style="background-color: blue; color: white"/>
@@ -234,11 +220,10 @@ $rowIsRated = mysqli_fetch_assoc($checkResultIsRated);
 
         <!-- view bid history -->
         <div class="bid-history">
-            <!-- Bid History Button -->
             <button id="bidHistoryBtn" class="btn btn-primary" style="background-color: blue; color: white">Bid History</button>
         </div>
 
-        <!-- bid history cont. -->
+        <!-- view bid history cont. -->
         <div id="bidHistoryModal" class="modal">
             <div class="modal-content">
                 <span class="close">&times;</span>
@@ -265,7 +250,7 @@ $rowIsRated = mysqli_fetch_assoc($checkResultIsRated);
             </div>
         </div>
 
-        <!-- style settings; adopted from ChatGPT -->
+        <!-- style settings adopted from ChatGPT -->
         <style>
             .modal {
                 display: none;
@@ -351,7 +336,5 @@ $rowIsRated = mysqli_fetch_assoc($checkResultIsRated);
 
     </div>
 </div>
-
-
 
 <?php include_once("footer.php")?>

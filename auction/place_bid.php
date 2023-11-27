@@ -27,7 +27,7 @@ if (isset($_POST['bid_price']) && $_POST['bid_price']!='') {
     $emailBidder = $rowBidder['userEmail'];
     $firstNameBidder = $rowBidder['userFirstName'];
 
-    // auction titel
+    // auction title
     $queryAuctionTitle = "SELECT * FROM Auctions WHERE auctionID = '$auctionID'";
     $resultAuctionTitle = send_query($queryAuctionTitle);
     $rowAuctionTitle = mysqli_fetch_assoc($resultAuctionTitle);
@@ -53,7 +53,7 @@ if (isset($_POST['bid_price']) && $_POST['bid_price']!='') {
 
 
   
-    // check if big is high enough
+    // check if the bid is high enough, if it is a numerical value and if the user is the winner
     $dateBid = date('Y-m-d H:i:s');
     if (!is_numeric($bidValue)) {
         echo "<script>alert('Invalid bid. Please enter a numerical value.');</script>";

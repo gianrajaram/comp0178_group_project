@@ -3,12 +3,11 @@
 <?php require("utilities.php")?>
 
 <div class="container">
-
 <h2 class="my-3">My watchlist</h2>
 
 <?php
 
-// WATCHLIST NOT WISHLIST
+// WATCHLIST NOT WISHLIST, wrong file name
 
 $connection = connectMAC();
 
@@ -21,7 +20,6 @@ $query = "SELECT a.auctionID, a.auctionName, a.auctionStartingPrice, MAX(b.bidVa
           LEFT JOIN Bids b ON a.auctionID = b.auctionID
           WHERE w.buyerID = '$buyerID'
           GROUP BY a.auctionID, a.auctionName, a.auctionStartingPrice";
-
 
 $result = send_queryMAC($query);
 
@@ -46,7 +44,7 @@ $result = send_queryMAC($query);
                         }
 
                         echo "<tr>";
-                        // auction names into clickable links
+                        // turn auction names into clickable links
                         echo "<td><a href='listing.php?item_id=" . htmlspecialchars($row['auctionID']) . "'>" . htmlspecialchars($row['auctionName']) . "</a></td>";
                         echo "<td>" . htmlspecialchars($auctionMaxCP) . "</td>";
                         echo "</tr>";

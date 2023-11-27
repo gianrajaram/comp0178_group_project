@@ -5,9 +5,10 @@ require_once("utilities.php");
 
 <?php
 
-//  connection w database
+// establish connection with the database
 $connection = connectMAC();
 
+// function for adding an item to the watchlist
 if (isset($_POST['watchlistsubmit'])) {
   $auctionID = $_POST['auctionID'];
   $userID = $_SESSION['userID'];
@@ -18,4 +19,3 @@ if (isset($_POST['watchlistsubmit'])) {
   echo "<script>window.location.href='my_wishlist.php';</script>";
 }
 ?>
-
