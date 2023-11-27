@@ -10,8 +10,6 @@
 <!-- GPT4 used primarily for debugging & logic testing throughout the script. I have added specific comments for
 any segment of the script where AI generated code appears. 
 Specific methods suggested initially by GPT4, then learned and used throughout the script include:
-- learning mysqli[...] functions
-- php shorthand "if-else" ternary operator eg: $ordering = isset($_GET['order_by']) ? $_GET['order_by'] : 'Price';
 - "hiding" variables to URL allowing for dynamic filtering & pagination
 - "Where 1" SQL element, allowing for dynamic query construction
 - NATURAL LANGUAGE MODE SQL match + database FULLTEXT mode requirement   -->
@@ -218,8 +216,8 @@ $results_per_page = 10;
 $start_from = ($curr_page - 1) * $results_per_page;
 $currentDateTime = date('Y-m-d H:i:s');
 
+# Query to fetch all auctions from database
 if ($isFormSubmitted) {
-  ## GPT 4 used for query construction
 $query ='SELECT 
             a.auctionID, 
             a.auctionName,
@@ -251,7 +249,7 @@ $query ='SELECT
             WHERE 1 ';
 
     $countQuery = "SELECT COUNT(DISTINCT a.auctionID) AS total FROM Auctions a LEFT JOIN Bids b ON a.auctionID = b.auctionID LEFT JOIN (SELECT auctionID, MAX(bidValue) AS highestBid FROM Bids GROUP BY auctionID) mb ON a.auctionID = mb.auctionID WHERE 1";
-  ## end of GPT 4 used for query construction
+
             
   if (!empty($keyword) && !empty($AIkeyword)) {
     $combinedSearchTerm = mysqli_real_escape_string($conn, $keyword . ' ' . $AIkeyword);
@@ -328,7 +326,7 @@ $query .= ' GROUP BY a.auctionID, a.auctionName, a.auctionStartingPrice, a.aucti
       die('SQL error: '.mysqli_error($conn));
   }
 } else {
-  ## GPT 4 used query construction.
+
   $defaultCountQuery = "SELECT COUNT(DISTINCT a.auctionID) AS total FROM Auctions a LEFT JOIN Bids b ON a.auctionID = b.auctionID LEFT JOIN (SELECT auctionID, MAX(bidValue) AS highestBid FROM Bids GROUP BY auctionID) mb ON a.auctionID = mb.auctionID WHERE 1";
   $defaultQuery = "SELECT 
   a.auctionID, 
@@ -363,7 +361,6 @@ LEFT JOIN
 
 $defaultQuery .= ' GROUP BY a.auctionID';
 $defaultCountQuery .= ' GROUP BY a.auctionID';
-# this section below is causing the error, remove it and everything works
 $defaultQuery .= " LIMIT $start_from, $results_per_page";
 
 $paginationCount = send_query($defaultCountQuery);
@@ -394,7 +391,7 @@ $max_page = ceil($num_results / $results_per_page);
 if (mysqli_num_rows($result)==0) {
   echo '<p> ! ! ! No listings were found under the given criteria ! ! ! </p>';
 } else {
-  ## exiting PHP mode tp include HTML line below
+  ## exiting PHP mode to include HTML line below
   ?>
 <ul class="list-group"> 
 <!-- re-entering PHP -->
@@ -446,7 +443,6 @@ if (mysqli_num_rows($result)==0) {
     
   for ($i = $low_page; $i <= $high_page; $i++) {
     if ($i == $curr_page) {
-      # below line adapted from GPT4
     echo '<li class="page-item active"><a class="page-link" href="#">' . $i . '</a></li>';
     } else {
       echo '<li class="page-item"><a class="page-link" href="browse.php?' . $querystring . 'page=' . $i . '">' . $i . '</a></li>';
