@@ -5,9 +5,10 @@ require_once("utilities.php");
 
 <?php
 
-// connection with database
+// establish connection with the database
 $connection = connectMAC();
 
+// function for removing an item from the watchlist
 if (isset($_POST['watchlistremove'])) {
   $auctionID = $_POST['auctionID'];
   $userID = $_SESSION['userID'];

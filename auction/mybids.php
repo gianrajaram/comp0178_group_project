@@ -8,13 +8,13 @@
 
 <?php
 
+// establish connection with the database
 $connection = connectMAC();
 
 $buyerID = $_SESSION['userID'];
 $auctionID = isset($_GET['item_id']) ? $_GET['item_id'] : 0;
 
-
-
+// get auction names for the specific buyer, as well as the highest bid value for each auction and buyer's highest bid value for each auction
 $query = "SELECT a.auctionID, a.auctionName, 
                  MAX(b1.bidValue) AS maxBuyerBidValue, 
                  MAX(b2.bidValue) AS maxBidValue
