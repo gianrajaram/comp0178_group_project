@@ -187,7 +187,7 @@ if(!$resultSize) {
               <i class="fa fa-search"></i>
             </span>
           </div>
-         <input type="text" class="form-control border-left-0" id="AIkeyword" name="AIkeyword" placeholder= "Explore creatively with AI search:" value ="<?php echo isset($_GET['AIkeyword']) ? htmlspecialchars($_GET['AIkeyword']) : ''; ?>">
+         <input type="text" class="form-control border-left-0" id="AIkeyword" name="AIkeyword" placeholder= "Explore creatively (via decription):" value ="<?php echo isset($_GET['AIkeyword']) ? htmlspecialchars($_GET['AIkeyword']) : ''; ?>">
         </div>
       </div>
     </div>
@@ -246,7 +246,7 @@ $query ='SELECT
             GROUP BY
                 auctionID
             ) mb ON a.auctionID = mb.auctionID
-            WHERE 1 ';
+            WHERE 1';
 
     $countQuery = "SELECT COUNT(DISTINCT a.auctionID) AS total FROM Auctions a LEFT JOIN Bids b ON a.auctionID = b.auctionID LEFT JOIN (SELECT auctionID, MAX(bidValue) AS highestBid FROM Bids GROUP BY auctionID) mb ON a.auctionID = mb.auctionID WHERE 1";
 

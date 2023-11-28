@@ -126,7 +126,7 @@ CREATE TABLE Auctions (
     auctionName VARCHAR(100) NOT NULL,
     auctionDescription VARCHAR(500),
     auctionPicture VARCHAR(100),
-    sellerID INT(10),
+    sellerID INT(10) NOT NULL,
     categoryType VARCHAR(100),
     categoryColor VARCHAR(100),
     categoryGender VARCHAR(100),
