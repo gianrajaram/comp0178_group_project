@@ -131,12 +131,16 @@ CREATE TABLE Auctions (
     categoryColor VARCHAR(100),
     categoryGender VARCHAR(100),
     categorySize VARCHAR(100),
+    ratingValue INT(1) NOT NULL CHECK (ratingValue >= 1 AND ratingValue <= 5),
+    ratingText VARCHAR(500),
+    winnerID INT(10),
     PRIMARY KEY(auctionID),
     FOREIGN KEY (sellerID) REFERENCES Users (userID) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (categoryType) REFERENCES CategoryClothsType (categoryType) ON UPDATE CASCADE ON DELETE RESTRICT,
     FOREIGN KEY (categoryColor) REFERENCES CategoryColorType (categoryColor) ON UPDATE CASCADE ON DELETE RESTRICT,
     FOREIGN KEY (categoryGender) REFERENCES categoryGenderType (categoryGender) ON UPDATE CASCADE ON DELETE RESTRICT,
-    FOREIGN KEY (categorySize) REFERENCES categorySizeType (categorySize) ON UPDATE CASCADE ON DELETE RESTRICT
+    FOREIGN KEY (categorySize) REFERENCES categorySizeType (categorySize) ON UPDATE CASCADE ON DELETE RESTRICT,
+    FOREIGN KEY (winnerID) REFERENCES Users (userID) ON UPDATE CASCADE ON DELETE RESTRICT
 )
 ENGINE=INNODB;
 
@@ -209,16 +213,7 @@ INSERT INTO Watchlists (buyerID, auctionID) VALUES
 ;
 
 
-CREATE TABLE Ratings (
-    auctionID INT(10) NOT NULL,
-    ratingValue INT(1) NOT NULL CHECK (ratingValue >= 1 AND ratingValue <= 5),
-    ratingText VARCHAR(500),
-    buyerID INT(10),
-    PRIMARY KEY (auctionID),
-    FOREIGN KEY (auctionID) REFERENCES Auctions (auctionID) ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY (buyerID) REFERENCES Users (userID) ON UPDATE CASCADE ON DELETE CASCADE
-)
-ENGINE=INNODB;
+
 
 CREATE TABLE Messages (
     messageID INT(10) NOT NULL AUTO_INCREMENT,

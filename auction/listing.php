@@ -95,7 +95,7 @@ if(isset($_SESSION['userID'])) {
 }
 
 // check if auction has already been rated, if auction is closed
-$checkQueryIsRated = "SELECT COUNT(*) as count FROM Ratings WHERE auctionID = '$auctionID'";
+$checkQueryIsRated = "SELECT COUNT(*) as count FROM Auctions WHERE auctionID = '$auctionID' and ratingValue IS NOT NULL";
 $checkResultIsRated = send_query($checkQueryIsRated);
 $rowIsRated = mysqli_fetch_assoc($checkResultIsRated);
 
