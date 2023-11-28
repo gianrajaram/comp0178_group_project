@@ -401,7 +401,7 @@ if (mysqli_num_rows($result)==0) {
     $item_id = $row['auctionID'];
     $title = $row['auctionName'];
     $description = $row['auctionDescription'];
-    $current_price = isset($row['highestBid']) ? $row['highestBid'] : $row['auctionStartingPrice'];
+    $current_price = $row['currentPrice'];
     $num_bids = $row['numBids'];
     $end_date = new DateTime($row['auctionEndDate']);
     $auctionPicture = $row['auctionPicture'];
