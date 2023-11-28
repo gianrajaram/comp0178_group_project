@@ -131,7 +131,7 @@ CREATE TABLE Auctions (
     categoryColor VARCHAR(100),
     categoryGender VARCHAR(100),
     categorySize VARCHAR(100),
-    ratingValue INT(1) NOT NULL CHECK (ratingValue >= 1 AND ratingValue <= 5),
+    ratingValue INT(1) CHECK (ratingValue >= 1 AND ratingValue <= 5),
     ratingText VARCHAR(500),
     winnerID INT(10),
     PRIMARY KEY(auctionID),
@@ -140,7 +140,7 @@ CREATE TABLE Auctions (
     FOREIGN KEY (categoryColor) REFERENCES CategoryColorType (categoryColor) ON UPDATE CASCADE ON DELETE RESTRICT,
     FOREIGN KEY (categoryGender) REFERENCES categoryGenderType (categoryGender) ON UPDATE CASCADE ON DELETE RESTRICT,
     FOREIGN KEY (categorySize) REFERENCES categorySizeType (categorySize) ON UPDATE CASCADE ON DELETE RESTRICT,
-    FOREIGN KEY (winnerID) REFERENCES Users (userID) ON UPDATE CASCADE ON DELETE RESTRICT
+    FOREIGN KEY (winnerID) REFERENCES Users (userID) ON UPDATE CASCADE ON DELETE SET NULL
 )
 ENGINE=INNODB;
 

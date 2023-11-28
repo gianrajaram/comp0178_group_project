@@ -37,13 +37,11 @@ if (isset($_POST['register'])) {
         exit;
     }
     else{
-        if (in_array($submitted_password, $list_common_passwords) || (strlen($submitted_password) < $min_length_password))
-        {
+        if (in_array($submitted_password, $list_common_passwords) || (strlen($submitted_password) < $min_length_password)){
             alert_message_registration($message = 'Choose a stronger password (min. 8 characters)'); 
             exit;   
         }
-        else
-        {
+        else{
             $password = mysqli_real_escape_string($connection,$_POST["passwordReg"]);
         }
     }
