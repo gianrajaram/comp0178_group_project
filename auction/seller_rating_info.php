@@ -22,20 +22,12 @@ if ($row = mysqli_fetch_assoc($result)) {
 }
 
 // query for user's auctions
-$auctionsQuery = "SELECT auctionID, auctionName FROM Auctions WHERE sellerID = '$sellerID'";
+$auctionsQuery = "SELECT auctionID, auctionName, ratingValue, ratingText FROM Auctions WHERE sellerID = '$sellerID' AND a.ratingValue IS NOT NULL";
 $auctionsResult = send_queryMAC($auctionsQuery);
 
-// query for user's ratings
-$ratingsQuery = "SELECT r.auctionID, r.ratingValue, r.ratingText, a.auctionName
-                 FROM Ratings r
-                 JOIN Auctions a ON r.auctionID = a.auctionID
-                 WHERE a.sellerID = '$sellerID'";
-$ratingsResult = send_queryMAC($ratingsQuery);
-
-$averageRatingQuery = "SELECT AVG(r.ratingValue) as overallAvgRating
-                       FROM Ratings r
-                       JOIN Auctions a ON r.auctionID = a.auctionID
-                       WHERE a.sellerID = '$sellerID'";
+$averageRatingQuery = "SELECT AVG(a.ratingValue) as overallAvgRating
+                       FROM Auctions a
+                       WHERE a.sellerID = '$sellerID' AND a.ratingValue IS NOT NULL";
 
 $avgResult = send_queryMAC($averageRatingQuery);
 if ($avgRow = mysqli_fetch_assoc($avgResult)) {
