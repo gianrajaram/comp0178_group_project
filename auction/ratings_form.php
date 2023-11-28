@@ -27,7 +27,9 @@ if (isset($_POST['submitRating'])) {
         $ratingText = "No comment.";
     }
         
-    $query = "INSERT INTO Ratings (auctionID, ratingValue, ratingText, buyerID) VALUES ('$auctionID', '$ratingValue', '$ratingText', '$userID')";
+    $query = "UPDATE Auctions 
+          SET ratingValue = '$ratingValue', ratingText = '$ratingText', winnerID = '$userID' 
+          WHERE auctionID = '$auctionID'";
 
     send_queryMAC($query);
     echo "<script>alert('Successfully submitted the rating.');</script>";
