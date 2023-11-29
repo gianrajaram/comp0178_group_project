@@ -4,10 +4,9 @@
 
 //Define function for establishing connection between database and php
 function connect(){
-    mysqli_report(MYSQLI_REPORT_OFF); // let errors be handled by error statements; without this throwing fatal exceptions despite error handling code - seems to be a problem in new php language update
     //read database host details securely
     $configFile = 'Database_host.txt';
-    $configData = file($configFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    $configData = file($configFile, FILE_IGNORE_NEW_LINES);
     $dbConfig = [];
     foreach ($configData as $line) {
        list($key, $value) = explode('=', $line);
@@ -45,7 +44,7 @@ function connectMAC()
     //beginning of adaptation from ChatGPT
     // Change the current working directory to the specified directory
     $configFile = 'Database_host_MAC.txt';
-    $configData = file($configFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    $configData = file($configFile, FILE_IGNORE_NEW_LINES);
     $dbConfig = [];
     
     foreach ($configData as $line) {

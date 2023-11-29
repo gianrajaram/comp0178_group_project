@@ -11,8 +11,7 @@ if (isset($_POST['register'])) {
     // Email - check if in correct format
     if (filter_var($_POST["emailReg"], FILTER_VALIDATE_EMAIL)){
         $emailReg = mysqli_real_escape_string($connection,$_POST["emailReg"]);
-    }
-    else{
+    }else{
         alert_message_registration($message = 'Email is NOT a valid email address');
         exit;
     }
@@ -21,8 +20,7 @@ if (isset($_POST['register'])) {
     if(empty($_POST["usernameReg"])){
         alert_message_registration($message = 'Username is not a valid entry.');
         exit;
-    }
-    else{
+    }else{
         $username = mysqli_real_escape_string($connection,$_POST["usernameReg"]);
     }
 
@@ -35,13 +33,11 @@ if (isset($_POST['register'])) {
     if (!($submitted_password == $submitted_passwordConfirmation)) {
         alert_message_registration($message = 'Password does not match password confirmation.');   
         exit;
-    }
-    else{
+    }else{
         if (in_array($submitted_password, $list_common_passwords) || (strlen($submitted_password) < $min_length_password)){
             alert_message_registration($message = 'Choose a stronger password (min. 8 characters)'); 
             exit;   
-        }
-        else{
+        }else{
             $password = mysqli_real_escape_string($connection,$_POST["passwordReg"]);
         }
     }

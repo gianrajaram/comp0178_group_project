@@ -14,14 +14,14 @@ while (true) {
                     Users UB ON B.buyerID = UB.userID 
                 WHERE 
                     A.auctionEndDate <= NOW() 
-                    AND A.auctionEndDate >= NOW() - INTERVAL 5 MINUTE 
+                    AND A.auctionEndDate >= NOW() - INTERVAL 10 MINUTE 
                 GROUP BY 
                     A.auctionID 
                 ORDER BY 
                     highestBid DESC";
     $result = send_query($query);
 
-    // In case there are auctions that have ended in the past 5 minutes
+    // In case there are auctions that have ended in the past 10 minutes
     if (mysqli_num_rows($result) > 0) {
         while ($row = mysqli_fetch_assoc($result)) {
             $emailSeller = $row['sellerEmail'];
@@ -78,10 +78,10 @@ while (true) {
         
     } 
         else {
-        echo "No auctions have ended in the past 5 minutes.";
+        echo "No auctions have ended in the past 10 minutes.";
         }
     
-    sleep(300); // Sleep for 5 minutes 
+    sleep(600); // Sleep for 10 minutes 
 }
 
 

@@ -13,8 +13,7 @@ session_start();
 if(empty($_POST["usernameLogin"])){
     alert_message_login($message = 'Please provide a username');
     exit;
-}
-else{
+}else{
     $username = mysqli_real_escape_string($connection,$_POST["usernameLogin"]);
 }
 
@@ -22,12 +21,11 @@ else{
 if(empty($_POST["passwordLogin"])){
     alert_message_login($message = 'Please provide a password.');
     exit;
-}
-else{
+}else{
     $password = mysqli_real_escape_string($connection,$_POST["passwordLogin"]);
 }
 // Acount type
-// If the user is admin, he can use the account type option empty and still log in
+// If the user is admin, he can leave the account type option empty and still log in
 if(empty($_POST["accountType"]) && ($_POST["usernameLogin"] == "admin")){
     $accountType = "Admin";
 }
@@ -48,12 +46,10 @@ else if (($_POST["accountType"] == "Same as last session")){
     if ($result_row['userAccountType'] == "Unspecified yet"){
         alert_message_login($message = 'This is your first log-in since registration. Please select account type to log in as.');
         exit;
-    }
-    else{
+    }else{
         $accountType = $result_row['userAccountType'];
     }
-} 
-else{
+} else{
     $accountType = $_POST["accountType"];
 }
 // Check email, password and activation status against database if they exist there
@@ -65,14 +61,11 @@ if (mysqli_num_rows($result_check_login) == 0){
     exit;
 }
 else if (mysqli_num_rows($result_check_login) == 1){
-    $query_check_active_status = "SELECT userIsActive FROM Users WHERE username = '$username'";
-    $result_check_active_status = send_query($query_check_active_status);
-    $result_row = mysqli_fetch_array($result_check_active_status);
+    $result_row = mysqli_fetch_array($result_check_login);
     if ($result_row['userIsActive'] == "Deactivated"){
         alert_message_login($message = 'Your account has been deactivated.');
         exit;
-    }
-    else{
+    }else{
         $query_update_account_type = "UPDATE Users SET userAccountType = '$accountType' WHERE username ='$username'";
         $result_update_account_type = send_query($query_update_account_type);
         $query_updated_user_details = "SELECT * FROM Users WHERE username = '$username'";

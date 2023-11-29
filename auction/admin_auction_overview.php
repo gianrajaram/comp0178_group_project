@@ -4,7 +4,7 @@ require("utilities.php");
 require("database_connection.php");
 
 
-// Fetch the users from the database
+// Fetch the auctions from the database
 $query_auctions = "SELECT auctionID, auctionStartDate, auctionEndDate, auctionName, auctionDescription, sellerID FROM Auctions ";
 $auctions = send_query($query_auctions);
 // Get auction status 

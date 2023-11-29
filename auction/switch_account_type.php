@@ -18,7 +18,6 @@ $_SESSION['account_type'] = $new_account_type;
 $query_update_account_type = "UPDATE Users SET userAccountType = '$new_account_type' WHERE username ='$current_username'";
 $result_update_account_type = send_query($query_update_account_type);
 
-
 // Redirect to index
 echo "<script>alert('You switched to $new_account_type view');</script>";
 echo "<script>window.location.href='index.php';</script>";

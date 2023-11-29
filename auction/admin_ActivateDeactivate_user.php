@@ -8,13 +8,13 @@ require_once("header.php")?>
 $connection = connect();
 
 
-// Extract $_POST variable from admin delete user form
+// Extract $_POST variable from admin activate/deactivate user form
 if (isset($_POST['userID'])) {
     $userID = $_POST['userID'];
     $userIsActive = $_POST['userIsActive'];
     if ($userIsActive == "Activated") {
-    $query= "UPDATE Users SET userIsActive = 'Deactivated' WHERE userID = '$userID'";
-    echo "<script>alert('Profile is deactivated.');</script>";
+        $query= "UPDATE Users SET userIsActive = 'Deactivated' WHERE userID = '$userID'";
+        echo "<script>alert('Profile is deactivated.');</script>";
 }
     elseif ($userIsActive == "Deactivated"){
         $query= "UPDATE Users SET userIsActive = 'Activated' WHERE userID = '$userID'";
