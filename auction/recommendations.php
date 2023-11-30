@@ -25,7 +25,8 @@ $result = null;
 $currentDateTime = date('Y-m-d H:i:s');
 
 # Query to find auctions based on similar biders to the current user who have bid on the same auctions
-# Count query is used to determine the number of results for pagination 
+# Count query is used to determine the number of results for pagination
+# Chat GPT 4 used for learning query construction  
 $recCountQuery = "SELECT 
 COUNT(DISTINCT a.auctionID) AS totalAuctions
 FROM
@@ -49,8 +50,11 @@ AND NOT EXISTS (
 )
 GROUP BY
 a.auctionID";
+# end of Chat GPT 4 adaptation
+
 
 # Select query to extract details of relevant auctions 
+# Chat GPT 4 used for learning query construction
 $recQuery = "SELECT 
     a.auctionID,
     a.auctionName,
@@ -85,7 +89,7 @@ GROUP BY
     a.auctionID";
 
 
-#
+# end of Chat GPT 4 adaptation
 $recQuery .= " LIMIT $start_from, $results_per_page";
 
 $result = send_query($recQuery);

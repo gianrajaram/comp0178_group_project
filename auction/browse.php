@@ -217,6 +217,7 @@ $start_from = ($curr_page - 1) * $results_per_page;
 $currentDateTime = date('Y-m-d H:i:s');
 
 # Query to fetch all auctions from database
+# GPT 4 used for learning query construction
 if ($isFormSubmitted) {
 $query ='SELECT 
             a.auctionID, 
@@ -249,7 +250,7 @@ $query ='SELECT
             WHERE 1';
 
     $countQuery = "SELECT COUNT(DISTINCT a.auctionID) AS total FROM Auctions a LEFT JOIN Bids b ON a.auctionID = b.auctionID LEFT JOIN (SELECT auctionID, MAX(bidValue) AS highestBid FROM Bids GROUP BY auctionID) mb ON a.auctionID = mb.auctionID WHERE 1";
-
+# end of GPT 4 used for query construction
             
   if (!empty($keyword) && !empty($AIkeyword)) {
     $combinedSearchTerm = mysqli_real_escape_string($conn, $keyword . ' ' . $AIkeyword);
@@ -327,6 +328,7 @@ $query .= ' GROUP BY a.auctionID, a.auctionName, a.auctionStartingPrice, a.aucti
   }
 } else {
 
+  # GPT 4 used for learning query construction
   $defaultCountQuery = "SELECT COUNT(DISTINCT a.auctionID) AS total FROM Auctions a LEFT JOIN Bids b ON a.auctionID = b.auctionID LEFT JOIN (SELECT auctionID, MAX(bidValue) AS highestBid FROM Bids GROUP BY auctionID) mb ON a.auctionID = mb.auctionID WHERE 1";
   $defaultQuery = "SELECT 
   a.auctionID, 
@@ -357,7 +359,7 @@ LEFT JOIN
       auctionID
   ) mb ON a.auctionID = mb.auctionID
   WHERE 1";
-
+# end of GPT 4 used for query construction
 
 $defaultQuery .= ' GROUP BY a.auctionID';
 $defaultCountQuery .= ' GROUP BY a.auctionID';
