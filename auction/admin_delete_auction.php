@@ -12,5 +12,5 @@ if (isset($_POST['auctionID'])) {
     $query= "DELETE FROM Auctions WHERE auctionID = '$auctionID'";
     send_query($query);
     echo "<script>alert('Auction was deleted.');</script>";
-    echo "<script>window.location.href='admin_user_overview.php';</script>";
+    echo "<script>window.location.href='admin_user_auction.php';</script>";
 }

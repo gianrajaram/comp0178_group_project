@@ -20,6 +20,11 @@ $result_update_account_type = send_query($query_update_account_type);
 
 // Redirect to index
 echo "<script>alert('You switched to $new_account_type view');</script>";
-echo "<script>window.location.href='index.php';</script>";
+if ($_SESSION['account_type'] == "Seller"){
+    echo "<script>window.location.href='create_auction.php';</script>";
+}         
+if ($_SESSION['account_type']== "Buyer"){
+    echo "<script>window.location.href='browse.php';</script>";
+}
 
 ?>

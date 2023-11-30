@@ -76,7 +76,12 @@ else if (mysqli_num_rows($result_check_login) == 1){
         $_SESSION['account_type'] = $row['userAccountType'];
         $_SESSION['userID'] = $row['userID'];
         echo "<script>alert('Login is successful!');</script>";
-        echo "<script>window.location.href='browse.php';</script>";
+        if ($_SESSION['account_type'] == "Seller"){
+            echo "<script>window.location.href='create_auction.php';</script>";
+        }         
+        else{
+            echo "<script>window.location.href='browse.php';</script>";
+        }
     }
 }
 else{
