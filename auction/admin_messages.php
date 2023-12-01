@@ -12,7 +12,8 @@ if(isset($_SESSION['userID'])) {
     $senderID = $_SESSION['userID'];
     //$userID = 2;
     // check if there are any previous messages
-    $query_received_messages = "SELECT senderID, userID, messageText, COUNT(*) as messageCount FROM messages WHERE userID = $senderID GROUP BY senderID";
+    $query_received_messages = "SELECT senderID, userID, messageText, COUNT(*) as messageCount 
+                                FROM messages WHERE userID = $senderID GROUP BY senderID";
     $result_received_messages = send_query($query_received_messages);
 
 } else {
@@ -166,7 +167,10 @@ if(isset($_SESSION['userID'])) {
     <?php
     if (isset($_GET['userID'])) {
         $targetUserID = $_GET['userID'];
-        $query_admin_messages = "SELECT * FROM messages WHERE (userID = $senderID AND senderID = $targetUserID) OR (userID = $targetUserID AND senderID = $senderID) ORDER BY messageTime";
+        $query_admin_messages = "SELECT * FROM messages 
+                                    WHERE (userID = $senderID AND senderID = $targetUserID) 
+                                    OR (userID = $targetUserID AND senderID = $senderID) 
+                                    ORDER BY messageTime";
         $result_admin_messages = send_query($query_admin_messages);
         ?>
 
@@ -181,7 +185,9 @@ if(isset($_SESSION['userID'])) {
                     $messageText = $row_messages["messageText"];
                     $messageSenderID = $row_messages["senderID"];
 
-                    $query_update_read = "UPDATE messages SET isRead = 0 WHERE senderID = $targetUserID AND userID = $senderID";
+                    $query_update_read = "UPDATE messages SET isRead = 0 
+                                            WHERE senderID = $targetUserID 
+                                            AND userID = $senderID";
                     send_query($query_update_read);
 
                     echo '<div class="message-box ' . ($messageSenderID == $senderID ? 'right' : 'left') . '" style="border-color: ' . ($messageSenderID == $targetUserID ?  '#e5e5e5':'#007bff') . ';">';
@@ -229,7 +235,19 @@ if(isset($_SESSION['userID'])) {
             echo '<tr><th>Nb of Messages</th><th>User ID</th><th>Last Message</th><th>Time of Latest Message</th></tr></thead><tbody>';
             $row_nb = mysqli_fetch_assoc($result_received_messages);
             $count = $row_nb['messageCount'];
-            $query_lastMessage = "SELECT senderID, isRead, messageTime AS latestMessageTime, messageText AS latestMessageText, COUNT(*) as messageCount FROM messages WHERE userID = 1 AND (senderID, messageTime) IN ( SELECT senderID, MAX(messageTime) AS latestMessageTime FROM messages WHERE userID = 1 GROUP BY senderID ) GROUP BY senderID, latestMessageTime, latestMessageText ORDER BY latestMessageTime DESC;";
+            $query_lastMessage = "SELECT senderID, isRead, messageTime AS latestMessageTime, 
+                                            messageText AS latestMessageText, 
+                                            COUNT(*) as messageCount 
+                                            FROM messages 
+                                            WHERE userID = 1 
+                                            AND (senderID, messageTime) 
+                                            IN ( SELECT senderID, MAX(messageTime) 
+                                                    AS latestMessageTime 
+                                                    FROM messages 
+                                                    WHERE userID = 1 
+                                                    GROUP BY senderID ) 
+                                            GROUP BY senderID, latestMessageTime, latestMessageText 
+                                            ORDER BY latestMessageTime DESC;";
             $result_lastMessage = send_query($query_lastMessage);
             if ($result_lastMessage) {
                 while ($row = mysqli_fetch_assoc($result_lastMessage)) {
