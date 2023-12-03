@@ -8,9 +8,8 @@ $result_adminMessage = send_query($query_adminMessage);
 $connection = connect();
 
 if(isset($_SESSION['userID'])) {
-    // Get the seller ID
+    // Get the admin ID
     $senderID = $_SESSION['userID'];
-    //$userID = 2;
     // check if there are any previous messages
     $query_received_messages = "SELECT senderID, userID, messageText, COUNT(*) as messageCount 
                                 FROM messages WHERE userID = $senderID GROUP BY senderID";

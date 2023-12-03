@@ -122,7 +122,9 @@ if(isset($_SESSION['userID'])) {
     $senderID = $_SESSION['userID'];
     $userID = 1; // the admin
     // check if there are any previous messages
-    $query_messages = "SELECT * FROM `messages` WHERE (userID = $userID AND senderID = $senderID) OR (userID = $senderID AND senderID = $userID) ORDER BY messageTime";
+    $query_messages = "SELECT * FROM `messages` 
+                        WHERE (userID = $userID AND senderID = $senderID) 
+                        OR (userID = $senderID AND senderID = $userID) ORDER BY messageTime";
     $result_messages = send_query($query_messages);
 } else {
   header("Location: login.php");

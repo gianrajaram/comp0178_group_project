@@ -2,14 +2,18 @@
 
 while (true) {
     echo "Begin closing auction process.";
-    // Notify all sellers whose auctions have ended in the past 1 min and their winners
-    $query = "SELECT A.auctionName, A.auctionReservePrice, U.userEmail AS sellerEmail, U.userFirstName AS sellerFirstName, MAX(B.bidValue) AS highestBid, UB.userEmail AS highestBuyerEmail, UB.userFirstName AS highestBuyerFirstName 
+    // Notify all sellers whose auctions have ended in the past 10 min and their winners
+    $query = "SELECT A.auctionName, A.auctionReservePrice, 
+                        U.userEmail AS sellerEmail, U.userFirstName AS sellerFirstName, 
+                        MAX(B.bidValue) AS highestBid, UB.userEmail AS highestBuyerEmail, 
+                        UB.userFirstName AS highestBuyerFirstName 
                 FROM 
                     Auctions A 
                 JOIN 
                     Users U ON A.sellerID = U.userID 
                 LEFT JOIN 
-                    Bids B ON A.auctionID = B.auctionID AND B.bidValue = (SELECT MAX(bidValue) FROM Bids WHERE auctionID = A.auctionID)
+                    Bids B ON A.auctionID = B.auctionID 
+                    AND B.bidValue = (SELECT MAX(bidValue) FROM Bids WHERE auctionID = A.auctionID)
                 LEFT JOIN 
                     Users UB ON B.buyerID = UB.userID 
                 WHERE 

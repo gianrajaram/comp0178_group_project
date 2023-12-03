@@ -17,21 +17,39 @@ if(isset($_SESSION['userID'])) {
 
     $userID= $_SESSION['userID'];
 
-    $sql_auction = "SELECT a.auctionID, a.sellerID, a.auctionName, a.auctionReservePrice, a.categoryType, a.categoryColor, a.categoryGender, a.categorySize, u.username, a.auctionDescription, a.auctionStartDate, a.auctionEndDate, a.auctionPicture, a.auctionStartingPrice, MAX(b.bidValue) as auctionMaxCP, MAX(b1.bidValue) AS maxBuyerBidValue, COUNT(b.auctionID) as auctionBidCount
+    $sql_auction = "SELECT a.auctionID, a.sellerID, a.auctionName, 
+                        a.auctionReservePrice, a.categoryType, a.categoryColor, 
+                        a.categoryGender, a.categorySize, u.username, a.auctionDescription,
+                        a.auctionStartDate, a.auctionEndDate, a.auctionPicture, a.auctionStartingPrice, 
+                        MAX(b.bidValue) as auctionMaxCP, 
+                        MAX(b1.bidValue) AS maxBuyerBidValue, 
+                        COUNT(b.auctionID) as auctionBidCount
                     FROM Auctions a
                     JOIN Users u ON a.sellerID = u.userID
                     LEFT JOIN Bids b ON a.auctionID = b.auctionID
                     LEFT JOIN Bids b1 ON a.auctionID = b1.auctionID AND b1.buyerID = '{$userID}'
                     WHERE a.auctionID = '{$auctionID}'
-                    GROUP BY a.auctionID, a.sellerID, a.auctionName, a.auctionReservePrice, a.categoryType, a.categoryColor, a.categoryGender, a.categorySize, u.username, a.auctionDescription, a.auctionStartDate, a.auctionEndDate, a.auctionStartingPrice";
+                    GROUP BY a.auctionID, a.sellerID, a.auctionName, a.auctionReservePrice, 
+                    a.categoryType, a.categoryColor, a.categoryGender, 
+                    a.categorySize, u.username, a.auctionDescription, a.auctionStartDate, 
+                    a.auctionEndDate, a.auctionStartingPrice";
 } else {
-    $sql_auction = "SELECT a.auctionID, a.sellerID, a.auctionName, a.auctionReservePrice, a.categoryType, a.categoryColor, a.categoryGender, a.categorySize, u.username, a.auctionDescription, a.auctionStartDate, a.auctionEndDate, a.auctionPicture, a.auctionStartingPrice, MAX(b.bidValue) as auctionMaxCP, MAX(b1.bidValue) AS maxBuyerBidValue, COUNT(b.auctionID) as auctionBidCount
+    $sql_auction = "SELECT a.auctionID, a.sellerID, a.auctionName, 
+                    a.auctionReservePrice, a.categoryType, a.categoryColor, 
+                    a.categoryGender, a.categorySize, u.username, a.auctionDescription,
+                    a.auctionStartDate, a.auctionEndDate, a.auctionPicture, a.auctionStartingPrice, 
+                    MAX(b.bidValue) as auctionMaxCP, 
+                    MAX(b1.bidValue) AS maxBuyerBidValue, 
+                    COUNT(b.auctionID) as auctionBidCount
                     FROM Auctions a
                     JOIN Users u ON a.sellerID = u.userID
                     LEFT JOIN Bids b ON a.auctionID = b.auctionID
                     LEFT JOIN Bids b1 ON a.auctionID = b1.auctionID
                     WHERE a.auctionID = '{$auctionID}'
-                    GROUP BY a.auctionID, a.sellerID, a.auctionName, a.auctionReservePrice, a.categoryType, a.categoryColor, a.categoryGender, a.categorySize, u.username, a.auctionDescription, a.auctionStartDate, a.auctionEndDate, a.auctionStartingPrice";
+                    GROUP BY a.auctionID, a.sellerID, a.auctionName, a.auctionReservePrice, 
+                    a.categoryType, a.categoryColor, a.categoryGender, 
+                    a.categorySize, u.username, a.auctionDescription, a.auctionStartDate, 
+                    a.auctionEndDate, a.auctionStartingPrice";
 }
 
 $result = send_queryMAC($sql_auction);

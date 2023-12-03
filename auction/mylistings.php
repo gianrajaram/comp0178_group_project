@@ -38,12 +38,17 @@ if(isset($_SESSION['userID'])) {
 
         //var_dump($row);     
         $auctionID = $row["auctionID"];
-        $query_bid = "SELECT a.auctionName, a.categoryType, a.categoryColor, a.categoryGender, a.categorySize, u.username, a.auctionDescription, a.auctionStartDate, a.auctionEndDate, a.auctionStartingPrice, MAX(b.bidValue) as auctionMaxCP 
+        $query_bid = "SELECT a.auctionName, a.categoryType, a.categoryColor, 
+                            a.categoryGender, a.categorySize, u.username, 
+                            a.auctionDescription, a.auctionStartDate, a.auctionEndDate, 
+                            a.auctionStartingPrice, MAX(b.bidValue) as auctionMaxCP 
         FROM Auctions a
         JOIN Users u ON a.sellerID = u.userID
         LEFT JOIN Bids b ON a.auctionID = b.auctionID
         WHERE a.auctionID = '{$auctionID}'
-        GROUP BY a.auctionID, a.auctionName, a.categoryType, a.categoryColor, a.categoryGender, a.categorySize, u.username, a.auctionDescription, a.auctionStartDate, a.auctionEndDate, a.auctionStartingPrice";
+        GROUP BY a.auctionID, a.auctionName, a.categoryType, a.categoryColor, 
+                  a.categoryGender, a.categorySize, u.username, 
+                  a.auctionDescription, a.auctionStartDate, a.auctionEndDate, a.auctionStartingPrice";
         $result_bid = send_query($query_bid);
         $row_bid = mysqli_fetch_assoc($result_bid);
         $auctionMaxCP = $row_bid['auctionMaxCP'];
