@@ -7,7 +7,7 @@
 <h2 class="my-3">Browse listings</h2>
 <div id="searchSpecs">
 
-<!-- GPT4 used primarily for debugging & logic testing throughout the script. I have added specific comments for
+<!-- For browse.php only: GPT4 used primarily for debugging & logic testing throughout the script. I have added specific comments for
 any segment of the script where AI generated code appears. 
 Specific methods suggested initially by GPT4, then learned and used throughout the script include:
 - "hiding" variables to URL allowing for dynamic filtering & pagination
